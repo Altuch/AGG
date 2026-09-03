@@ -154,6 +154,7 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
                 pFrame->SetCurrentForm(*pContactForm);
                 pContactForm->Draw();
                 pContactForm->Show();
+                pContactForm->AttachContactListener();
                 pFrame->RemoveControl(*this);
             }
             break;

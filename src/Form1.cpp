@@ -173,6 +173,7 @@ void Form1::OnLoginSuccess(void) {
         pFrame->SetCurrentForm(*pContactForm);
         pContactForm->Draw();
         pContactForm->Show();
+        pContactForm->AttachContactListener();
         pFrame->RemoveControl(*this);
     }
 }

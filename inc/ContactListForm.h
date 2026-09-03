@@ -16,6 +16,11 @@ public:
     virtual ~ContactListForm(void);
 
     result Initialize(AggConnection* pConn);
+    // Реєструє форму як слухача списку контактів. Кеш може прийти
+    // синхронно (одразу під час виклику) і спричинити перемальовування,
+    // тож викликати це треба ЛИШЕ після AddControl/SetCurrentForm/Show,
+    // інакше control ще не приєднаний до Frame і RequestRedraw/Show впаде.
+    void AttachContactListener(void);
     virtual result OnInitializing(void);
     virtual result OnTerminating(void);
 
