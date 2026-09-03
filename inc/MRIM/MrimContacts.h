@@ -49,6 +49,7 @@ private:
     Osp::Base::Collection::ArrayList* pCachedContacts;
 
     void ParseContactList2(Osp::Base::ByteBuffer& payload);
+    void ParseUserStatus(Osp::Base::ByteBuffer& payload);
     void ClearCache(void);
 };
 

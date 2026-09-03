@@ -14,6 +14,7 @@
 #define MRIM_MSG_FLAG_MULTICAST 0x00001000
 #define MRIM_MSG_FLAG_ALARM     0x00004000
 #define MRIM_MSG_FLAG_FLASH     0x00008000
+#define MRIM_MSG_FLAG_OLD       0x00200000
 
 class AggConnection;
 

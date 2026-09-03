@@ -55,8 +55,51 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             ParseContactList2(payload);
             return true;
         }
+        case 0x100f: { // MRIM_CS_USER_STATUS
+            ParseUserStatus(payload);
+            return true;
+        }
     }
     return false;
+}
+
+// Фіксований формат пакета (немає "старого"/"нового" варіанту, як
+// вважалося раніше — саме звідси й був краш на пристрої, дивись
+// DebugInfo/crashinfo.txt): status, xstatus, title, desc, email,
+// clientCaps, client. Усі читання вже безпечні (MrimUtils перевіряє
+// GetRemaining() і ніколи не читає за межі буфера).
+void MrimContacts::ParseUserStatus(ByteBuffer& payload) {
+    unsigned long status = MrimUtils::ReadUL(payload);
+    MrimUtils::ReadLPS(payload);       // xstatus (CP1251) - поки не показуємо в UI
+    MrimUtils::ReadLPSUcs2(payload);   // title (UCS2)
+    MrimUtils::ReadLPSUcs2(payload);   // desc (UCS2)
+    String email = MrimUtils::ReadLPS(payload); // CP1251
+    MrimUtils::ReadUL(payload);        // clientCaps
+    MrimUtils::ReadLPS(payload);       // client (CP1251)
+
+    email.Trim();
+    email.ToLower();
+    if (email.IsEmpty() || pCachedContacts == null) return;
+
+    AppLog("MrimContacts: Контакт %S змінив статус на 0x%X", email.GetPointer(), status);
+
+    for (int i = 0; i < pCachedContacts->GetCount(); i++) {
+        ContactInfo* pContact = static_cast<ContactInfo*>(pCachedContacts->GetAt(i));
+        if (pContact == null) continue;
+
+        String cEmail = pContact->email;
+        cEmail.Trim();
+        cEmail.ToLower();
+
+        if (cEmail.Equals(email, true)) {
+            pContact->status = status;
+            break;
+        }
+    }
+
+    if (pListener != null) {
+        pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+    }
 }
 
 void MrimContacts::ParseContactList2(ByteBuffer& payload) {
@@ -72,13 +115,18 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
     pCachedContacts->Construct();
 
     unsigned long groupsCount = MrimUtils::ReadUL(payload);
+    // groupMask/contactMask - не просто прапорці "є/немає", а форматні
+    // рядки: кожен символ описує ще одне (маска-залежне) поле в кінці
+    // запису групи/контакту. 's' = LPS-рядок, будь-що інше = DWORD.
     String groupMask = MrimUtils::ReadLPS(payload);
     String contactMask = MrimUtils::ReadLPS(payload);
 
     for (unsigned long i = 0; i < groupsCount; i++) {
+        if (payload.GetRemaining() < 8) break;
         GroupInfo* pGroup = new GroupInfo();
         pGroup->flags = MrimUtils::ReadUL(payload);
-        pGroup->name = MrimUtils::ReadLPS(payload);
+        pGroup->name = MrimUtils::ReadLPSUcs2(payload);
+        MrimUtils::SkipFormattedRecord(payload, groupMask, 2);
         pCachedGroups->Add(*pGroup);
     }
 
@@ -86,18 +134,24 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
         ContactInfo* pContact = new ContactInfo();
         pContact->flags = MrimUtils::ReadUL(payload);
         pContact->groupId = MrimUtils::ReadUL(payload);
-        pContact->email = MrimUtils::ReadLPS(payload);
-        pContact->nickname = MrimUtils::ReadLPS(payload);
+        pContact->email = MrimUtils::ReadLPS(payload);       // CP1251
+        pContact->nickname = MrimUtils::ReadLPSUcs2(payload); // UCS2
 
-        unsigned long isAuth = MrimUtils::ReadUL(payload);
-        (void)isAuth;
-
+        MrimUtils::ReadUL(payload); // serverFlags (не використовується)
         pContact->status = MrimUtils::ReadUL(payload);
 
-        if (contactMask.GetLength() >= 7 && payload.GetRemaining() >= 4) {
-            String phone = MrimUtils::ReadLPS(payload);
-            (void)phone;
-        }
+        MrimUtils::ReadLPS(payload);       // phone (CP1251)
+        MrimUtils::ReadLPS(payload);       // xstatus (CP1251)
+        MrimUtils::ReadLPSUcs2(payload);   // xstatus title (UCS2)
+        MrimUtils::ReadLPSUcs2(payload);   // xstatus desc (UCS2)
+        MrimUtils::ReadUL(payload);        // featFlags
+        MrimUtils::ReadLPS(payload);       // client (CP1251)
+        MrimUtils::ReadUL(payload);        // blog post id, hi DWORD
+        MrimUtils::ReadUL(payload);        // blog post id, lo DWORD
+        MrimUtils::ReadUL(payload);        // blog post timestamp
+        MrimUtils::ReadLPSUcs2(payload);   // blog post text (UCS2)
+
+        MrimUtils::SkipFormattedRecord(payload, contactMask, 16);
 
         pCachedContacts->Add(*pContact);
     }

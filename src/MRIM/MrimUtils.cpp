@@ -1,9 +1,59 @@
 #include "MRIM/MrimUtils.h"
-#include <FText.h>
 
 using namespace Osp::Base;
 using namespace Osp::Base::Utility;
-using namespace Osp::Text;
+
+// Таблиця CP1251 (Windows-1251) <-> Unicode. MRIM історично передає всі
+// "класичні" LPS-поля (логін, email, телефон, xstatus, client) саме в
+// CP1251, а не в UTF-8 — автовизначення тут не потрібне й лише вносило
+// плутанину: кожне поле пакета має наперед відомий, фіксований формат.
+static mchar Cp1251ByteToUnicode(byte b) {
+    if (b < 0x80) return (mchar)b;
+    if (b >= 0xC0 && b <= 0xFF) return (mchar)(0x0410 + (b - 0xC0)); // А-Я, а-я
+    switch (b) {
+        case 0xA8: return 0x0401; // Ё
+        case 0xB8: return 0x0451; // ё
+        case 0xAA: return 0x0404; // Є
+        case 0xBA: return 0x0454; // є
+        case 0xAF: return 0x0407; // Ї
+        case 0xBF: return 0x0457; // ї
+        case 0xB2: return 0x0406; // І
+        case 0xB3: return 0x0456; // і
+        case 0xA5: return 0x0490; // Ґ
+        case 0xB4: return 0x0491; // ґ
+        case 0xA1: return 0x040E; // Ў
+        case 0xA2: return 0x045E; // ў
+        case 0x90: return 0x0402; // Ђ
+        case 0x93: return 0x201C; // "
+        case 0x94: return 0x201D; // "
+        case 0x96: return 0x2013; // –
+        case 0x97: return 0x2014; // —
+        case 0xA0: return 0x00A0; // non-breaking space
+        default:   return (mchar)b;
+    }
+}
+
+static byte UnicodeToCp1251Byte(mchar ch) {
+    if (ch < 0x80) return (byte)ch;
+    if (ch >= 0x0410 && ch <= 0x044F) return (byte)(0xC0 + (ch - 0x0410));
+    switch (ch) {
+        case 0x0401: return 0xA8; // Ё
+        case 0x0451: return 0xB8; // ё
+        case 0x0404: return 0xAA; // Є
+        case 0x0454: return 0xBA; // є
+        case 0x0407: return 0xAF; // Ї
+        case 0x0457: return 0xBF; // ї
+        case 0x0406: return 0xB2; // І
+        case 0x0456: return 0xB3; // і
+        case 0x0490: return 0xA5; // Ґ
+        case 0x0491: return 0xB4; // ґ
+        case 0x040E: return 0xA1; // Ў
+        case 0x045E: return 0xA2; // ў
+        case 0x0402: return 0x90; // Ђ
+        case 0x00A0: return 0xA0;
+        default:     return '?';
+    }
+}
 
 void MrimUtils::AppendUL(ByteBuffer& buffer, unsigned long value) {
     byte data[4];
@@ -27,21 +77,32 @@ void MrimUtils::BuildHeader(ByteBuffer& buffer, unsigned long command, unsigned 
 }
 
 void MrimUtils::AppendLPS(ByteBuffer& buffer, const String& text) {
-    if (text.IsEmpty()) {
+    int strLen = text.GetLength();
+    if (strLen == 0) {
         AppendUL(buffer, 0);
         return;
     }
-    ByteBuffer* pTextBytes = Utf8Encoding().GetBytesN(text);
-    if (pTextBytes != null) {
-        int len = pTextBytes->GetLimit() - 1;
-        AppendUL(buffer, len);
-        byte* pRawBytes = new byte[len];
-        pTextBytes->GetArray(pRawBytes, 0, len);
-        buffer.SetArray(pRawBytes, 0, len);
-        delete[] pRawBytes;
-        delete pTextBytes;
-    } else {
+    AppendUL(buffer, strLen);
+    for (int i = 0; i < strLen; i++) {
+        mchar ch;
+        text.GetCharAt(i, ch);
+        byte b = UnicodeToCp1251Byte(ch);
+        buffer.SetByte(b);
+    }
+}
+
+void MrimUtils::AppendLPSUcs2(ByteBuffer& buffer, const String& text) {
+    int strLen = text.GetLength();
+    if (strLen == 0) {
         AppendUL(buffer, 0);
+        return;
+    }
+    AppendUL(buffer, strLen * 2);
+    for (int i = 0; i < strLen; i++) {
+        mchar ch;
+        text.GetCharAt(i, ch);
+        buffer.SetByte((byte)(ch & 0xFF));
+        buffer.SetByte((byte)((ch >> 8) & 0xFF));
     }
 }
 
@@ -60,15 +121,46 @@ String MrimUtils::ReadLPS(ByteBuffer& buffer) {
     byte* strBytes = new byte[len];
     buffer.GetArray(strBytes, 0, len);
 
-    ByteBuffer tmpBuf;
-    tmpBuf.Construct(len);
-    tmpBuf.SetArray(strBytes, 0, len);
-    tmpBuf.Flip();
-
     String resultStr;
-    Utf8Encoding().GetString(tmpBuf, resultStr);
+    for (unsigned long i = 0; i < len; i++) {
+        resultStr.Append(Cp1251ByteToUnicode(strBytes[i]));
+    }
     delete[] strBytes;
     return resultStr;
+}
+
+String MrimUtils::ReadLPSUcs2(ByteBuffer& buffer) {
+    if (buffer.GetRemaining() < 4) return String(L"");
+    unsigned long len = ReadUL(buffer);
+    if (len == 0 || len > 8192 || (unsigned long)buffer.GetRemaining() < len) return String(L"");
+
+    byte* strBytes = new byte[len];
+    buffer.GetArray(strBytes, 0, len);
+
+    String resultStr;
+    unsigned long charCount = len / 2;
+    for (unsigned long i = 0; i < charCount; i++) {
+        mchar ch = (mchar)(strBytes[i * 2] | (strBytes[i * 2 + 1] << 8));
+        resultStr.Append(ch);
+    }
+    delete[] strBytes;
+    return resultStr;
+}
+
+void MrimUtils::SkipFormattedRecord(ByteBuffer& buffer, const String& mask, int startIndex) {
+    int maskLen = mask.GetLength();
+    for (int i = startIndex; i < maskLen; i++) {
+        mchar c;
+        mask.GetCharAt(i, c);
+        if (c == L's') {
+            unsigned long len = ReadUL(buffer);
+            if (len > 0 && (unsigned long)buffer.GetRemaining() >= len) {
+                buffer.SetPosition(buffer.GetPosition() + len);
+            }
+        } else {
+            ReadUL(buffer);
+        }
+    }
 }
 
 bool MrimUtils::IsValidIpAddress(const String& ip) {
