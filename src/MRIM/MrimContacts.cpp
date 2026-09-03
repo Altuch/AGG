@@ -55,8 +55,69 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             ParseContactList2(payload);
             return true;
         }
+        case 0x100f: { // MRIM_CS_USER_STATUS
+            ParseUserStatus(payload);
+            return true;
+        }
     }
     return false;
+}
+
+// За mrim-docs (contacts.md, MRIM_CS_USER_STATUS) є два формати:
+//  - MRIM <=1.13: UL status, LPS email
+//  - MRIM >=1.14: UL status, LPS xstatus, LPS title, LPS desc, LPS email,
+//                 UL clientCaps, LPS useragent
+// Немає прапорця, який каже, який саме формат прийшов, тож визначаємо
+// за вмістом: перший LPS після status - або email (містить '@'), або
+// тип xstatus (технічний рядок на кшталт STATUS_ONLINE, без '@').
+// Це та сама евристика, що колись спричинила краш (DebugInfo/crashinfo.txt),
+// але тепер це безпечно: усі читання йдуть через bounds-checked
+// MrimUtils::ReadUL/ReadLPS, які ніколи не читають за межі буфера.
+// Усі "класичні" LPS-поля тут - CP1251 (протокол >=1.16 для UTF-16LE
+// нами не використовується, AGG заявляє версію 1.8).
+void MrimContacts::ParseUserStatus(ByteBuffer& payload) {
+    unsigned long status = MrimUtils::ReadUL(payload);
+    String str1 = MrimUtils::ReadLPS(payload);
+
+    String email;
+    int atIndex = -1;
+    str1.IndexOf(L"@", 0, atIndex);
+
+    if (atIndex >= 0) {
+        // Старий формат (MRIM <=1.13): str1 і є email
+        email = str1;
+    } else {
+        // Новий формат (MRIM >=1.14): str1 - тип xstatus
+        MrimUtils::ReadLPS(payload);   // xstatus title
+        MrimUtils::ReadLPS(payload);   // xstatus desc
+        email = MrimUtils::ReadLPS(payload);
+        MrimUtils::ReadUL(payload);    // clientCaps
+        MrimUtils::ReadLPS(payload);   // useragent
+    }
+
+    email.Trim();
+    email.ToLower();
+    if (email.IsEmpty() || pCachedContacts == null) return;
+
+    AppLog("MrimContacts: Контакт %S змінив статус на 0x%X", email.GetPointer(), status);
+
+    for (int i = 0; i < pCachedContacts->GetCount(); i++) {
+        ContactInfo* pContact = static_cast<ContactInfo*>(pCachedContacts->GetAt(i));
+        if (pContact == null) continue;
+
+        String cEmail = pContact->email;
+        cEmail.Trim();
+        cEmail.ToLower();
+
+        if (cEmail.Equals(email, true)) {
+            pContact->status = status;
+            break;
+        }
+    }
+
+    if (pListener != null) {
+        pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+    }
 }
 
 void MrimContacts::ParseContactList2(ByteBuffer& payload) {
@@ -72,13 +133,30 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
     pCachedContacts->Construct();
 
     unsigned long groupsCount = MrimUtils::ReadUL(payload);
+    // groupMask/contactMask - форматні рядки: кожен символ описує ще одне
+    // поле в записі групи/контакту. За mrim-docs (contacts.md) довжина
+    // contactMask прямо каже, яка "версія" запису прийшла:
+    //   6  "uussuu"              - MRIM 1.7 (базові поля)
+    //   7  "uussuus"             - MRIM 1.8-1.13 (+ телефон) - це AGG
+    //   12 "uussuussssus"        - MRIM 1.15 (+ xstatus/useragent)
+    //   19 "uussuussssusuuusss"  - MRIM 1.20 (+ мікроблог)
+    // Орієнтуємось на РЕАЛЬНУ довжину маски від сервера, а не на версію,
+    // яку заявляє клієнт - сервер вирішує сам. Кодування - CP1251 для
+    // усього (UTF-16LE в MRIM з'являється лише з 1.16, ми його не заявляємо).
     String groupMask = MrimUtils::ReadLPS(payload);
     String contactMask = MrimUtils::ReadLPS(payload);
+    int contactMaskLen = contactMask.GetLength();
+
+    const unsigned long FLAG_NAME_UNICODE = 0x200; // прапорець "ім'я/нік в юнікоді" (рідко використовується)
 
     for (unsigned long i = 0; i < groupsCount; i++) {
+        if (payload.GetRemaining() < 8) break;
         GroupInfo* pGroup = new GroupInfo();
         pGroup->flags = MrimUtils::ReadUL(payload);
-        pGroup->name = MrimUtils::ReadLPS(payload);
+        pGroup->name = (pGroup->flags & FLAG_NAME_UNICODE)
+                     ? MrimUtils::ReadLPSUcs2(payload)
+                     : MrimUtils::ReadLPS(payload);
+        MrimUtils::SkipFormattedRecord(payload, groupMask, 2);
         pCachedGroups->Add(*pGroup);
     }
 
@@ -86,18 +164,35 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
         ContactInfo* pContact = new ContactInfo();
         pContact->flags = MrimUtils::ReadUL(payload);
         pContact->groupId = MrimUtils::ReadUL(payload);
-        pContact->email = MrimUtils::ReadLPS(payload);
-        pContact->nickname = MrimUtils::ReadLPS(payload);
+        pContact->email = MrimUtils::ReadLPS(payload); // CP1251
+        pContact->nickname = (pContact->flags & FLAG_NAME_UNICODE)
+                            ? MrimUtils::ReadLPSUcs2(payload)
+                            : MrimUtils::ReadLPS(payload);
 
-        unsigned long isAuth = MrimUtils::ReadUL(payload);
-        (void)isAuth;
-
+        MrimUtils::ReadUL(payload); // "чи авторизований" (0/1) - не використовується
         pContact->status = MrimUtils::ReadUL(payload);
 
-        if (contactMask.GetLength() >= 7 && payload.GetRemaining() >= 4) {
-            String phone = MrimUtils::ReadLPS(payload);
-            (void)phone;
+        if (contactMaskLen >= 7) {
+            MrimUtils::ReadLPS(payload); // телефон (CP1251)
         }
+        if (contactMaskLen >= 12) {
+            MrimUtils::ReadLPS(payload); // xstatus (CP1251)
+            MrimUtils::ReadLPS(payload); // заголовок xstatus (CP1251)
+            MrimUtils::ReadLPS(payload); // опис xstatus (CP1251)
+            MrimUtils::ReadUL(payload);  // маска функцій
+            MrimUtils::ReadLPS(payload); // useragent (CP1251)
+        }
+        if (contactMaskLen >= 19) {
+            MrimUtils::ReadUL(payload);  // айді мікроблог-поста, частина 1
+            MrimUtils::ReadUL(payload);  // айді мікроблог-поста, частина 2
+            MrimUtils::ReadUL(payload);  // unix-time поста
+            MrimUtils::ReadLPS(payload); // текст поста
+            MrimUtils::ReadLPS(payload); // зарезервовано
+            MrimUtils::ReadLPS(payload); // "ReplyTo" (?)
+        }
+
+        // Якщо маска довша за відомі нам 19 полів - безпечно пропускаємо решту.
+        MrimUtils::SkipFormattedRecord(payload, contactMask, 19);
 
         pCachedContacts->Add(*pContact);
     }

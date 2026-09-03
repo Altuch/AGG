@@ -19,6 +19,8 @@ void MrimMessages::SendMessageTo(const String& to, const String& text) {
 
     ByteBuffer payload;
     payload.Construct(2048);
+    // AGG заявляє протокол MRIM 1.8 (MrimUtils::BuildHeader) - за mrim-docs
+    // UTF-16LE в MRIM з'являється лише з 1.16, до того всі LPS - CP1251.
     MrimUtils::AppendUL(payload, 0); // Звичайне повідомлення (Plain text)
     MrimUtils::AppendLPS(payload, cleanTo);
     MrimUtils::AppendLPS(payload, text);
@@ -58,7 +60,7 @@ void MrimMessages::SendTyping(const String& to) {
     MrimUtils::AppendUL(payload, MRIM_MSG_FLAG_TYPING | MRIM_MSG_FLAG_NORECV);
     MrimUtils::AppendLPS(payload, cleanTo);
     MrimUtils::AppendLPS(payload, L" "); // За специфікацією протоколу - 1 пробіл
-    MrimUtils::AppendLPS(payload, L" ");
+    MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
 
     pConnection->SendPacket(0x1008, payload);
@@ -93,6 +95,8 @@ bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
                 sender = MrimUtils::ReadLPS(payload);
             }
 
+            // AGG заявляє протокол MRIM 1.8 - текст повідомлення тут CP1251
+            // (UTF-16LE в MRIM з'являється лише з 1.16).
             String text = L"";
             if (payload.GetRemaining() >= 4) {
                 text = MrimUtils::ReadLPS(payload);

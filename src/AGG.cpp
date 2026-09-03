@@ -61,6 +61,7 @@ bool AGG::OnAppInitializing(AppRegistry& appRegistry) {
         pFrame->SetCurrentForm(*pContactForm);
         pContactForm->Draw();
         pContactForm->Show();
+        pContactForm->AttachContactListener();
     } else {
         AppLog("Збережених даних немає: відкриваємо форму авторизації...");
 

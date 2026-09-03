@@ -27,8 +27,11 @@ result ContactListForm::Initialize(AggConnection* pConn) {
     result r = Form::Construct(L"IDF_CONT");
     if (IsFailed(r)) return r;
 
-    if (pConnection != null) pConnection->SetContactListListener(this);
     return E_SUCCESS;
+}
+
+void ContactListForm::AttachContactListener(void) {
+    if (pConnection != null) pConnection->SetContactListListener(this);
 }
 
 result ContactListForm::OnInitializing(void) {
