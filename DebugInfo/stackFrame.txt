@@ -1,0 +1,31 @@
+PC: 0x40107084 LR: 0x96C7B6C8 Stack PTR : 0x0A97E7D8 
+0x96C7B6C8 __AssertEx
+0x96C7B48C __Log_assertfEx
+0x96C7B484 __Log_assertfEx
+0x96C7B478 __Log_assertfEx
+0x96C7B6C8 __AssertEx
+0x948CF215 m_AssertEx
+0x9788D1C1 __gnu_cxx::__verbose_terminate_handler()
+0x9788BC2B __cxxabiv1::__terminate(void (*)())
+0x9788BC59 std::terminate()
+0x9788C415 __cxa_pure_virtual
+0x9788C3FD __cxa_pure_virtual
+0x96DF1C75 _ZN12MrimContacts15ParseUserStatusERN3Osp4Base10ByteBuffer
+0x96DE7885 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x96DF1A1D _ZN12MrimContacts15ParseUserStatusERN3Osp4Base10ByteBuffer
+0x96DF19D1 _ZN12MrimContacts14ProcessCommandEmRN3Osp4Base10ByteBuffer
+0x96DF19D1 _ZN12MrimContacts14ProcessCommandEmRN3Osp4Base10ByteBuffer
+0x96DE7885 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x980AE460 operator delete[](void*)
+0x96DE7885 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x96DE7885 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x980AE549 Mem_freeAppEx
+0x980A5013 Osp_freeEx(void*, char const*, int)
+0x96DE78E7 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x980AE71F Mem_freeEx
+0x9815ABBB _ZN3Osp3Net7Sockets13__SocketEvent8FireImplEPNS_4Base7Runt
+0x9815AB59 Osp::Net::Sockets::__SocketEvent::GetSocket() const
+0x980A131D _ZN3Osp4Base7Runtime5Event16ProcessListenersERKNS1_9IEvent
+0x980A14FF Osp::Base::Runtime::Event::Fire(Osp::Base::Runtime::IEventArg const&)
+0x9530A7D1 __SocketHandleEvent(void*, WmEvent*)
+0x9530A6AB __ConvertError(int)

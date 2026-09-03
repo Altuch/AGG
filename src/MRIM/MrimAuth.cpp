@@ -1,0 +1,62 @@
+#include "MRIM/MrimAuth.h"
+#include "MRIM/MrimUtils.h"
+#include "AggConnection.h"
+
+using namespace Osp::Base;
+
+MrimAuth::MrimAuth(AggConnection* pConn) : pConnection(pConn), pListener(null) {}
+MrimAuth::~MrimAuth(void) {}
+
+void MrimAuth::SetListener(ILoginListener* pListener) {
+    this->pListener = pListener;
+}
+
+void MrimAuth::NotifyLoginFailed(const String& reason) {
+    if (this->pListener != null) {
+        this->pListener->OnLoginFailed(reason);
+    }
+}
+
+void MrimAuth::SendLogin2(const String& login, const String& password) {
+    ByteBuffer payload;
+    payload.Construct(1024);
+    MrimUtils::AppendLPS(payload, login);
+    MrimUtils::AppendLPS(payload, password);
+    MrimUtils::AppendUL(payload, 0x00000001);
+    MrimUtils::AppendLPS(payload, L"STATUS_ONLINE");
+    MrimUtils::AppendLPS(payload, L"Онлайн");
+    MrimUtils::AppendLPS(payload, L"");
+    MrimUtils::AppendUL(payload, 0x0000FF03);
+    MrimUtils::AppendLPS(payload, L"client=\"magent\" version=\"5.0\" build=\"2094\"");
+    MrimUtils::AppendLPS(payload, L"MRA 5.0 (build 2094);");
+    payload.Flip();
+
+    pConnection->SendPacket(0x1038, payload);
+    AppLog("Sent LOGIN2 packet.");
+}
+
+bool MrimAuth::ProcessCommand(unsigned long command, ByteBuffer& payload) {
+    switch (command) {
+        case 0x1004: { // MRIM_CS_LOGIN_ACK
+            AppLog("MRIM_CS_LOGIN_ACK received -> викликаємо OnLoginSuccess!");
+            if (this->pListener != null) {
+                this->pListener->OnLoginSuccess();
+            }
+            return true;
+        }
+        case 0x1005: { // MRIM_CS_LOGIN_REJ
+            String reason = MrimUtils::ReadLPS(payload);
+            AppLog("MRIM_CS_LOGIN_REJ: %S", reason.GetPointer());
+
+            String userReason = L"Невірний логін або пароль!";
+            if (reason.GetLength() > 0) {
+                userReason = L"Вхід відхилено сервером: " + reason;
+            }
+            if (this->pListener != null) {
+                this->pListener->OnLoginFailed(userReason);
+            }
+            return true;
+        }
+    }
+    return false;
+}

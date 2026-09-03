@@ -1,0 +1,1 @@
+-march=armv7-a -mlittle-endian -mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=hard -Xlinker -lm -Xlinker -lc -L"C:/bada/2.0.6/Model/WaveWVGA/Target" -L"C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/lib" -shared -o"AGG.exe"

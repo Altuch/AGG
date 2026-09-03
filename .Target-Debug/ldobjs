@@ -1,0 +1,1 @@
+./src/AGG.o ./src/AGGEntry.o ./src/AggConnection.o ./src/CONTACT.o ./src/ChatForm.o ./src/ContactListForm.o ./src/Form1.o ./src/Settings.o ./src/MRIM/MrimAuth.o ./src/MRIM/MrimContacts.o ./src/MRIM/MrimMessages.o ./src/MRIM/MrimUtils.o 
