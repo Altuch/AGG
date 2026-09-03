@@ -16,11 +16,15 @@ public:
     virtual ~ContactListForm(void);
 
     result Initialize(AggConnection* pConn);
+<<<<<<< Updated upstream
     // Реєструє форму як слухача списку контактів. Кеш може прийти
     // синхронно (одразу під час виклику) і спричинити перемальовування,
     // тож викликати це треба ЛИШЕ після AddControl/SetCurrentForm/Show,
     // інакше control ще не приєднаний до Frame і RequestRedraw/Show впаде.
     void AttachContactListener(void);
+=======
+    void ScheduleAttachContactListener(void);
+>>>>>>> Stashed changes
     virtual result OnInitializing(void);
     virtual result OnTerminating(void);
 
@@ -39,6 +43,9 @@ private:
     static const int ID_OPTIONKEY_SETTINGS = 101;
     static const int ID_SOFTKEY_EXIT       = 102;
     static const long USER_EVENT_CONTACTS_READY = 2001;
+    static const long USER_EVENT_ATTACH_LISTENER = 2002;
+
+    void AttachContactListener(void);
 
     AggConnection* pConnection;
     Osp::Ui::Controls::GroupedList* pGroupedList;

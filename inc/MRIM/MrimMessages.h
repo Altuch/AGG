@@ -3,7 +3,6 @@
 
 #include <FBase.h>
 
-// Офіційні флаги повідомлень протоколу MRIM
 #define MRIM_MSG_FLAG_OFFLINE   0x00000001
 #define MRIM_MSG_FLAG_NORECV    0x00000004
 #define MRIM_MSG_FLAG_AUTHORIZE 0x00000008

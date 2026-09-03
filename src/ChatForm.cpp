@@ -2,6 +2,8 @@
 #include "ContactListForm.h"
 #include <FApp.h>
 #include <FGraphics.h>
+#include <FIo.h>
+#include <FText.h>
 
 // Константи статусів доставки протоколу MRIM
 #define MRIM_DELIVERY_STATUS_OK             0x0000
@@ -16,8 +18,11 @@ using namespace Osp::Ui::Controls;
 using namespace Osp::App;
 using namespace Osp::Base;
 using namespace Osp::Base::Collection;
+using namespace Osp::Base::Utility;
 using namespace Osp::Graphics;
 using namespace Osp::System;
+using namespace Osp::Io;
+using namespace Osp::Text;
 
 ChatForm::ChatForm(void) :
     pConnection(null),
@@ -41,7 +46,7 @@ result ChatForm::Initialize(AggConnection* pConn, const String& name, const Stri
     contactName = name.IsEmpty() ? email : name;
     contactEmail = email;
     contactEmail.Trim();
-    contactEmail.ToLower(); // Примусовий чистий lowercase
+    contactEmail.ToLower();
 
     if (pConnection != null) {
         pConnection->SetMessageListener(this);
@@ -58,6 +63,9 @@ result ChatForm::OnInitializing(void) {
 
     SetSoftkeyActionId(SOFTKEY_1, ID_BTN_SEND);
     AddSoftkeyActionListener(SOFTKEY_1, *this);
+
+    SetOptionkeyActionId(ID_OPTIONKEY_CHAT);
+    AddOptionkeyActionListener(*this);
 
     pCustomListHistory = static_cast<CustomList*>(GetControl(L"IDC_HISTORY"));
     if (pCustomListHistory != null) {
@@ -81,6 +89,8 @@ result ChatForm::OnInitializing(void) {
         pBtnNudge->AddActionEventListener(*this);
     }
 
+    LoadHistory();
+
     return E_SUCCESS;
 }
 
@@ -88,7 +98,7 @@ result ChatForm::OnTerminating(void) {
     return E_SUCCESS;
 }
 
-void ChatForm::AppendMessageToChat(const String& senderTitle, const String& text, bool isIncoming) {
+void ChatForm::AppendMessageToChat(const String& senderTitle, const String& text, bool isIncoming, bool saveToHistory) {
     if (pCustomListHistory == null || pItemFormat == null) return;
 
     CustomListItem* pItem = new CustomListItem();
@@ -107,6 +117,86 @@ void ChatForm::AppendMessageToChat(const String& senderTitle, const String& text
         pCustomListHistory->RequestRedraw(true);
         pCustomListHistory->Draw();
         pCustomListHistory->Show();
+    }
+
+    if (saveToHistory) {
+        SaveMessageToHistory(header, text);
+    }
+}
+
+void ChatForm::SendNudgeNow(void) {
+    if (pConnection == null) return;
+    pConnection->SendNudge(contactEmail);
+    AppendMessageToChat(L"Ви", L"🔔 Будильник відправлено!", false);
+}
+
+// Локальний файл історії чату - не має нічого спільного з кодуванням
+// MRIM-протоколу (те окреме питання), тому звичайний UTF-8.
+String ChatForm::GetHistoryFilePath(void) {
+    String safeName = contactEmail;
+    safeName.Replace(L"@", L"_");
+    safeName.Replace(L".", L"_");
+    return L"/Home/hist_" + safeName + L".dat";
+}
+
+void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
+    if (contactEmail.IsEmpty()) return;
+    String path = GetHistoryFilePath();
+
+    File file;
+    // У bada немає атомарного "додати або створити" - пробуємо дописати,
+    // а якщо файлу ще немає, створюємо новий.
+    result r = file.Construct(path, L"a+");
+    if (IsFailed(r)) {
+        r = file.Construct(path, L"w");
+        if (IsFailed(r)) return;
+    }
+
+    String line = sender + L"\t" + text + L"\n";
+    ByteBuffer* pLineBytes = Utf8Encoding().GetBytesN(line);
+    if (pLineBytes != null) {
+        file.Write(*pLineBytes);
+        delete pLineBytes;
+    }
+}
+
+void ChatForm::LoadHistory(void) {
+    if (contactEmail.IsEmpty()) return;
+    String path = GetHistoryFilePath();
+
+    File file;
+    result r = file.Construct(path, L"r");
+    if (IsFailed(r)) return; // Історії ще немає - це нормально
+
+    ByteBuffer fileBuf;
+    fileBuf.Construct(32768);
+    file.Read(fileBuf);
+    fileBuf.Flip();
+
+    if (fileBuf.GetLimit() == 0) return;
+
+    String content;
+    Utf8Encoding().GetString(fileBuf, content);
+
+    StringTokenizer lineTok(content, L"\n");
+    while (lineTok.HasMoreTokens()) {
+        String line;
+        lineTok.GetNextToken(line);
+        line.Trim();
+        if (line.IsEmpty()) continue;
+
+        int tabPos = -1;
+        line.IndexOf(L"\t", 0, tabPos);
+        if (tabPos < 0) continue;
+
+        String sender;
+        String text;
+        line.SubString(0, tabPos, sender);
+        line.SubString(tabPos + 1, text);
+
+        bool isIncoming = !sender.Equals(L"Ви", true);
+        // saveToHistory=false: щойно прочитали з цього ж файлу, повторно писати не треба.
+        AppendMessageToChat(sender, text, isIncoming, false);
     }
 }
 
@@ -134,12 +224,47 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_BTN_NUDGE: {
-            if (pConnection == null) break;
-
-            pConnection->SendNudge(contactEmail);
-            AppendMessageToChat(L"Ви", L"🔔 Будильник відправлено!", false);
+        	SendNudgeNow();
             break;
         }
+
+        case ID_OPTIONKEY_CHAT: {
+                    OptionMenu* pMenu = new OptionMenu();
+                    pMenu->Construct();
+                    pMenu->AddItem(L"Розбудити", ID_MENU_NUDGE);
+                    pMenu->AddItem(L"Інформація про контакт", ID_MENU_INFO);
+                    pMenu->AddItem(L"Очистити історію", ID_MENU_CLEAR_HISTORY);
+                    pMenu->AddActionEventListener(*this);
+                    pMenu->SetShowState(true);
+                    pMenu->Show();
+                    break;
+                }
+
+        case ID_MENU_NUDGE: {
+                    SendNudgeNow();
+                    break;
+                }
+
+                case ID_MENU_INFO: {
+                    MessageBox infoBox;
+                    infoBox.Construct(L"Інформація про контакт", contactName + L"\n" + contactEmail, MSGBOX_STYLE_OK, 0);
+                    int modalResult = 0;
+                    infoBox.ShowAndWait(modalResult);
+                    break;
+                }
+
+                case ID_MENU_CLEAR_HISTORY: {
+                    if (pCustomListHistory != null) {
+                        pCustomListHistory->RemoveAllItems();
+                        if (GetParent() != null) {
+                            pCustomListHistory->RequestRedraw(true);
+                            pCustomListHistory->Draw();
+                            pCustomListHistory->Show();
+                        }
+                    }
+                    File::Remove(GetHistoryFilePath());
+                    break;
+                }
 
         case ID_SOFTKEY_BACK: {
             if (pConnection != null) {
@@ -154,7 +279,11 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
                 pFrame->SetCurrentForm(*pContactForm);
                 pContactForm->Draw();
                 pContactForm->Show();
+<<<<<<< Updated upstream
                 pContactForm->AttachContactListener();
+=======
+                pContactForm->ScheduleAttachContactListener();
+>>>>>>> Stashed changes
                 pFrame->RemoveControl(*this);
             }
             break;
@@ -189,13 +318,13 @@ void ChatForm::OnMessageDeliveryStatus(unsigned long status) {
     if (status == MRIM_DELIVERY_STATUS_OK) {
         return; // Доставлено успішно — попереджень не потрібно
     } else if (status == MRIM_DELIVERY_STATUS_USER_NOT_FOUND) {
-        AppendMessageToChat(L"Система", L"⚠ Користувача не знайдено на сервері.", true);
+        AppendMessageToChat(L"Система", L"⚠ Користувача не знайдено на сервері.", true, false);
     } else if (status == MRIM_DELIVERY_STATUS_NO_OFFLINE) {
-        AppendMessageToChat(L"Система", L"⚠ Отримувач офлайн (повідомлення не доставлено).", true);
+        AppendMessageToChat(L"Система", L"⚠ Отримувач офлайн (повідомлення не доставлено).", true, false);
     } else if (status == MRIM_DELIVERY_STATUS_OFFLINE_LIMIT) {
-        AppendMessageToChat(L"Система", L"⚠ Перевищено ліміт офлайн-повідомлень.", true);
+        AppendMessageToChat(L"Система", L"⚠ Перевищено ліміт офлайн-повідомлень.", true, false);
     } else if (status == MRIM_DELIVERY_STATUS_SERVER_ERROR) {
-        AppendMessageToChat(L"Система", L"⚠ Помилка сервера під час доставки.", true);
+        AppendMessageToChat(L"Система", L"⚠ Помилка сервера під час доставки.", true, false);
     }
 }
 

@@ -1,5 +1,6 @@
 #include "Settings.h"
 #include "Form1.h"
+#include "ContactListForm.h"
 #include "MRIM/MrimUtils.h"
 
 using namespace Osp::Ui;
@@ -8,10 +9,11 @@ using namespace Osp::App;
 using namespace Osp::Base;
 using namespace Osp::Base::Utility;
 
-Settings::Settings(void) : pEditIp(null), pEditPort(null) {}
+Settings::Settings(void) : pEditIp(null), pEditPort(null), pConnection(null) {}
 Settings::~Settings(void) {}
 
-bool Settings::Initialize(void) {
+bool Settings::Initialize(AggConnection* pConn) {
+    pConnection = pConn;
     Construct(L"IDF_SETTINGS");
     return true;
 }
@@ -85,9 +87,33 @@ void Settings::ResetToDefault(void) {
     msgBox.ShowAndWait(modalResult);
 }
 
-void Settings::OnActionPerformed(const Control& source, int actionId) {
+void Settings::ReturnFromSettings(void) {
     Frame* pFrame = Application::GetInstance()->GetAppFrame()->GetFrame();
+    if (pFrame == null) return;
 
+    if (pConnection != null) {
+        ContactListForm* pContactForm = new ContactListForm();
+        pContactForm->Initialize(pConnection);
+
+        pFrame->AddControl(*pContactForm);
+        pFrame->SetCurrentForm(*pContactForm);
+        pContactForm->Draw();
+        pContactForm->Show();
+        pContactForm->ScheduleAttachContactListener();
+        pFrame->RemoveControl(*this);
+    } else {
+        Form1* pForm1 = new Form1();
+        pForm1->Initialize();
+
+        pFrame->AddControl(*pForm1);
+        pFrame->SetCurrentForm(*pForm1);
+        pForm1->Draw();
+        pForm1->Show();
+        pFrame->RemoveControl(*this);
+    }
+}
+
+void Settings::OnActionPerformed(const Control& source, int actionId) {
     switch (actionId) {
         case ID_SOFTKEY_SAVE: {
             String ip = (pEditIp != null) ? pEditIp->GetText() : L"103.71.21.140";
@@ -136,28 +162,12 @@ void Settings::OnActionPerformed(const Control& source, int actionId) {
             int modalResult = 0;
             msgBox.ShowAndWait(modalResult);
 
-            Form1* pForm1 = new Form1();
-            pForm1->Initialize();
-            if (pFrame != null) {
-                pFrame->AddControl(*pForm1);
-                pFrame->SetCurrentForm(*pForm1);
-                pForm1->Draw();
-                pForm1->Show();
-                pFrame->RemoveControl(*this);
-            }
+            ReturnFromSettings();
             break;
         }
 
         case ID_SOFTKEY_BACK: {
-            Form1* pForm1 = new Form1();
-            pForm1->Initialize();
-            if (pFrame != null) {
-                pFrame->AddControl(*pForm1);
-                pFrame->SetCurrentForm(*pForm1);
-                pForm1->Draw();
-                pForm1->Show();
-                pFrame->RemoveControl(*this);
-            }
+        	ReturnFromSettings();
             break;
         }
 

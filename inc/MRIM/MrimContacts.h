@@ -44,7 +44,6 @@ private:
     AggConnection* pConnection;
     IContactListListener* pListener;
 
-    // Кеш контактів для миттєвого відновлення при поверненні з чату
     Osp::Base::Collection::ArrayList* pCachedGroups;
     Osp::Base::Collection::ArrayList* pCachedContacts;
 

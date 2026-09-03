@@ -18,6 +18,6 @@
     <EditField id="IDC_TEXT" parent="IDF_CHAT">
         <property GroupStyle="GROUP_STYLE_NONE" InputStyle="INPUT_STYLE_FULLSCREEN" KeypadEnabled="TRUE" LimitLength="100" bShowTitleText="FALSE" disabledBGBitmapPath="" disabledColor="" disabledColorOpacity="100" disabledTextColor="" ellipsisPosition="ELLIPSIS_POSITION_END" enableClear="FALSE" guideText="Write a message" guideTextColor="" highlightedBGBitmapPath="" highlightedColor="" highlightedColorOpacity="100" highlightedTextColor="" horizontalMargin="10" keypadAction="" linkTextColor="" lowerCaseMode="FALSE" normalBGBitmapPath="" normalColor="" normalColorOpacity="100" normalTextColor="" pressedBGBitmapPath="" pressedColor="" pressedColorOpacity="100" text="" textHorizontalAlignment="ALIGNMENT_LEFT" textSize="34" titleStyle="EDIT_FIELD_TITLE_STYLE_NONE" titleText="" titleTextColor="" verticalMargin="10" viewMode="FALSE"/>
         <layout height="80" mode="Portrait" style="EDIT_FIELD_STYLE_NORMAL" width="480" x="0" y="560"/>
-        <layout height="80" mode="Landscape" style="EDIT_FIELD_STYLE_NORMAL" width="531" x="134" y="272"/>
+        <layout height="120" mode="Landscape" style="EDIT_FIELD_STYLE_NORMAL" width="535" x="130" y="272"/>
     </EditField>
 </Scene>

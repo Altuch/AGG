@@ -18,6 +18,6 @@
     <GroupedList id="IDC_CONTACT_LIST" parent="IDF_CONT">
         <property colorOfEmptyListText="" fastScroll="FALSE" itemDivider="TRUE" textOfEmptyList=""/>
         <layout height="712" mode="Portrait" style="CUSTOM_LIST_STYLE_NORMAL" width="480" x="0" y="0"/>
-        <layout height="148" mode="Landscape" style="CUSTOM_LIST_STYLE_NORMAL" width="456" x="233" y="8"/>
+        <layout height="392" mode="Landscape" style="CUSTOM_LIST_STYLE_NORMAL" width="800" x="0" y="0"/>
     </GroupedList>
 </Scene>

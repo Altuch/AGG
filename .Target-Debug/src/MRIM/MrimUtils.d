@@ -86,17 +86,7 @@ src/MRIM/MrimUtils.d src/MRIM/MrimUtils.o: ../src/MRIM/MrimUtils.cpp \
  C:/bada/2.0.6/Include/FBaseUtilFileZipper.h \
  C:/bada/2.0.6/Include/FBaseUtilFileUnzipper.h \
  C:/bada/2.0.6/Include/FBaseUtilZipEntry.h \
- C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h \
- C:/bada/2.0.6/Include/FText.h C:/bada/2.0.6/Include/FTextEncoding.h \
- C:/bada/2.0.6/Include/FTextEncoder.h C:/bada/2.0.6/Include/FTextConfig.h \
- C:/bada/2.0.6/Include/FTextDecoder.h \
- C:/bada/2.0.6/Include/FTextUtf8Encoding.h \
- C:/bada/2.0.6/Include/FTextUtf8Encoder.h \
- C:/bada/2.0.6/Include/FTextUtf8Decoder.h \
- C:/bada/2.0.6/Include/FTextAsciiEncoding.h \
- C:/bada/2.0.6/Include/FTextLatin1Encoding.h \
- C:/bada/2.0.6/Include/FTextGsmEncoding.h \
- C:/bada/2.0.6/Include/FTextUcs2Encoding.h
+ C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
 
@@ -295,27 +285,3 @@ C:/bada/2.0.6/Include/FBaseUtilFileUnzipper.h:
 C:/bada/2.0.6/Include/FBaseUtilZipEntry.h:
 
 C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h:
-
-C:/bada/2.0.6/Include/FText.h:
-
-C:/bada/2.0.6/Include/FTextEncoding.h:
-
-C:/bada/2.0.6/Include/FTextEncoder.h:
-
-C:/bada/2.0.6/Include/FTextConfig.h:
-
-C:/bada/2.0.6/Include/FTextDecoder.h:
-
-C:/bada/2.0.6/Include/FTextUtf8Encoding.h:
-
-C:/bada/2.0.6/Include/FTextUtf8Encoder.h:
-
-C:/bada/2.0.6/Include/FTextUtf8Decoder.h:
-
-C:/bada/2.0.6/Include/FTextAsciiEncoding.h:
-
-C:/bada/2.0.6/Include/FTextLatin1Encoding.h:
-
-C:/bada/2.0.6/Include/FTextGsmEncoding.h:
-
-C:/bada/2.0.6/Include/FTextUcs2Encoding.h:

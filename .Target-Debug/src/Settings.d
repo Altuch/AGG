@@ -378,6 +378,7 @@ src/Settings.d src/Settings.o: ../src/Settings.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Settings.h:
@@ -1197,5 +1198,7 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:

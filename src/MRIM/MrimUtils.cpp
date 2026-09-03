@@ -3,10 +3,14 @@
 using namespace Osp::Base;
 using namespace Osp::Base::Utility;
 
+<<<<<<< Updated upstream
 // Таблиця CP1251 (Windows-1251) <-> Unicode. MRIM історично передає всі
 // "класичні" LPS-поля (логін, email, телефон, xstatus, client) саме в
 // CP1251, а не в UTF-8 — автовизначення тут не потрібне й лише вносило
 // плутанину: кожне поле пакета має наперед відомий, фіксований формат.
+=======
+
+>>>>>>> Stashed changes
 static mchar Cp1251ByteToUnicode(byte b) {
     if (b < 0x80) return (mchar)b;
     if (b >= 0xC0 && b <= 0xFF) return (mchar)(0x0410 + (b - 0xC0)); // А-Я, а-я
@@ -77,6 +81,7 @@ void MrimUtils::BuildHeader(ByteBuffer& buffer, unsigned long command, unsigned 
 }
 
 void MrimUtils::AppendLPS(ByteBuffer& buffer, const String& text) {
+<<<<<<< Updated upstream
     int strLen = text.GetLength();
     if (strLen == 0) {
         AppendUL(buffer, 0);
@@ -89,6 +94,20 @@ void MrimUtils::AppendLPS(ByteBuffer& buffer, const String& text) {
         byte b = UnicodeToCp1251Byte(ch);
         buffer.SetByte(b);
     }
+=======
+	int strLen = text.GetLength();
+	if (strLen == 0) {
+        AppendUL(buffer, 0);
+        return;
+    }
+	AppendUL(buffer, strLen);
+	    for (int i = 0; i < strLen; i++) {
+	        mchar ch;
+	        text.GetCharAt(i, ch);
+	        byte b = UnicodeToCp1251Byte(ch);
+	        buffer.SetByte(b);
+	    }
+>>>>>>> Stashed changes
 }
 
 void MrimUtils::AppendLPSUcs2(ByteBuffer& buffer, const String& text) {
@@ -121,14 +140,39 @@ String MrimUtils::ReadLPS(ByteBuffer& buffer) {
     byte* strBytes = new byte[len];
     buffer.GetArray(strBytes, 0, len);
 
+<<<<<<< Updated upstream
     String resultStr;
     for (unsigned long i = 0; i < len; i++) {
         resultStr.Append(Cp1251ByteToUnicode(strBytes[i]));
+=======
+    String resultStr;
+        for (unsigned long i = 0; i < len; i++) {
+            resultStr.Append(Cp1251ByteToUnicode(strBytes[i]));
+        }
+        delete[] strBytes;
+        return resultStr;
+}
+
+String MrimUtils::ReadLPSUcs2(ByteBuffer& buffer) {
+    if (buffer.GetRemaining() < 4) return String(L"");
+    unsigned long len = ReadUL(buffer);
+    if (len == 0 || len > 8192 || (unsigned long)buffer.GetRemaining() < len) return String(L"");
+
+    byte* strBytes = new byte[len];
+    buffer.GetArray(strBytes, 0, len);
+
+    String resultStr;
+    unsigned long charCount = len / 2;
+    for (unsigned long i = 0; i < charCount; i++) {
+        mchar ch = (mchar)(strBytes[i * 2] | (strBytes[i * 2 + 1] << 8));
+        resultStr.Append(ch);
+>>>>>>> Stashed changes
     }
     delete[] strBytes;
     return resultStr;
 }
 
+<<<<<<< Updated upstream
 String MrimUtils::ReadLPSUcs2(ByteBuffer& buffer) {
     if (buffer.GetRemaining() < 4) return String(L"");
     unsigned long len = ReadUL(buffer);
@@ -147,6 +191,8 @@ String MrimUtils::ReadLPSUcs2(ByteBuffer& buffer) {
     return resultStr;
 }
 
+=======
+>>>>>>> Stashed changes
 void MrimUtils::SkipFormattedRecord(ByteBuffer& buffer, const String& mask, int startIndex) {
     int maskLen = mask.GetLength();
     for (int i = startIndex; i < maskLen; i++) {

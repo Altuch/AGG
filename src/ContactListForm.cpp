@@ -30,6 +30,14 @@ result ContactListForm::Initialize(AggConnection* pConn) {
     return E_SUCCESS;
 }
 
+<<<<<<< Updated upstream
+=======
+void ContactListForm::ScheduleAttachContactListener(void) {
+    SendUserEvent(USER_EVENT_ATTACH_LISTENER, null);
+}
+
+
+>>>>>>> Stashed changes
 void ContactListForm::AttachContactListener(void) {
     if (pConnection != null) pConnection->SetContactListListener(this);
 }
@@ -38,6 +46,8 @@ result ContactListForm::OnInitializing(void) {
     SetTitleText(L"Контакти");
     SetOptionkeyActionId(ID_OPTIONKEY_SETTINGS);
     AddOptionkeyActionListener(*this);
+    SetSoftkeyActionId(SOFTKEY_0, ID_OPTIONKEY_SETTINGS);
+    AddSoftkeyActionListener(SOFTKEY_0, *this);
     SetSoftkeyActionId(SOFTKEY_1, ID_SOFTKEY_EXIT);
     AddSoftkeyActionListener(SOFTKEY_1, *this);
 
@@ -166,6 +176,9 @@ void ContactListForm::OnContactListReceived(IList* pGroups, IList* pContacts) {
 }
 
 void ContactListForm::OnUserEventReceivedN(long requestId, IList* pArgs) {
+    if (requestId == USER_EVENT_ATTACH_LISTENER) {
+        AttachContactListener();
+    }
     if (pArgs != null) {
         pArgs->RemoveAll(true);
         delete pArgs;
@@ -200,7 +213,7 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
     switch (actionId) {
         case ID_OPTIONKEY_SETTINGS: {
             Settings* pSettings = new Settings();
-            pSettings->Initialize();
+            pSettings->Initialize(pConnection);
             if (pFrame != null) {
                 pFrame->AddControl(*pSettings);
                 pFrame->SetCurrentForm(*pSettings);

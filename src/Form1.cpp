@@ -173,7 +173,11 @@ void Form1::OnLoginSuccess(void) {
         pFrame->SetCurrentForm(*pContactForm);
         pContactForm->Draw();
         pContactForm->Show();
+<<<<<<< Updated upstream
         pContactForm->AttachContactListener();
+=======
+        pContactForm->ScheduleAttachContactListener();
+>>>>>>> Stashed changes
         pFrame->RemoveControl(*this);
     }
 }
