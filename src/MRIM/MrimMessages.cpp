@@ -11,7 +11,6 @@ void MrimMessages::SetListener(IMessageListener* pListener) {
     this->pListener = pListener;
 }
 
-// 1. Відправка звичайного текстового повідомлення
 void MrimMessages::SendMessageTo(const String& to, const String& text) {
     String cleanTo = to;
     cleanTo.Trim();
@@ -19,18 +18,15 @@ void MrimMessages::SendMessageTo(const String& to, const String& text) {
 
     ByteBuffer payload;
     payload.Construct(2048);
-    // AGG заявляє протокол MRIM 1.8 (MrimUtils::BuildHeader) - за mrim-docs
-    // UTF-16LE в MRIM з'являється лише з 1.16, до того всі LPS - CP1251.
-    MrimUtils::AppendUL(payload, 0); // Звичайне повідомлення (Plain text)
+    MrimUtils::AppendUL(payload, 0);
     MrimUtils::AppendLPS(payload, cleanTo);
     MrimUtils::AppendLPS(payload, text);
-    MrimUtils::AppendLPS(payload, L""); // RTF порожній
+    MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
 
-    pConnection->SendPacket(0x1008, payload); // MRIM_CS_MESSAGE
+    pConnection->SendPacket(0x1008, payload);
 }
 
-// 2. Відправка Будильника (Nudge)
 void MrimMessages::SendNudge(const String& to) {
     String cleanTo = to;
     cleanTo.Trim();
@@ -47,7 +43,6 @@ void MrimMessages::SendNudge(const String& to) {
     pConnection->SendPacket(0x1008, payload);
 }
 
-// 3. Відправка статусу «набирає повідомлення...»
 void MrimMessages::SendTyping(const String& to) {
     String cleanTo = to;
     cleanTo.Trim();
@@ -55,18 +50,15 @@ void MrimMessages::SendTyping(const String& to) {
 
     ByteBuffer payload;
     payload.Construct(512);
-    // КРИТИЧНО: 0x0400 (TYPING) | 0x0004 (NORECV) = 0x0404
-    // Це забороняє серверу генерувати статус доставки і помилку 0x8006
     MrimUtils::AppendUL(payload, MRIM_MSG_FLAG_TYPING | MRIM_MSG_FLAG_NORECV);
     MrimUtils::AppendLPS(payload, cleanTo);
-    MrimUtils::AppendLPS(payload, L" "); // За специфікацією протоколу - 1 пробіл
+    MrimUtils::AppendLPS(payload, L" ");
     MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
 
     pConnection->SendPacket(0x1008, payload);
 }
 
-// 4. Підтвердження отримання повідомлення серверу
 void MrimMessages::SendMessageRecv(const String& from, unsigned long msgId) {
     String cleanFrom = from;
     cleanFrom.Trim();
@@ -81,10 +73,9 @@ void MrimMessages::SendMessageRecv(const String& from, unsigned long msgId) {
     pConnection->SendPacket(0x1011, payload); // MRIM_CS_MESSAGE_RECV
 }
 
-// 5. Розбір вхідних пакетів
 bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     switch (command) {
-        case 0x1009: { // MRIM_CS_MESSAGE_ACK (Вхідне повідомлення)
+        case 0x1009: {
             if (payload.GetRemaining() < 8) return true;
 
             unsigned long msgId = MrimUtils::ReadUL(payload);

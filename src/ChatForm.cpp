@@ -130,8 +130,6 @@ void ChatForm::SendNudgeNow(void) {
     AppendMessageToChat(L"Ви", L"🔔 Будильник відправлено!", false);
 }
 
-// Локальний файл історії чату - не має нічого спільного з кодуванням
-// MRIM-протоколу (те окреме питання), тому звичайний UTF-8.
 String ChatForm::GetHistoryFilePath(void) {
     String safeName = contactEmail;
     safeName.Replace(L"@", L"_");
@@ -144,8 +142,6 @@ void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
     String path = GetHistoryFilePath();
 
     File file;
-    // У bada немає атомарного "додати або створити" - пробуємо дописати,
-    // а якщо файлу ще немає, створюємо новий.
     result r = file.Construct(path, L"a+");
     if (IsFailed(r)) {
         r = file.Construct(path, L"w");
@@ -279,11 +275,7 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
                 pFrame->SetCurrentForm(*pContactForm);
                 pContactForm->Draw();
                 pContactForm->Show();
-<<<<<<< Updated upstream
-                pContactForm->AttachContactListener();
-=======
                 pContactForm->ScheduleAttachContactListener();
->>>>>>> Stashed changes
                 pFrame->RemoveControl(*this);
             }
             break;

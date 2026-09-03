@@ -30,14 +30,10 @@ result ContactListForm::Initialize(AggConnection* pConn) {
     return E_SUCCESS;
 }
 
-<<<<<<< Updated upstream
-=======
 void ContactListForm::ScheduleAttachContactListener(void) {
     SendUserEvent(USER_EVENT_ATTACH_LISTENER, null);
 }
 
-
->>>>>>> Stashed changes
 void ContactListForm::AttachContactListener(void) {
     if (pConnection != null) pConnection->SetContactListListener(this);
 }
