@@ -1,6 +1,7 @@
 #include "ContactListForm.h"
 #include "ChatForm.h"
 #include "Settings.h"
+#include "Form1.h"
 #include <FApp.h>
 #include <FGraphics.h>
 
@@ -13,13 +14,25 @@ using namespace Osp::Graphics;
 
 ContactListForm::ContactListForm(void) :
     pConnection(null), pGroupedList(null), pItemFormat(null),
-    pSavedGroups(null), pSavedContacts(null) {}
+    pSavedGroups(null), pSavedContacts(null), strangersGroupIndex(-1),
+    pBitmapOnline(null), pBitmapAway(null), pBitmapDnd(null), pBitmapOffline(null) {}
 
 ContactListForm::~ContactListForm(void) {
-    if (pConnection != null) pConnection->SetContactListListener(null);
+	DetachListeners();
     if (pItemFormat != null) delete pItemFormat;
     if (pSavedGroups != null) { pSavedGroups->RemoveAll(true); delete pSavedGroups; }
     if (pSavedContacts != null) { pSavedContacts->RemoveAll(true); delete pSavedContacts; }
+    if (pBitmapOnline != null) delete pBitmapOnline;
+    if (pBitmapAway != null) delete pBitmapAway;
+    if (pBitmapDnd != null) delete pBitmapDnd;
+    if (pBitmapOffline != null) delete pBitmapOffline;
+}
+
+const Bitmap* ContactListForm::GetStatusBitmap(unsigned long status) const {
+    if (status == 0 || status == 0x80000001) return pBitmapOffline;
+    if (status == 0x2) return pBitmapAway;
+    if (status == 0x4) return pBitmapDnd;
+    return pBitmapOnline;
 }
 
 result ContactListForm::Initialize(AggConnection* pConn) {
@@ -35,15 +48,40 @@ void ContactListForm::ScheduleAttachContactListener(void) {
 }
 
 void ContactListForm::AttachContactListener(void) {
-    if (pConnection != null) pConnection->SetContactListListener(this);
+	if (pConnection == null) return;
+	pConnection->SetContactListListener(this);
+	pConnection->SetContactListVisibleListener(this);
+	pConnection->SetConnectionStateListener(this);
+}
+
+void ContactListForm::DetachListeners(void) {
+    if (pConnection == null) return;
+    pConnection->SetContactListListener(null);
+    pConnection->SetContactListVisibleListener(null);
+    pConnection->SetConnectionStateListener(this);
+}
+
+void ContactListForm::OnUnreadCountChanged(void) {
+	SendUserEvent(USER_EVENT_CONTACTS_READY, null);
+	}
+
+void ContactListForm::OnConnectionStateChanged(bool connected) {
+    SetTitleText(connected ? L"Контакти" : L"Контакти (з'єднання...)");
+    if (GetParent() != null) {
+        RequestRedraw(true);
+        Draw();
+        Show();
+    }
 }
 
 result ContactListForm::OnInitializing(void) {
     SetTitleText(L"Контакти");
-    SetOptionkeyActionId(ID_OPTIONKEY_SETTINGS);
+    SetOptionkeyActionId(ID_OPTIONKEY_MENU);
     AddOptionkeyActionListener(*this);
+
     SetSoftkeyActionId(SOFTKEY_0, ID_OPTIONKEY_SETTINGS);
     AddSoftkeyActionListener(SOFTKEY_0, *this);
+
     SetSoftkeyActionId(SOFTKEY_1, ID_SOFTKEY_EXIT);
     AddSoftkeyActionListener(SOFTKEY_1, *this);
 
@@ -54,7 +92,17 @@ result ContactListForm::OnInitializing(void) {
         pGroupedList->AddGroupedItemEventListener(*this);
         pItemFormat = new CustomListItemFormat();
         pItemFormat->Construct();
-        pItemFormat->AddElement(1, Rectangle(15, 10, 440, 40));
+        pItemFormat->AddElement(2, Rectangle(15, 14, 32, 32));
+        pItemFormat->AddElement(1, Rectangle(60, 10, 340, 40));
+        pItemFormat->AddElement(3, Rectangle(405, 10, 50, 40));
+    }
+
+    AppResource* pAppResource = Application::GetInstance()->GetAppResource();
+    if (pAppResource != null) {
+        pBitmapOnline  = pAppResource->GetBitmapN(L"Statuses/Online.png");
+        pBitmapAway    = pAppResource->GetBitmapN(L"Statuses/Away.png");
+        pBitmapDnd     = pAppResource->GetBitmapN(L"Statuses/Busy.png");
+        pBitmapOffline = pAppResource->GetBitmapN(L"Statuses/Offline.png");
     }
 
     if (pSavedGroups != null && pSavedContacts != null) PopulateList();
@@ -79,17 +127,14 @@ void ContactListForm::PopulateList(void) {
 
             String displayName = pContact->nickname.IsEmpty() ? pContact->email : pContact->nickname;
 
-            // Правильна перевірка онлайну (покриває X-Статуси)
-            if (pContact->status != 0 && pContact->status != 0x80000001) {
-                displayName = L"● " + displayName;
-            } else {
-                displayName = L"○ " + displayName;
-            }
-
             CustomListItem* pItem = new CustomListItem();
             pItem->Construct(60);
             if (pItemFormat != null) pItem->SetItemFormat(*pItemFormat);
+            const Bitmap* pStatusBitmap = GetStatusBitmap(pContact->status);
+            if (pStatusBitmap != null) pItem->SetElement(2, *pStatusBitmap, null);
             pItem->SetElement(1, displayName);
+            int unreadCount = (pConnection != null) ? pConnection->GetUnreadCount(pContact->email) : 0;
+            if (unreadCount > 0) pItem->SetElement(3, Integer::ToString(unreadCount));
             pGroupedList->AddItem(0, *pItem, cIdx);
         }
     } else {
@@ -111,23 +156,40 @@ void ContactListForm::PopulateList(void) {
                 if (inThisGroup) {
                     String displayName = pContact->nickname.IsEmpty() ? pContact->email : pContact->nickname;
 
-                    if (pContact->status != 0 && pContact->status != 0x80000001) {
-                        displayName = L"● " + displayName;
-                    } else {
-                        displayName = L"○ " + displayName;
-                    }
-
                     CustomListItem* pItem = new CustomListItem();
                     pItem->Construct(60);
                     if (pItemFormat != null) pItem->SetItemFormat(*pItemFormat);
+                    const Bitmap* pStatusBitmap = GetStatusBitmap(pContact->status);
+                    if (pStatusBitmap != null) pItem->SetElement(2, *pStatusBitmap, null);
                     pItem->SetElement(1, displayName);
+                    int unreadCount = (pConnection != null) ? pConnection->GetUnreadCount(pContact->email) : 0;
+                    if (unreadCount > 0) pItem->SetElement(3, Integer::ToString(unreadCount));
                     pGroupedList->AddItem(gIdx, *pItem, cIdx);
                 }
             }
         }
     }
+    IList* pStrangers = (pConnection != null) ? pConnection->GetStrangerEmails() : null;
+        if (pStrangers != null && pStrangers->GetCount() > 0) {
+            int nextGroupIndex = (groupsCount == 0 && contactsCount > 0) ? 1 : groupsCount;
+            strangersGroupIndex = nextGroupIndex;
+            pGroupedList->AddGroup(L"Невідомі", null, nextGroupIndex);
 
-    // Примусово перемальовуємо екран як в офіційному прикладі
+            for (int sIdx = 0; sIdx < pStrangers->GetCount(); sIdx++) {
+                String* pEmail = static_cast<String*>(pStrangers->GetAt(sIdx));
+                if (pEmail == null) continue;
+
+                CustomListItem* pItem = new CustomListItem();
+                pItem->Construct(60);
+                if (pItemFormat != null) pItem->SetItemFormat(*pItemFormat);
+                // Немає статус-іконки - для невідомих контактів ми не
+                // отримуємо MRIM_CS_USER_STATUS (ми ж на них не підписані).
+                pItem->SetElement(1, *pEmail);
+                int unreadCount = pConnection->GetUnreadCount(*pEmail);
+                if (unreadCount > 0) pItem->SetElement(3, Integer::ToString(unreadCount));
+                pGroupedList->AddItem(nextGroupIndex, *pItem, sIdx);
+            }
+        }
     if (GetParent() != null) {
         pGroupedList->RequestRedraw(true);
         pGroupedList->Draw();
@@ -166,14 +228,24 @@ void ContactListForm::OnContactListReceived(IList* pGroups, IList* pContacts) {
         pCNew->flags = pC->flags;
         pSavedContacts->Add(*pCNew);
     }
-
-    // Викликаємо оновлення списку НАПРЯМУ
-    PopulateList();
+    if (pConnection != null) {
+            ArrayList knownEmails;
+            knownEmails.Construct();
+            for (int i = 0; i < pSavedContacts->GetCount(); i++) {
+                ContactInfo* pC = static_cast<ContactInfo*>(pSavedContacts->GetAt(i));
+                if (pC != null) knownEmails.Add(*(new String(pC->email)));
+            }
+            pConnection->SetKnownContactEmails(&knownEmails);
+            knownEmails.RemoveAll(true);
+        }
+    SendUserEvent(USER_EVENT_CONTACTS_READY, null);
 }
 
 void ContactListForm::OnUserEventReceivedN(long requestId, IList* pArgs) {
     if (requestId == USER_EVENT_ATTACH_LISTENER) {
         AttachContactListener();
+    } else if (requestId == USER_EVENT_CONTACTS_READY) {
+            PopulateList();
     }
     if (pArgs != null) {
         pArgs->RemoveAll(true);
@@ -182,13 +254,34 @@ void ContactListForm::OnUserEventReceivedN(long requestId, IList* pArgs) {
 }
 
 void ContactListForm::OnItemStateChanged(const Control& source, int groupIndex, int itemIndex, int itemId, ItemStatus status) {
-    if (pSavedContacts == null || itemId < 0 || itemId >= pSavedContacts->GetCount()) return;
+	String targetName;
+	String targetEmail;
+
+	if (strangersGroupIndex >= 0 && groupIndex == strangersGroupIndex) {
+	        // Тап по групі "Невідомі" - itemId тут індекс у СПИСКУ НЕВІДОМИХ
+	        // (окремий простір індексів від pSavedContacts, див. PopulateList).
+	        IList* pStrangers = (pConnection != null) ? pConnection->GetStrangerEmails() : null;
+	        if (pStrangers == null || itemId < 0 || itemId >= pStrangers->GetCount()) return;
+	        String* pEmail = static_cast<String*>(pStrangers->GetAt(itemId));
+	        if (pEmail == null) return;
+	        targetEmail = *pEmail;
+	        targetName = *pEmail; // немає нікнейму - показуємо сам email
+	    } else {
+	        if (pSavedContacts == null || itemId < 0 || itemId >= pSavedContacts->GetCount())
+	return;
+	        ContactInfo* pTarget = static_cast<ContactInfo*>(pSavedContacts->GetAt(itemId));
+	        if (pTarget == null) return;
+	        targetName = pTarget->nickname;
+	        targetEmail = pTarget->email;
+	    }
 
     ContactInfo* pTarget = static_cast<ContactInfo*>(pSavedContacts->GetAt(itemId));
     if (pTarget == null) return;
 
+    DetachListeners();
+
     ChatForm* pChatForm = new ChatForm();
-    pChatForm->Initialize(pConnection, pTarget->nickname, pTarget->email);
+    pChatForm->Initialize(pConnection, targetName, targetEmail);
 
     Frame* pFrame = Application::GetInstance()->GetAppFrame()->GetFrame();
     if (pFrame != null) {
@@ -215,12 +308,76 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
                 pFrame->SetCurrentForm(*pSettings);
                 pSettings->Draw();
                 pSettings->Show();
+                DetachListeners();
                 pFrame->RemoveControl(*this);
             }
             break;
         }
         case ID_SOFTKEY_EXIT: {
             Application::GetInstance()->Terminate();
+            break;
+        }
+
+        case ID_OPTIONKEY_MENU: {
+            OptionMenu* pMenu = new OptionMenu();
+            pMenu->Construct();
+            pMenu->AddItem(L"Змінити статус", ID_MENU_CHANGE_STATUS);
+            pMenu->AddItem(L"Вийти з акаунту", ID_MENU_LOGOUT);
+            pMenu->AddItem(L"Налаштування", ID_OPTIONKEY_SETTINGS);
+            pMenu->AddActionEventListener(*this);
+            pMenu->SetShowState(true);
+            pMenu->Show();
+            break;
+        }
+
+        case ID_MENU_CHANGE_STATUS: {
+            OptionMenu* pStatusMenu = new OptionMenu();
+            pStatusMenu->Construct();
+            pStatusMenu->AddItem(L"Онлайн", ID_STATUS_ONLINE);
+            pStatusMenu->AddItem(L"Відійшов", ID_STATUS_AWAY);
+            pStatusMenu->AddItem(L"Невидимка", ID_STATUS_INVISIBLE);
+            pStatusMenu->AddActionEventListener(*this);
+            pStatusMenu->SetShowState(true);
+            pStatusMenu->Show();
+            break;
+        }
+
+        case ID_STATUS_ONLINE: {
+            if (pConnection != null) pConnection->ChangeStatus(0x1);
+            break;
+        }
+        case ID_STATUS_AWAY: {
+            if (pConnection != null) pConnection->ChangeStatus(0x2);
+            break;
+        }
+        case ID_STATUS_INVISIBLE: {
+            if (pConnection != null) pConnection->ChangeStatus(0x80000001);
+            break;
+        }
+
+        case ID_MENU_LOGOUT: {
+            AppRegistry* pReg = Application::GetInstance()->GetAppRegistry();
+            if (pReg != null) {
+                pReg->Remove(L"UserEmail");
+                pReg->Remove(L"UserPassword");
+                pReg->Save();
+            }
+            DetachListeners();
+            if (pConnection != null) {
+                delete pConnection;
+                pConnection = null;
+            }
+
+            Form1* pForm1 = new Form1();
+            pForm1->Initialize();
+
+            if (pFrame != null) {
+                pFrame->AddControl(*pForm1);
+                pFrame->SetCurrentForm(*pForm1);
+                pForm1->Draw();
+                pForm1->Show();
+                pFrame->RemoveControl(*this);
+            }
             break;
         }
     }

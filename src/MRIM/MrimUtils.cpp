@@ -3,10 +3,6 @@
 using namespace Osp::Base;
 using namespace Osp::Base::Utility;
 
-// Таблиця CP1251 (Windows-1251) <-> Unicode. MRIM історично передає всі
-// "класичні" LPS-поля (логін, email, телефон, xstatus, client) саме в
-// CP1251, а не в UTF-8 — автовизначення тут не потрібне й лише вносило
-// плутанину: кожне поле пакета має наперед відомий, фіксований формат.
 static mchar Cp1251ByteToUnicode(byte b) {
     if (b < 0x80) return (mchar)b;
     if (b >= 0xC0 && b <= 0xFF) return (mchar)(0x0410 + (b - 0xC0)); // А-Я, а-я
@@ -116,7 +112,7 @@ unsigned long MrimUtils::ReadUL(ByteBuffer& buffer) {
 String MrimUtils::ReadLPS(ByteBuffer& buffer) {
     if (buffer.GetRemaining() < 4) return String(L"");
     unsigned long len = ReadUL(buffer);
-    if (len == 0 || len > 4096 || (unsigned long)buffer.GetRemaining() < len) return String(L"");
+    if (len == 0 || len > 20000 || (unsigned long)buffer.GetRemaining() < len) return String(L"");
 
     byte* strBytes = new byte[len];
     buffer.GetArray(strBytes, 0, len);
@@ -145,6 +141,49 @@ String MrimUtils::ReadLPSUcs2(ByteBuffer& buffer) {
     }
     delete[] strBytes;
     return resultStr;
+}
+
+static int Base64CharValue(mchar c) {
+    if (c >= L'A' && c <= L'Z') return c - L'A';
+    if (c >= L'a' && c <= L'z') return c - L'a' + 26;
+    if (c >= L'0' && c <= L'9') return c - L'0' + 52;
+    if (c == L'+') return 62;
+    if (c == L'/') return 63;
+    return -1;
+}
+
+String MrimUtils::Base64DecodeUtf16LEToString(const String& base64Text) {
+    int len = base64Text.GetLength();
+    if (len <= 0 || len > 20000) return String(L"");
+
+    byte* raw = new byte[(len / 4 + 1) * 3];
+    int rawLen = 0;
+
+    int bits = 0;
+    int bitCount = 0;
+    for (int i = 0; i < len; i++) {
+        mchar ch;
+        base64Text.GetCharAt(i, ch);
+        int val = Base64CharValue(ch);
+        if (val < 0) continue;
+
+        bits = (bits << 6) | val;
+        bitCount += 6;
+        if (bitCount >= 8) {
+            bitCount -= 8;
+            raw[rawLen++] = (byte)((bits >> bitCount) & 0xFF);
+        }
+    }
+
+    String result;
+    int charCount = rawLen / 2;
+    for (int i = 0; i < charCount; i++) {
+        mchar ch = (mchar)(raw[i * 2] | (raw[i * 2 + 1] << 8));
+        result.Append(ch);
+    }
+
+    delete[] raw;
+    return result;
 }
 
 void MrimUtils::SkipFormattedRecord(ByteBuffer& buffer, const String& mask, int startIndex) {

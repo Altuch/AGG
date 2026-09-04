@@ -370,6 +370,8 @@ src/ChatForm.d src/ChatForm.o: ../src/ChatForm.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h \
+ C:/bada/2.0.6/Include/FGraphics.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h \
  C:/bada/2.0.6/Include/FApp.h C:/bada/2.0.6/Include/FAppApplication.h \
  C:/bada/2.0.6/Include/FAppConfig.h C:/bada/2.0.6/Include/FAppTypes.h \
@@ -393,9 +395,8 @@ src/ChatForm.d src/ChatForm.o: ../src/ChatForm.cpp \
  C:/bada/2.0.6/Include/FAppJavaAppManager.h \
  C:/bada/2.0.6/Include/FAppJarInfo.h \
  C:/bada/2.0.6/Include/FAppIAppControlListener.h \
- C:/bada/2.0.6/Include/FGraphics.h C:/bada/2.0.6/Include/FIo.h \
- C:/bada/2.0.6/Include/FIoDirectory.h C:/bada/2.0.6/Include/FBaseTypes.h \
- C:/bada/2.0.6/Include/FBaseDateTime.h \
+ C:/bada/2.0.6/Include/FIo.h C:/bada/2.0.6/Include/FIoDirectory.h \
+ C:/bada/2.0.6/Include/FBaseTypes.h C:/bada/2.0.6/Include/FBaseDateTime.h \
  C:/bada/2.0.6/Include/FBaseString.h \
  C:/bada/2.0.6/Include/FBaseResource.h \
  C:/bada/2.0.6/Include/FBaseColArrayList.h \
@@ -1220,6 +1221,10 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h:
 
+C:/bada/2.0.6/Include/FGraphics.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h:
+
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
 
 C:/bada/2.0.6/Include/FApp.h:
@@ -1269,8 +1274,6 @@ C:/bada/2.0.6/Include/FAppJavaAppManager.h:
 C:/bada/2.0.6/Include/FAppJarInfo.h:
 
 C:/bada/2.0.6/Include/FAppIAppControlListener.h:
-
-C:/bada/2.0.6/Include/FGraphics.h:
 
 C:/bada/2.0.6/Include/FIo.h:
 

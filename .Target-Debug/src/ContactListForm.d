@@ -252,7 +252,7 @@ src/ContactListForm.d src/ContactListForm.o: ../src/ContactListForm.cpp \
  C:/bada/2.0.6/Include/FUiRelativeLayout.h \
  C:/bada/2.0.6/Include/FUiGridLayout.h \
  C:/bada/2.0.6/Include/FUiCustomControlBase.h \
- C:/bada/2.0.6/Include/FBase.h \
+ C:/bada/2.0.6/Include/FBase.h C:/bada/2.0.6/Include/FGraphics.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h \
  C:/bada/2.0.6/Include/FNet.h \
  C:/bada/2.0.6/Include/FNetNetConnectionManager.h \
@@ -354,6 +354,7 @@ src/ContactListForm.d src/ContactListForm.o: ../src/ContactListForm.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ChatForm.h \
  C:/bada/2.0.6/Include/FSystem.h C:/bada/2.0.6/Include/FSysAlarm.h \
  C:/bada/2.0.6/Include/FSysIAlarmEventListener.h \
@@ -393,7 +394,8 @@ src/ContactListForm.d src/ContactListForm.o: ../src/ContactListForm.cpp \
  C:/bada/2.0.6/Include/FAppJavaAppManager.h \
  C:/bada/2.0.6/Include/FAppJarInfo.h \
  C:/bada/2.0.6/Include/FAppIAppControlListener.h \
- C:/bada/2.0.6/Include/FGraphics.h
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Form1.h \
+ C:/bada/2.0.6/Include/FUiControls.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h:
 
@@ -947,6 +949,8 @@ C:/bada/2.0.6/Include/FUiCustomControlBase.h:
 
 C:/bada/2.0.6/Include/FBase.h:
 
+C:/bada/2.0.6/Include/FGraphics.h:
+
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h:
 
 C:/bada/2.0.6/Include/FNet.h:
@@ -1157,6 +1161,8 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h:
+
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ChatForm.h:
 
 C:/bada/2.0.6/Include/FSystem.h:
@@ -1245,4 +1251,6 @@ C:/bada/2.0.6/Include/FAppJarInfo.h:
 
 C:/bada/2.0.6/Include/FAppIAppControlListener.h:
 
-C:/bada/2.0.6/Include/FGraphics.h:
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Form1.h:
+
+C:/bada/2.0.6/Include/FUiControls.h:

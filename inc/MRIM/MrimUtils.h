@@ -14,6 +14,7 @@ public:
     static Osp::Base::String ReadLPSUcs2(Osp::Base::ByteBuffer& buffer);
 
     static unsigned long ReadUL(Osp::Base::ByteBuffer& buffer);
+    static Osp::Base::String Base64DecodeUtf16LEToString(const Osp::Base::String& base64Text);
     static void BuildHeader(Osp::Base::ByteBuffer& buffer, unsigned long command, unsigned long dataLen);
     static bool IsValidIpAddress(const Osp::Base::String& ip);
 

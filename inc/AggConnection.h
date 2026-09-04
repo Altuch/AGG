@@ -9,7 +9,13 @@
 #include "MRIM/MrimMessages.h"
 
 class MessageRouter;
+class IUnreadCountListener;
 
+class IConnectionStateListener {
+public:
+    virtual ~IConnectionStateListener(void) {}
+    virtual void OnConnectionStateChanged(bool connected) = 0;
+};
 
 class AggConnection : public Osp::Net::Sockets::ISocketEventListener,
                       public Osp::Base::Runtime::ITimerEventListener
@@ -32,9 +38,21 @@ public:
     void SetContactListListener(IContactListListener* pListener) { if (pContactMgr) pContactMgr->SetListener(pListener); }
     void SetActiveChatListener(IMessageListener* pListener, const Osp::Base::String& email);
     void ClearActiveChatListener(void);
+    int GetUnreadCount(const Osp::Base::String& email) const;
+    void SetContactListVisibleListener(IUnreadCountListener* pListener);
+
+    void SetKnownContactEmails(Osp::Base::Collection::IList* pEmails);
+    Osp::Base::Collection::IList* GetStrangerEmails(void) const;
+
+    void SetConnectionStateListener(IConnectionStateListener* pListener) { pConnectionStateListener = pListener; }
+    void NotifyLoggedIn(void);
+
     void SendMessageTo(const Osp::Base::String& to, const Osp::Base::String& text) { if (pMessageMgr) pMessageMgr->SendMessageTo(to, text); }
     void SendNudge(const Osp::Base::String& to) { if (pMessageMgr) pMessageMgr->SendNudge(to); }
     void SendTyping(const Osp::Base::String& to) { if (pMessageMgr) pMessageMgr->SendTyping(to); }
+
+    void ChangeStatus(unsigned long status);
+    static void NotifyAppForegroundState(bool foreground);
 
     virtual void OnSocketConnected(Osp::Net::Sockets::Socket& socket);
     virtual void OnSocketClosed(Osp::Net::Sockets::Socket& socket, Osp::Net::Sockets::NetSocketClosedReason reason);
@@ -48,6 +66,9 @@ private:
     result InitSocket(void);
     void SendHello(void);
     void SendPing(void);
+    void ScheduleReconnect(void);
+    void AttemptReconnect(void);
+    void HandleForcedLogout(void);
 
     Osp::Net::Sockets::Socket* pSocket;
     Osp::Base::ByteBuffer* pTxBuffer;
@@ -58,10 +79,21 @@ private:
     bool isTimerStarted;
     int pingIntervalMsec;
 
+    Osp::Base::String lastServerIp;
+    int lastServerPort;
+    bool hasLoggedInOnce;
+    bool isReconnecting;
+    bool isForceLoggedOut;
+    int reconnectAttempt;
+    Osp::Base::Runtime::Timer* pReconnectTimer;
+    IConnectionStateListener* pConnectionStateListener;
+
     MrimAuth* pAuthMgr;
     MrimContacts* pContactMgr;
     MrimMessages* pMessageMgr;
     MessageRouter* pMessageRouter;
+
+    static AggConnection* pActiveInstance;
 };
 
 #endif

@@ -6,18 +6,13 @@
 
 <Scene Bversion="2.0.6.v20120503" Dversion="20100701">
     <Form id="IDF_CONT">
-        <property BGColor="" BGColorOpacity="100" Orientation="Automatic" softKey0NormalIcon="" softKey0PressedIcon="" softKey0Text="Settings" softKey1NormalIcon="" softKey1PressedIcon="" softKey1Text="Quit" title="Contacts" titleAlign="ALIGN_CENTER" titleIcon=""/>
+        <property BGColor="" BGColorOpacity="100" Orientation="Portrait" softKey0NormalIcon="" softKey0PressedIcon="" softKey0Text="Profile" softKey1NormalIcon="" softKey1PressedIcon="" softKey1Text="SMTH" title="Contacts" titleAlign="ALIGN_CENTER" titleIcon=""/>
         <layout mode="Portrait" style="FORM_STYLE_INDICATOR|FORM_STYLE_TITLE|FORM_STYLE_SOFTKEY_0|FORM_STYLE_SOFTKEY_1|FORM_STYLE_OPTIONKEY"/>
         <layout mode="Landscape" style="FORM_STYLE_INDICATOR|FORM_STYLE_TITLE|FORM_STYLE_SOFTKEY_0|FORM_STYLE_SOFTKEY_1|FORM_STYLE_OPTIONKEY"/>
     </Form>
-    <GroupedListView id="IDC_GROUPEDLISTVIEW1" parent="IDF_CONT">
-        <property BGColor="" BGColorOpacity="100" bitmapPathOfEmptyList="" colorOfEmptyListText="" fastScroll="FALSE" itemDivider="TRUE" itemDividerColor="" sectionColor="" sweepEnabled="FALSE" textOfEmptyList=""/>
-        <layout height="356" mode="Portrait" style="CUSTOM_LIST_STYLE_NORMAL" width="240" x="0" y="0"/>
-        <layout height="74" mode="Landscape" style="CUSTOM_LIST_STYLE_NORMAL" width="137" x="287" y="79"/>
-    </GroupedListView>
-    <GroupedList id="IDC_CONTACT_LIST" parent="IDF_CONT">
+    <GroupedList id="IDC_GROUPEDLIST1" parent="IDF_CONT">
         <property colorOfEmptyListText="" fastScroll="FALSE" itemDivider="TRUE" textOfEmptyList=""/>
         <layout height="356" mode="Portrait" style="CUSTOM_LIST_STYLE_NORMAL" width="240" x="0" y="0"/>
-        <layout height="196" mode="Landscape" style="CUSTOM_LIST_STYLE_NORMAL" width="400" x="0" y="0"/>
+        <layout height="74" mode="Landscape" style="CUSTOM_LIST_STYLE_NORMAL" width="228" x="171" y="68"/>
     </GroupedList>
 </Scene>

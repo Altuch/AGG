@@ -37,8 +37,9 @@ void MrimAuth::SendLogin2(const String& login, const String& password) {
 
 bool MrimAuth::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     switch (command) {
-        case 0x1004: { // MRIM_CS_LOGIN_ACK
+        case 0x1004: {
             AppLog("MRIM_CS_LOGIN_ACK received -> викликаємо OnLoginSuccess!");
+            if (pConnection != null) pConnection->NotifyLoggedIn();
             if (this->pListener != null) {
                 this->pListener->OnLoginSuccess();
             }

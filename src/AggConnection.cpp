@@ -1,18 +1,30 @@
 #include "AggConnection.h"
 #include "MRIM/MrimUtils.h"
 #include "MessageRouter.h"
+#include "Form1.h"
 #include <FText.h>
+#include <FUi.h>
+#include <FApp.h>
 
 using namespace Osp::Net;
 using namespace Osp::Net::Sockets;
 using namespace Osp::Base;
+using namespace Osp::Base::Collection;
 using namespace Osp::Base::Runtime;
 using namespace Osp::Base::Utility;
 using namespace Osp::Text;
+using namespace Osp::Ui;
+using namespace Osp::Ui::Controls;
+using namespace Osp::App;
+
+AggConnection* AggConnection::pActiveInstance = null;
 
 AggConnection::AggConnection(void) :
     pSocket(null), pTxBuffer(null), pRxBuffer(null), pPingTimer(null),
     isRedirected(false), isTimerStarted(false), pingIntervalMsec(0),
+    lastServerPort(0), hasLoggedInOnce(false), isReconnecting(false),
+    isForceLoggedOut(false),
+    reconnectAttempt(0), pReconnectTimer(null), pConnectionStateListener(null),
     pAuthMgr(null), pContactMgr(null), pMessageMgr(null), pMessageRouter(null)
 {
     pAuthMgr = new MrimAuth(this);
@@ -21,6 +33,8 @@ AggConnection::AggConnection(void) :
 }
 
 AggConnection::~AggConnection(void) {
+    if (pActiveInstance == this) pActiveInstance = null;
+
     if (pSocket != null) {
         pSocket->RemoveSocketListener(*this);
         pSocket->Close();
@@ -32,13 +46,24 @@ AggConnection::~AggConnection(void) {
         pPingTimer->Cancel();
         delete pPingTimer;
     }
+    if (pReconnectTimer != null) {
+        pReconnectTimer->Cancel();
+        delete pReconnectTimer;
+    }
     delete pAuthMgr;
     delete pContactMgr;
     delete pMessageMgr;
     delete pMessageRouter;
 }
 
+void AggConnection::NotifyAppForegroundState(bool foreground) {
+    if (pActiveInstance == null || !pActiveInstance->hasLoggedInOnce) return;
+    pActiveInstance->ChangeStatus(foreground ? 0x1 : 0x2);
+}
+
 result AggConnection::Construct(void) {
+    pActiveInstance = this;
+
     pTxBuffer = new ByteBuffer();
     pTxBuffer->Construct(4096);
 
@@ -50,10 +75,15 @@ result AggConnection::Construct(void) {
 
     pPingTimer = new Timer();
     pPingTimer->Construct(*this);
+
+    pReconnectTimer = new Timer();
+    pReconnectTimer->Construct(*this);
+
     pMessageRouter = new MessageRouter();
-        if (pMessageMgr != null) {
-            pMessageMgr->SetListener(pMessageRouter);
-        }
+    if (pMessageMgr != null) {
+        pMessageMgr->SetListener(pMessageRouter);
+    }
+
     return r;
 }
 
@@ -63,6 +93,30 @@ void AggConnection::SetActiveChatListener(IMessageListener* pListener, const Str
 
 void AggConnection::ClearActiveChatListener(void) {
     if (pMessageRouter != null) pMessageRouter->ClearActiveChat();
+}
+
+int AggConnection::GetUnreadCount(const String& email) const {
+    return pMessageRouter != null ? pMessageRouter->GetUnreadCount(email) : 0;
+}
+
+void AggConnection::SetContactListVisibleListener(IUnreadCountListener* pListener) {
+    if (pMessageRouter != null) pMessageRouter->SetUnreadCountListener(pListener);
+}
+
+void AggConnection::SetKnownContactEmails(IList* pEmails) {
+    if (pMessageRouter != null) pMessageRouter->SetKnownContacts(pEmails);
+}
+
+IList* AggConnection::GetStrangerEmails(void) const {
+    return pMessageRouter != null ? pMessageRouter->GetStrangerEmails() : null;
+}
+
+void AggConnection::ChangeStatus(unsigned long status) {
+    ByteBuffer payload;
+    payload.Construct(16);
+    MrimUtils::AppendUL(payload, status);
+    payload.Flip();
+    SendPacket(0x1022, payload);
 }
 
 result AggConnection::InitSocket(void) {
@@ -98,6 +152,9 @@ result AggConnection::ConnectToRedirector(const String& serverIp) {
 
 result AggConnection::ConnectToDirectServer(const String& serverIp, int port) {
     isRedirected = true;
+    lastServerIp = serverIp;
+    lastServerPort = port;
+
     result r = InitSocket();
     if (IsFailed(r)) return r;
 
@@ -117,9 +174,79 @@ void AggConnection::OnSocketClosed(Socket& socket, NetSocketClosedReason reason)
         pPingTimer->Cancel();
         isTimerStarted = false;
     }
-    if (isRedirected && pAuthMgr != null) {
-        pAuthMgr->NotifyLoginFailed(L"З'єднання розірвано. Перевірте мережу.");
+
+    if (isForceLoggedOut) {
+        return;
     }
+
+    if (!hasLoggedInOnce) {
+        if (isRedirected && pAuthMgr != null) {
+            pAuthMgr->NotifyLoginFailed(L"З'єднання розірвано. Перевірте мережу.");
+        }
+        return;
+    }
+
+    bool wasAlreadyReconnecting = isReconnecting;
+    isReconnecting = true;
+    if (!wasAlreadyReconnecting && pConnectionStateListener != null) {
+        pConnectionStateListener->OnConnectionStateChanged(false);
+    }
+    ScheduleReconnect();
+}
+
+void AggConnection::NotifyLoggedIn(void) {
+    hasLoggedInOnce = true;
+    bool wasReconnecting = isReconnecting;
+    isReconnecting = false;
+    reconnectAttempt = 0;
+    if (wasReconnecting && pConnectionStateListener != null) {
+        pConnectionStateListener->OnConnectionStateChanged(true);
+    }
+}
+
+void AggConnection::ScheduleReconnect(void) {
+    if (pReconnectTimer == null) return;
+    reconnectAttempt++;
+
+    int delayMsec = 3000;
+    if (reconnectAttempt == 2) delayMsec = 6000;
+    else if (reconnectAttempt == 3) delayMsec = 12000;
+    else if (reconnectAttempt >= 4) delayMsec = 20000;
+
+    pReconnectTimer->Start(delayMsec);
+}
+
+void AggConnection::AttemptReconnect(void) {
+    if (lastServerIp.IsEmpty()) return;
+    AppLog("Спроба перепідключення #%d...", reconnectAttempt);
+    ConnectToDirectServer(lastServerIp, lastServerPort);
+}
+
+void AggConnection::HandleForcedLogout(void) {
+    isForceLoggedOut = true;
+
+    Frame* pFrame = Application::GetInstance()->GetAppFrame()->GetFrame();
+    if (pFrame == null) return;
+
+    MessageBox msgBox;
+    msgBox.Construct(
+        L"Вихід із застосунку",
+        L"Ви увійшли в цей акаунт з іншого пристрою. MRIM дозволяє лише один активний сеанс - увійдіть знову, коли будете готові.",
+        MSGBOX_STYLE_OK);
+    int modalResult = 0;
+    msgBox.ShowAndWait(modalResult);
+
+    Form* pOldForm = pFrame->GetCurrentForm();
+
+    Form1* pForm1 = new Form1();
+    pForm1->Initialize();
+
+    pFrame->AddControl(*pForm1);
+    pFrame->SetCurrentForm(*pForm1);
+    pForm1->Draw();
+    pForm1->Show();
+
+    if (pOldForm != null) pFrame->RemoveControl(*pOldForm);
 }
 
 void AggConnection::OnSocketReadyToSend(Socket& socket) {}
@@ -153,6 +280,10 @@ void AggConnection::SendPing(void) {
 }
 
 void AggConnection::OnTimerExpired(Timer& timer) {
+    if (&timer == pReconnectTimer) {
+        AttemptReconnect();
+        return;
+    }
     if (isTimerStarted) {
         SendPing();
         pPingTimer->Start(pingIntervalMsec);
@@ -162,7 +293,6 @@ void AggConnection::OnTimerExpired(Timer& timer) {
 void AggConnection::OnSocketReadyToReceive(Socket& socket) {
     unsigned long buflen = 0;
 
-    // Блискуча знахідка з документації bada: дізнаємося точний розмір даних!
     socket.Ioctl(NET_SOCKET_FIONREAD, buflen);
     if (buflen == 0) return;
 
@@ -174,9 +304,8 @@ void AggConnection::OnSocketReadyToReceive(Socket& socket) {
 
     tempBuf.Flip();
 
-    // Правильно дописуємо дані в кінець (TCP фрагментація)
     pRxBuffer->SetArray(tempBuf.GetPointer(), 0, tempBuf.GetLimit());
-    pRxBuffer->Flip(); // Готуємо буфер до читання
+    pRxBuffer->Flip();
 
     if (!isRedirected) {
         String redirectAddress;
@@ -206,10 +335,9 @@ void AggConnection::OnSocketReadyToReceive(Socket& socket) {
             unsigned long command = MrimUtils::ReadUL(*pRxBuffer);
             unsigned long dataLen = MrimUtils::ReadUL(*pRxBuffer);
 
-            // Перевіряємо, чи отримано весь пакет повністю
             if (static_cast<unsigned long>(pRxBuffer->GetRemaining()) < 24 + dataLen) {
                 pRxBuffer->SetPosition(packetStartPos);
-                break; // Чекаємо наступного OnSocketReadyToReceive
+                break;
             }
 
             pRxBuffer->SetPosition(packetStartPos + 44);
@@ -247,11 +375,13 @@ void AggConnection::OnSocketReadyToReceive(Socket& socket) {
                 if (pAuthMgr) pAuthMgr->SendLogin2(userLogin, userPassword);
             }
 
-            // Переходимо до наступного пакета
+            if (!handled && command == 0x1013) {
+                handled = true;
+                HandleForcedLogout();
+            }
+
             pRxBuffer->SetPosition((packetStartPos + 44) + dataLen);
         }
     }
-
-    // ВАЖЛИВО: Зсуває недочитані (фрагментовані) дані на початок для склеювання
     pRxBuffer->Compact();
 }

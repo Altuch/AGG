@@ -379,7 +379,9 @@ src/Form1.d src/Form1.o: ../src/Form1.cpp \
  C:/bada/2.0.6/Include/FAppJavaAppManager.h \
  C:/bada/2.0.6/Include/FAppJarInfo.h \
  C:/bada/2.0.6/Include/FAppIAppControlListener.h \
- C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h \
+ C:/bada/2.0.6/Include/FGraphics.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Form1.h:
 
@@ -1200,3 +1202,7 @@ C:/bada/2.0.6/Include/FAppJarInfo.h:
 C:/bada/2.0.6/Include/FAppIAppControlListener.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h:
+
+C:/bada/2.0.6/Include/FGraphics.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h:

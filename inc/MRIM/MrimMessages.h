@@ -39,6 +39,8 @@ public:
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
 
 private:
+    void SendOfflineMessageDelete(void);
+    void HandleOfflineMessageEnvelope(const Osp::Base::String& envelope);
     AggConnection* pConnection;
     IMessageListener* pListener;
 };

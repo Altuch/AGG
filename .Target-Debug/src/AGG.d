@@ -393,6 +393,8 @@ src/AGG.d src/AGG.o: ../src/AGG.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h \
+ C:/bada/2.0.6/Include/FGraphics.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h
 
@@ -1247,6 +1249,10 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h:
+
+C:/bada/2.0.6/Include/FGraphics.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h:
 

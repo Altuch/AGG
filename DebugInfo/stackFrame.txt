@@ -1,31 +1,20 @@
-PC: 0x1C0CAC72 LR: 0x99F0F4A0 Stack PTR : 0x0AD7E708 
-0x99F0F4A0 CWsEditArea::AppendText(unsigned short*)
-0x99F0F4A0 CWsEditArea::AppendText(unsigned short*)
-0x97B773F9 _ZN3Osp2Ui8Controls8EditArea10AppendTextERKNS_4Base6String
-0x97B773F9 _ZN3Osp2Ui8Controls8EditArea10AppendTextERKNS_4Base6String
-0x975831D7 ChatForm::AppendMessageToChat(Osp::Base::String const&, Osp::Base::String const&, bool)
-0x97A888E7 Osp::Base::String::Reset()
-0x97583F93 ChatForm::OnMessageReceived(Osp::Base::String const&, Osp::Base::String const&, bool)
-0x97A88C51 Osp::Base::String::operator==(Osp::Base::String const&) const
-0x97A89035 Osp::Base::String::Equals(Osp::Base::String const&, bool) const
-0x9758B145 MessageRouter::OnMessageReceived(Osp::Base::String const&)
-0x97A8F013 Osp_freeEx(void*, char const*, int)
-0x9758FE55 _ZN12MrimMessages14ProcessCommandEmRN3Osp4Base10ByteBuffer
-0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
-0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
-0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
-0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
-0x9758265F _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
-0x97A9871F Mem_freeEx
-0x97B44BBB _ZN3Osp3Net7Sockets13__SocketEvent8FireImplEPNS_4Base7Runt
-0x97B44B59 Osp::Net::Sockets::__SocketEvent::GetSocket() const
-0x97A8B31D _ZN3Osp4Base7Runtime5Event16ProcessListenersERKNS1_9IEvent
-0x97A8B4FF Osp::Base::Runtime::Event::Fire(Osp::Base::Runtime::IEventArg const&)
-0x9A7347D1 __SocketHandleEvent(void*, WmEvent*)
-0x9A7346AB __ConvertError(int)
-0x9A7346AB __ConvertError(int)
-0x9939827B Event_processPi
-0x99395AA7 Event_process
-0x99395AE1 Event_iterate
-0x99395B05 Event_runMainloopEx
-0x97B0C5CB _ZN3Osp3App17__BaseApplication7OnStartERKNS_4Base7Runtime2
+PC: 0x4000740A LR: 0x401AA1AF Stack PTR : 0x0AFBDF6C 
+0x4000740A [Platform Fns]
+0x401AA1AE [Platform Fns]
+0x401AA93C [Platform Fns]
+0x401AAE10 [Platform Fns]
+0x401AAEC2 [Platform Fns]
+0x6E9CB80C Osp::Base::Runtime::Event::Fire(Osp::Base::Runtime::IEventArg const&)
+0x6D030154 __SocketHandleEvent(void*, WmEvent*)
+0x4002007C [Platform Fns]
+0x40028402 [Platform Fns]
+0x69E679F4 Event_processPi
+0x400B5C9C [Platform Fns]
+0x6EA949FC Osp::App::__AppExecutable::OnStart(Osp::Base::Runtime::_EventDispatcherEventArg const&)
+0x6EA95F46 virtual thunk to Osp::App::__AppExecutable::OnStart(Osp::Base::Runtime::_EventDispatcherEventArg const&)
+0x6E9CC684 Osp::Base::Runtime::__EventDispatcherCore::Start()
+0x6EA934A0 Osp::App::__AppExecutable::Run()
+0x6EA9B130 Osp::App::Application::Execute(Osp::App::Application* (*)(), Osp::Base::Collection::IList const*, Osp::App::AppAttributeType)
+0x400538DC [Platform Fns]
+0x4006D300 [Platform Fns]
+0x402070CC [Platform Fns]

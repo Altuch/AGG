@@ -82,8 +82,14 @@ bool AGG::OnAppTerminating(AppRegistry& appRegistry, bool forcedTermination) {
     return true;
 }
 
-void AGG::OnForeground(void) { MessageRouter::SetAppForeground(true); }
-void AGG::OnBackground(void) { MessageRouter::SetAppForeground(false); }
+void AGG::OnForeground(void) {
+    MessageRouter::SetAppForeground(true);
+    AggConnection::NotifyAppForegroundState(true);
+}
+void AGG::OnBackground(void) {
+    MessageRouter::SetAppForeground(false);
+    AggConnection::NotifyAppForegroundState(false);
+}
 void AGG::OnLowMemory(void) {}
 void AGG::OnBatteryLevelChanged(BatteryLevel batteryLevel) {}
 void AGG::OnScreenOn(void) {}

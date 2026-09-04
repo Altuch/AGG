@@ -120,6 +120,20 @@ bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
 
             return true;
         }
+        case 0x101D: { // MRIM_CS_OFFLINE_MESSAGE_ACK - офлайн-повідомлення, надіслані при вході
+                    if (payload.GetRemaining() < 8) return true;
+                    MrimUtils::ReadUL(payload); // id (64-біт, low) - не потрібен, див. HandleOfflineMessageEnvelope
+                    MrimUtils::ReadUL(payload); // id (64-біт, high)
+
+                    String envelope = MrimUtils::ReadLPS(payload);
+                    HandleOfflineMessageEnvelope(envelope);
+
+                    // Одразу підтверджуємо - сервер на 0x101E чистить ВСЮ чергу
+                    // офлайн-повідомлень незалежно від id, тож повторний виклик
+                    // після кожного повідомлення нешкідливий.
+                    SendOfflineMessageDelete();
+                    return true;
+                }
 
         case 0x1012: { // MRIM_CS_MESSAGE_STATUS
             if (payload.GetRemaining() < 4) return true;
@@ -134,4 +148,60 @@ bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
         }
     }
     return false;
+}
+
+void MrimMessages::SendOfflineMessageDelete(void) {
+    ByteBuffer payload;
+    payload.Construct(8);
+    // 64-бітний id за протоколом, але сервер (mrim-server) його
+    // ігнорує й чистить чергу цілком - нулі тут абсолютно достатньо.
+    MrimUtils::AppendUL(payload, 0);
+    MrimUtils::AppendUL(payload, 0);
+    payload.Flip();
+
+    pConnection->SendPacket(0x101E, payload); // MRIM_CS_OFFLINE_MESSAGE_DELETE
+}
+
+void MrimMessages::HandleOfflineMessageEnvelope(const String& envelope) {
+	int envLen = envelope.GetLength();
+	if (envLen <= 0) return;
+    String sender = L"";
+    int fromPos = -1;
+    envelope.IndexOf(L"From: ", 0, fromPos);
+    if (fromPos >= 0 && fromPos < envLen) {
+        int lineEnd = -1;
+        envelope.IndexOf(L"\r\n", fromPos, lineEnd);
+        int start = fromPos + 6; // довжина "From: "
+                if (start >= 0 && start <= envLen && lineEnd > start && lineEnd <= envLen) {
+                    envelope.SubString(start, lineEnd - start, sender);
+                }
+    }
+    sender.Trim();
+    if (sender.IsEmpty()) return;
+
+    int bodyStart = -1;
+    envelope.IndexOf(L"\r\n\r\n", 0, bodyStart);
+    if (bodyStart < 0) return;
+    bodyStart += 4;
+    if (bodyStart < 0 || bodyStart > envLen) return;
+
+    String base64Body;
+    if (bodyStart < envLen) {
+    	envelope.SubString(bodyStart, base64Body);
+    }
+    base64Body.Trim();
+    if (base64Body.IsEmpty()) return;
+
+    if (base64Body.GetLength() > 20000) {
+            String truncated;
+            base64Body.SubString(0, 20000, truncated);
+            base64Body = truncated;
+    }
+
+    String text = MrimUtils::Base64DecodeUtf16LEToString(base64Body);
+    if (text.IsEmpty()) return;
+
+    if (this->pListener != null) {
+        this->pListener->OnMessageReceived(sender, text, false);
+    }
 }
