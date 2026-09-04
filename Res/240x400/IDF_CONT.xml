@@ -6,7 +6,7 @@
 
 <Scene Bversion="2.0.6.v20120503" Dversion="20100701">
     <Form id="IDF_CONT">
-        <property BGColor="" BGColorOpacity="100" Orientation="Automatic" softKey0NormalIcon="" softKey0PressedIcon="" softKey0Text="" softKey1NormalIcon="" softKey1PressedIcon="" softKey1Text="" title="Контакти" titleAlign="ALIGN_CENTER" titleIcon=""/>
+        <property BGColor="" BGColorOpacity="100" Orientation="Automatic" softKey0NormalIcon="" softKey0PressedIcon="" softKey0Text="Settings" softKey1NormalIcon="" softKey1PressedIcon="" softKey1Text="Quit" title="Contacts" titleAlign="ALIGN_CENTER" titleIcon=""/>
         <layout mode="Portrait" style="FORM_STYLE_INDICATOR|FORM_STYLE_TITLE|FORM_STYLE_SOFTKEY_0|FORM_STYLE_SOFTKEY_1|FORM_STYLE_OPTIONKEY"/>
         <layout mode="Landscape" style="FORM_STYLE_INDICATOR|FORM_STYLE_TITLE|FORM_STYLE_SOFTKEY_0|FORM_STYLE_SOFTKEY_1|FORM_STYLE_OPTIONKEY"/>
     </Form>

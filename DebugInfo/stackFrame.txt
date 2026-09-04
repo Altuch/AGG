@@ -1,31 +1,31 @@
-PC: 0x40107084 LR: 0x40286EC5 Stack PTR : 0x094BD5CC 
-0x990AFC08 __Log_diag
-0x990AFC08 __Log_diag
-0x990AFC08 __Log_diag
-0x990AFC08 __Log_diag
-0x97A98460 operator delete[](void*)
+PC: 0x1C0CAC72 LR: 0x99F0F4A0 Stack PTR : 0x0AD7E708 
+0x99F0F4A0 CWsEditArea::AppendText(unsigned short*)
+0x99F0F4A0 CWsEditArea::AppendText(unsigned short*)
+0x97B773F9 _ZN3Osp2Ui8Controls8EditArea10AppendTextERKNS_4Base6String
+0x97B773F9 _ZN3Osp2Ui8Controls8EditArea10AppendTextERKNS_4Base6String
+0x975831D7 ChatForm::AppendMessageToChat(Osp::Base::String const&, Osp::Base::String const&, bool)
 0x97A888E7 Osp::Base::String::Reset()
-0x97A98460 operator delete[](void*)
-0x97A888E7 Osp::Base::String::Reset()
-0x97A888E7 Osp::Base::String::Reset()
-0x97A98460 operator delete[](void*)
-0x97A888E7 Osp::Base::String::Reset()
-0x97A98460 operator delete[](void*)
-0x97A98460 operator delete[](void*)
-0x97FE6C15 AggConnection::Construct()
-0x97FE6C15 AggConnection::Construct()
-0x97FE6C21 AggConnection::Construct()
-0x97FE6C21 AggConnection::Construct()
-0x97FED3F1 Form1::OnInitializing()
-0x97B85B77 Osp::Ui::Controls::Form::AddToParent(Osp::Ui::Container const&, int, int, int)
-0x97B60661 Osp::Ui::Control::GetBounds(int&, int&, int&, int&) const
-0x97B60661 Osp::Ui::Control::GetBounds(int&, int&, int&, int&) const
-0x97B85713 Osp::Ui::Controls::Form::AddControlImplAt(Osp::Ui::Control const&)
-0x97B61E95 Osp::Ui::Control::AddNotify()
-0x97B5F86B Osp::Ui::Container::AddNotify()
-0x97B87F11 _ZN3Osp2Ui8Controls5Frame16AddControlImplAtERKNS0_7Control
-0x97B5F0E9 Osp::Ui::Container::AddControl(Osp::Ui::Control const&)
-0x97B87E0F Osp::Ui::Controls::Frame::AddControl(Osp::Ui::Control const&)
-0x97FE3E1D AGG::OnAppInitializing(Osp::App::AppRegistry&)
-0x97B09C8B _ZN3Osp3App19__NativeApplication15AppInitializingERNS0_11A
-0x97FE3B5D AGG::OnAppInitializing(Osp::App::AppRegistry&)
+0x97583F93 ChatForm::OnMessageReceived(Osp::Base::String const&, Osp::Base::String const&, bool)
+0x97A88C51 Osp::Base::String::operator==(Osp::Base::String const&) const
+0x97A89035 Osp::Base::String::Equals(Osp::Base::String const&, bool) const
+0x9758B145 MessageRouter::OnMessageReceived(Osp::Base::String const&)
+0x97A8F013 Osp_freeEx(void*, char const*, int)
+0x9758FE55 _ZN12MrimMessages14ProcessCommandEmRN3Osp4Base10ByteBuffer
+0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x975825A1 _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x9758265F _ZN13AggConnection22OnSocketReadyToReceiveERN3Osp3Net7Sock
+0x97A9871F Mem_freeEx
+0x97B44BBB _ZN3Osp3Net7Sockets13__SocketEvent8FireImplEPNS_4Base7Runt
+0x97B44B59 Osp::Net::Sockets::__SocketEvent::GetSocket() const
+0x97A8B31D _ZN3Osp4Base7Runtime5Event16ProcessListenersERKNS1_9IEvent
+0x97A8B4FF Osp::Base::Runtime::Event::Fire(Osp::Base::Runtime::IEventArg const&)
+0x9A7347D1 __SocketHandleEvent(void*, WmEvent*)
+0x9A7346AB __ConvertError(int)
+0x9A7346AB __ConvertError(int)
+0x9939827B Event_processPi
+0x99395AA7 Event_process
+0x99395AE1 Event_iterate
+0x99395B05 Event_runMainloopEx
+0x97B0C5CB _ZN3Osp3App17__BaseApplication7OnStartERKNS_4Base7Runtime2

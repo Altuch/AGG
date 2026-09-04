@@ -5,7 +5,6 @@
 #include <FGraphics.h>
 #include <FIo.h>
 
-// Константи статусів доставки протоколу MRIM
 #define MRIM_DELIVERY_STATUS_OK             0x0000
 #define MRIM_DELIVERY_STATUS_USER_NOT_FOUND 0x8001
 #define MRIM_DELIVERY_STATUS_SERVER_ERROR   0x8003
@@ -24,18 +23,13 @@ using namespace Osp::Io;
 
 ChatForm::ChatForm(void) :
     pConnection(null),
-    pCustomListHistory(null),
-    pItemFormat(null),
+    pEditAreaHistory(null),
     pEditInput(null),
     pBtnNudge(null) {}
 
 ChatForm::~ChatForm(void) {
     if (pConnection != null) {
         pConnection->ClearActiveChatListener();
-    }
-    if (pItemFormat != null) {
-        delete pItemFormat;
-        pItemFormat = null;
     }
 }
 
@@ -44,7 +38,7 @@ result ChatForm::Initialize(AggConnection* pConn, const String& name, const Stri
     contactName = name.IsEmpty() ? email : name;
     contactEmail = email;
     contactEmail.Trim();
-    contactEmail.ToLower(); // Примусовий чистий lowercase
+    contactEmail.ToLower();
 
     if (pConnection != null) {
         pConnection->SetActiveChatListener(this, contactEmail);
@@ -65,15 +59,9 @@ result ChatForm::OnInitializing(void) {
     SetOptionkeyActionId(ID_OPTIONKEY_CHAT);
     AddOptionkeyActionListener(*this);
 
-    pCustomListHistory = static_cast<CustomList*>(GetControl(L"IDC_HISTORY"));
-    if (pCustomListHistory != null) {
-        int listWidth = pCustomListHistory->GetWidth();
-        if (listWidth <= 0) listWidth = 460;
-
-        pItemFormat = new CustomListItemFormat();
-        pItemFormat->Construct();
-        pItemFormat->AddElement(1, Rectangle(10, 5, listWidth - 20, 25));
-        pItemFormat->AddElement(2, Rectangle(10, 30, listWidth - 20, 45));
+    pEditAreaHistory = static_cast<EditArea*>(GetControl(L"IDC_HISTORY"));
+    if (pEditAreaHistory != null) {
+        pEditAreaHistory->SetKeypadEnabled(false);
     }
 
     pEditInput = static_cast<EditField*>(GetControl(L"IDC_TEXT"));
@@ -97,24 +85,17 @@ result ChatForm::OnTerminating(void) {
 }
 
 void ChatForm::AppendMessageToChat(const String& senderTitle, const String& text, bool isIncoming, bool saveToHistory) {
-    if (pCustomListHistory == null || pItemFormat == null) return;
-
-    CustomListItem* pItem = new CustomListItem();
-    pItem->Construct(80);
-    pItem->SetItemFormat(*pItemFormat);
+    if (pEditAreaHistory == null) return;
 
     String header = isIncoming ? senderTitle : L"Ви";
 
-    pItem->SetElement(1, header);
-    pItem->SetElement(2, text);
-
-    pCustomListHistory->AddItem(*pItem);
-    pCustomListHistory->ScrollToBottom();
+    String entry = header + L": " + text + L"\n\n";
+    pEditAreaHistory->AppendText(entry);
 
     if (GetParent() != null) {
-        pCustomListHistory->RequestRedraw(true);
-        pCustomListHistory->Draw();
-        pCustomListHistory->Show();
+        pEditAreaHistory->RequestRedraw(true);
+        pEditAreaHistory->Draw();
+        pEditAreaHistory->Show();
     }
 
     if (saveToHistory) {
@@ -128,10 +109,6 @@ void ChatForm::SendNudgeNow(void) {
     AppendMessageToChat(L"Ви", L"🔔 Будильник відправлено!", false);
 }
 
-// Локальний файл історії чату - не має нічого спільного з кодуванням
-// MRIM-протоколу (те окреме питання), тому звичайний UTF-8. Той самий
-// шлях (MrimUtils::GetHistoryFilePath) використовує і MessageRouter,
-// щоб обидва писали/читали той самий файл.
 String ChatForm::GetHistoryFilePath(void) {
     return MrimUtils::GetHistoryFilePath(contactEmail);
 }
@@ -141,8 +118,6 @@ void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
     String path = GetHistoryFilePath();
 
     File file;
-    // У bada немає атомарного "додати або створити" - пробуємо дописати,
-    // а якщо файлу ще немає, створюємо новий.
     result r = file.Construct(path, L"a+");
     if (IsFailed(r)) {
         r = file.Construct(path, L"w");
@@ -150,9 +125,6 @@ void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
     }
 
     String line = sender + L"\t" + text + L"\n";
-    // File::Write(const String&) пише рядок як є (у документації прямо
-    // сказано, що клас File не має Close() - дані фіксуються, коли
-    // локальний об'єкт `file` виходить за межі області видимості).
     file.Write(line);
 }
 
@@ -162,10 +134,12 @@ void ChatForm::LoadHistory(void) {
 
     File file;
     result r = file.Construct(path, L"r");
-    if (IsFailed(r)) return; // Історії ще немає - це нормально
+    if (IsFailed(r)) return;
 
-    // File::Read(String&) читає рівно один рядок (до '\n' або EOF) - саме
-    // те, що треба для нашого формату "sender\ttext\n" по одному рядку.
+    String ringBuffer[MAX_LOADED_HISTORY_LINES];
+    int ringCount = 0;
+    int ringNext = 0;
+
     while (true) {
         String line;
         r = file.Read(line);
@@ -173,6 +147,15 @@ void ChatForm::LoadHistory(void) {
 
         line.Trim();
         if (line.IsEmpty()) continue;
+
+        ringBuffer[ringNext] = line;
+        ringNext = (ringNext + 1) % MAX_LOADED_HISTORY_LINES;
+        if (ringCount < MAX_LOADED_HISTORY_LINES) ringCount++;
+    }
+
+    int startIndex = (ringCount < MAX_LOADED_HISTORY_LINES) ? 0 : ringNext;
+    for (int i = 0; i < ringCount; i++) {
+        String& line = ringBuffer[(startIndex + i) % MAX_LOADED_HISTORY_LINES];
 
         int tabPos = -1;
         line.IndexOf(L"\t", 0, tabPos);
@@ -184,7 +167,6 @@ void ChatForm::LoadHistory(void) {
         line.SubString(tabPos + 1, text);
 
         bool isIncoming = !sender.Equals(L"Ви", true);
-        // saveToHistory=false: щойно прочитали з цього ж файлу, повторно писати не треба.
         AppendMessageToChat(sender, text, isIncoming, false);
     }
 }
@@ -243,12 +225,12 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_MENU_CLEAR_HISTORY: {
-            if (pCustomListHistory != null) {
-                pCustomListHistory->RemoveAllItems();
+            if (pEditAreaHistory != null) {
+                pEditAreaHistory->SetText(L"");
                 if (GetParent() != null) {
-                    pCustomListHistory->RequestRedraw(true);
-                    pCustomListHistory->Draw();
-                    pCustomListHistory->Show();
+                    pEditAreaHistory->RequestRedraw(true);
+                    pEditAreaHistory->Draw();
+                    pEditAreaHistory->Show();
                 }
             }
             File::Remove(GetHistoryFilePath());
@@ -288,10 +270,6 @@ void ChatForm::OnMessageReceived(const String& sender, const String& text, bool 
     cleanSender.ToLower();
 
     if (cleanSender.Equals(contactEmail, true)) {
-        // saveToHistory=false: MessageRouter вже зберіг це повідомлення
-        // в історію (він тепер єдине джерело правди для вхідних
-        // повідомлень, незалежно від того, чи відкритий цей чат) - тут
-        // лише показуємо його наживо.
         if (isNudge) {
             Vibrator vibrator;
             vibrator.Construct();
@@ -304,9 +282,8 @@ void ChatForm::OnMessageReceived(const String& sender, const String& text, bool 
 }
 
 void ChatForm::OnMessageDeliveryStatus(unsigned long status) {
-    // Системні сповіщення про доставку - ефемерні, в історію чату не пишемо.
     if (status == MRIM_DELIVERY_STATUS_OK) {
-        return; // Доставлено успішно — попереджень не потрібно
+        return;
     } else if (status == MRIM_DELIVERY_STATUS_USER_NOT_FOUND) {
         AppendMessageToChat(L"Система", L"⚠ Користувача не знайдено на сервері.", true, false);
     } else if (status == MRIM_DELIVERY_STATUS_NO_OFFLINE) {

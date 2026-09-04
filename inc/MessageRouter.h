@@ -15,6 +15,7 @@ public:
     virtual void OnMessageReceived(const Osp::Base::String& sender, const Osp::Base::String& text, bool isNudge);
     virtual void OnMessageDeliveryStatus(unsigned long status);
     virtual void OnTypingReceived(const Osp::Base::String& sender);
+    static void SetAppForeground(bool foreground);
 
 private:
     static void SaveMessageToHistory(const Osp::Base::String& email, const Osp::Base::String& sender, const Osp::Base::String& text);
@@ -23,6 +24,7 @@ private:
 
     IMessageListener* pActiveChatListener;
     Osp::Base::String activeChatEmail;
+    static bool isAppInForeground;
 };
 
 #endif

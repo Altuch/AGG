@@ -9,6 +9,7 @@
 #include "Form1.h"
 #include "ContactListForm.h"
 #include "AggConnection.h"
+#include "MessageRouter.h"
 #include <FApp.h>
 #include <FBase.h>
 
@@ -81,8 +82,8 @@ bool AGG::OnAppTerminating(AppRegistry& appRegistry, bool forcedTermination) {
     return true;
 }
 
-void AGG::OnForeground(void) {}
-void AGG::OnBackground(void) {}
+void AGG::OnForeground(void) { MessageRouter::SetAppForeground(true); }
+void AGG::OnBackground(void) { MessageRouter::SetAppForeground(false); }
 void AGG::OnLowMemory(void) {}
 void AGG::OnBatteryLevelChanged(BatteryLevel batteryLevel) {}
 void AGG::OnScreenOn(void) {}

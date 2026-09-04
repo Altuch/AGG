@@ -9,8 +9,14 @@ using namespace Osp::Io;
 using namespace Osp::Text;
 using namespace Osp::App;
 
+bool MessageRouter::isAppInForeground = true;
+
 MessageRouter::MessageRouter(void) : pActiveChatListener(null) {}
 MessageRouter::~MessageRouter(void) {}
+
+void MessageRouter::SetAppForeground(bool foreground) {
+    isAppInForeground = foreground;
+}
 
 void MessageRouter::SetActiveChat(IMessageListener* pListener, const String& email) {
     pActiveChatListener = pListener;
@@ -30,8 +36,6 @@ void MessageRouter::SaveMessageToHistory(const String& email, const String& send
     String path = MrimUtils::GetHistoryFilePath(email);
 
     File file;
-    // У bada немає атомарного "додати або створити" - пробуємо дописати,
-    // а якщо файлу ще немає, створюємо новий.
     result r = file.Construct(path, L"a+");
     if (IsFailed(r)) {
         r = file.Construct(path, L"w");
@@ -83,10 +87,9 @@ void MessageRouter::OnMessageReceived(const String& sender, const String& text, 
     bool isActiveChat = !activeChatEmail.IsEmpty() && cleanSender.Equals(activeChatEmail, true);
 
     if (isActiveChat && pActiveChatListener != null) {
-        // Чат відкритий зараз - хай ChatForm сам покаже повідомлення наживо.
         pActiveChatListener->OnMessageReceived(sender, text, isNudge);
-    } else {
-        // Чат не відкритий (або взагалі жоден чат не активний) - сповіщення.
+    }
+    if (!isActiveChat || !isAppInForeground) {
         ShowNotification(cleanSender, displayText, isNudge);
     }
 }

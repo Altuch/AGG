@@ -12,12 +12,12 @@
     </Form>
     <Button id="IDC_BUTTON_LOGIN" parent="IDF_AUTH">
         <property NormalBGBitmapPath="" PressedBGBitmapPath="" disableTextColor="" disabledBitmapPath="" disabledColor="" disabledColorOpacity="100" hAlign="ALIGN_CENTER" highlightedBGBitmapPath="" highlightedColor="" highlightedColorOpacity="100" highlightedTextColor="" normalBitmapPath="" normalColor="" normalColorOpacity="100" normalTextColor="" pressedBitmapPath="" pressedColor="" pressedColorOpacity="100" pressedTextColor="" text="Log In" textSize="16" vAlign="ALIGN_MIDDLE"/>
-        <layout height="31" mode="Portrait" width="80" x="140" y="200"/>
+        <layout height="31" mode="Portrait" width="80" x="20" y="201"/>
         <layout height="24" mode="Landscape" width="108" x="280" y="38"/>
     </Button>
     <Button id="IDC_BUTTON_SIGNUP" parent="IDF_AUTH">
         <property NormalBGBitmapPath="" PressedBGBitmapPath="" disableTextColor="" disabledBitmapPath="" disabledColor="" disabledColorOpacity="100" hAlign="ALIGN_CENTER" highlightedBGBitmapPath="" highlightedColor="" highlightedColorOpacity="100" highlightedTextColor="" normalBitmapPath="" normalColor="" normalColorOpacity="100" normalTextColor="" pressedBitmapPath="" pressedColor="" pressedColorOpacity="100" pressedTextColor="" text="Sign Up" textSize="16" vAlign="ALIGN_MIDDLE"/>
-        <layout height="31" mode="Portrait" width="81" x="20" y="200"/>
+        <layout height="31" mode="Portrait" width="81" x="139" y="201"/>
         <layout height="24" mode="Landscape" width="108" x="280" y="118"/>
     </Button>
     <Button id="IDC_BUTTON_SETTINGS" parent="IDF_AUTH">

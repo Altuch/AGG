@@ -22,7 +22,6 @@ public:
     virtual void OnActionPerformed(const Osp::Ui::Control& source, int actionId);
     virtual void OnUserEventReceivedN(long requestId, Osp::Base::Collection::IList* pArgs);
 
-    // Слухачі MRIM-повідомлень (тепер оновлюватимуть UI напряму)
     virtual void OnMessageReceived(const Osp::Base::String& sender, const Osp::Base::String& text, bool isNudge);
     virtual void OnMessageDeliveryStatus(unsigned long status);
     virtual void OnTypingReceived(const Osp::Base::String& sender);
@@ -32,7 +31,7 @@ public:
 
 private:
     void AppendMessageToChat(const Osp::Base::String& senderTitle, const Osp::Base::String& text, bool isIncoming, bool saveToHistory = true);
-        void SendNudgeNow(void);
+    void SendNudgeNow(void);
 
     Osp::Base::String GetHistoryFilePath(void);
     void SaveMessageToHistory(const Osp::Base::String& sender, const Osp::Base::String& text);
@@ -46,12 +45,13 @@ private:
     static const int ID_MENU_INFO          = 306;
     static const int ID_MENU_CLEAR_HISTORY = 307;
 
+    static const int MAX_LOADED_HISTORY_LINES = 200;
+
     AggConnection* pConnection;
     Osp::Base::String contactName;
     Osp::Base::String contactEmail;
 
-    Osp::Ui::Controls::CustomList* pCustomListHistory;
-    Osp::Ui::Controls::CustomListItemFormat* pItemFormat;
+    Osp::Ui::Controls::EditArea* pEditAreaHistory;
     Osp::Ui::Controls::EditField* pEditInput;
     Osp::Ui::Controls::Button* pBtnNudge;
 };
