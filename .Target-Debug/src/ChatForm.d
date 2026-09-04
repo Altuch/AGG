@@ -370,6 +370,7 @@ src/ChatForm.d src/ChatForm.o: ../src/ChatForm.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h \
  C:/bada/2.0.6/Include/FApp.h C:/bada/2.0.6/Include/FAppApplication.h \
  C:/bada/2.0.6/Include/FAppConfig.h C:/bada/2.0.6/Include/FAppTypes.h \
  C:/bada/2.0.6/Include/FAppAppManager.h \
@@ -417,8 +418,7 @@ src/ChatForm.d src/ChatForm.o: ../src/ChatForm.cpp \
  C:/bada/2.0.6/Include/FIoClientChannel.h \
  C:/bada/2.0.6/Include/FIoIChannelResponseEventListener.h \
  C:/bada/2.0.6/Include/FIoServerChannel.h \
- C:/bada/2.0.6/Include/FIoIChannelRequestEventListener.h \
- C:/bada/2.0.6/Include/FText.h
+ C:/bada/2.0.6/Include/FIoIChannelRequestEventListener.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ChatForm.h:
 
@@ -1220,6 +1220,8 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/ContactListForm.h:
 
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
+
 C:/bada/2.0.6/Include/FApp.h:
 
 C:/bada/2.0.6/Include/FAppApplication.h:
@@ -1331,5 +1333,3 @@ C:/bada/2.0.6/Include/FIoIChannelResponseEventListener.h:
 C:/bada/2.0.6/Include/FIoServerChannel.h:
 
 C:/bada/2.0.6/Include/FIoIChannelRequestEventListener.h:
-
-C:/bada/2.0.6/Include/FText.h:

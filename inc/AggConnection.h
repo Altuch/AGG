@@ -8,6 +8,9 @@
 #include "MRIM/MrimContacts.h"
 #include "MRIM/MrimMessages.h"
 
+class MessageRouter;
+
+
 class AggConnection : public Osp::Net::Sockets::ISocketEventListener,
                       public Osp::Base::Runtime::ITimerEventListener
 {
@@ -25,22 +28,20 @@ public:
 
     void SendPacket(unsigned long command, Osp::Base::ByteBuffer& payload);
 
-    // Фасадні методи для UI форм
     void SetLoginListener(ILoginListener* pListener) { if (pAuthMgr) pAuthMgr->SetListener(pListener); }
     void SetContactListListener(IContactListListener* pListener) { if (pContactMgr) pContactMgr->SetListener(pListener); }
-    void SetMessageListener(IMessageListener* pListener) { if (pMessageMgr) pMessageMgr->SetListener(pListener); }
+    void SetActiveChatListener(IMessageListener* pListener, const Osp::Base::String& email);
+    void ClearActiveChatListener(void);
     void SendMessageTo(const Osp::Base::String& to, const Osp::Base::String& text) { if (pMessageMgr) pMessageMgr->SendMessageTo(to, text); }
     void SendNudge(const Osp::Base::String& to) { if (pMessageMgr) pMessageMgr->SendNudge(to); }
     void SendTyping(const Osp::Base::String& to) { if (pMessageMgr) pMessageMgr->SendTyping(to); }
 
-    // === 5 МЕТОДІВ ISocketEventListener ===
     virtual void OnSocketConnected(Osp::Net::Sockets::Socket& socket);
     virtual void OnSocketClosed(Osp::Net::Sockets::Socket& socket, Osp::Net::Sockets::NetSocketClosedReason reason);
     virtual void OnSocketReadyToReceive(Osp::Net::Sockets::Socket& socket);
     virtual void OnSocketReadyToSend(Osp::Net::Sockets::Socket& socket);
     virtual void OnSocketAccept(Osp::Net::Sockets::Socket& socket);
 
-    // === 1 МЕТОД ITimerEventListener ===
     virtual void OnTimerExpired(Osp::Base::Runtime::Timer& timer);
 
 private:
@@ -60,6 +61,7 @@ private:
     MrimAuth* pAuthMgr;
     MrimContacts* pContactMgr;
     MrimMessages* pMessageMgr;
+    MessageRouter* pMessageRouter;
 };
 
 #endif

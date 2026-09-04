@@ -194,6 +194,7 @@ src/AggConnection.d src/AggConnection.o: ../src/AggConnection.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h \
  C:/bada/2.0.6/Include/FText.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h:
@@ -619,5 +620,7 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MessageRouter.h:
 
 C:/bada/2.0.6/Include/FText.h:

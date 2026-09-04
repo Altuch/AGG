@@ -11,6 +11,7 @@ CPP_SRCS += \
 ../src/ChatForm.cpp \
 ../src/ContactListForm.cpp \
 ../src/Form1.cpp \
+../src/MessageRouter.cpp \
 ../src/Settings.cpp 
 
 OBJS += \
@@ -21,6 +22,7 @@ OBJS += \
 ./src/ChatForm.o \
 ./src/ContactListForm.o \
 ./src/Form1.o \
+./src/MessageRouter.o \
 ./src/Settings.o 
 
 CPP_DEPS += \
@@ -31,6 +33,7 @@ CPP_DEPS += \
 ./src/ChatForm.d \
 ./src/ContactListForm.d \
 ./src/Form1.d \
+./src/MessageRouter.d \
 ./src/Settings.d 
 
 

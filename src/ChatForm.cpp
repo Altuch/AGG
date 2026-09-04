@@ -1,9 +1,9 @@
 #include "ChatForm.h"
 #include "ContactListForm.h"
+#include "MRIM/MrimUtils.h"
 #include <FApp.h>
 #include <FGraphics.h>
 #include <FIo.h>
-#include <FText.h>
 
 // Константи статусів доставки протоколу MRIM
 #define MRIM_DELIVERY_STATUS_OK             0x0000
@@ -18,11 +18,9 @@ using namespace Osp::Ui::Controls;
 using namespace Osp::App;
 using namespace Osp::Base;
 using namespace Osp::Base::Collection;
-using namespace Osp::Base::Utility;
 using namespace Osp::Graphics;
 using namespace Osp::System;
 using namespace Osp::Io;
-using namespace Osp::Text;
 
 ChatForm::ChatForm(void) :
     pConnection(null),
@@ -33,7 +31,7 @@ ChatForm::ChatForm(void) :
 
 ChatForm::~ChatForm(void) {
     if (pConnection != null) {
-        pConnection->SetMessageListener(null);
+        pConnection->ClearActiveChatListener();
     }
     if (pItemFormat != null) {
         delete pItemFormat;
@@ -46,10 +44,10 @@ result ChatForm::Initialize(AggConnection* pConn, const String& name, const Stri
     contactName = name.IsEmpty() ? email : name;
     contactEmail = email;
     contactEmail.Trim();
-    contactEmail.ToLower();
+    contactEmail.ToLower(); // Примусовий чистий lowercase
 
     if (pConnection != null) {
-        pConnection->SetMessageListener(this);
+        pConnection->SetActiveChatListener(this, contactEmail);
     }
 
     return Form::Construct(L"IDF_CHAT");
@@ -130,11 +128,12 @@ void ChatForm::SendNudgeNow(void) {
     AppendMessageToChat(L"Ви", L"🔔 Будильник відправлено!", false);
 }
 
+// Локальний файл історії чату - не має нічого спільного з кодуванням
+// MRIM-протоколу (те окреме питання), тому звичайний UTF-8. Той самий
+// шлях (MrimUtils::GetHistoryFilePath) використовує і MessageRouter,
+// щоб обидва писали/читали той самий файл.
 String ChatForm::GetHistoryFilePath(void) {
-    String safeName = contactEmail;
-    safeName.Replace(L"@", L"_");
-    safeName.Replace(L".", L"_");
-    return L"/Home/hist_" + safeName + L".dat";
+    return MrimUtils::GetHistoryFilePath(contactEmail);
 }
 
 void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
@@ -142,6 +141,8 @@ void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
     String path = GetHistoryFilePath();
 
     File file;
+    // У bada немає атомарного "додати або створити" - пробуємо дописати,
+    // а якщо файлу ще немає, створюємо новий.
     result r = file.Construct(path, L"a+");
     if (IsFailed(r)) {
         r = file.Construct(path, L"w");
@@ -149,11 +150,10 @@ void ChatForm::SaveMessageToHistory(const String& sender, const String& text) {
     }
 
     String line = sender + L"\t" + text + L"\n";
-    ByteBuffer* pLineBytes = Utf8Encoding().GetBytesN(line);
-    if (pLineBytes != null) {
-        file.Write(*pLineBytes);
-        delete pLineBytes;
-    }
+    // File::Write(const String&) пише рядок як є (у документації прямо
+    // сказано, що клас File не має Close() - дані фіксуються, коли
+    // локальний об'єкт `file` виходить за межі області видимості).
+    file.Write(line);
 }
 
 void ChatForm::LoadHistory(void) {
@@ -164,20 +164,13 @@ void ChatForm::LoadHistory(void) {
     result r = file.Construct(path, L"r");
     if (IsFailed(r)) return; // Історії ще немає - це нормально
 
-    ByteBuffer fileBuf;
-    fileBuf.Construct(32768);
-    file.Read(fileBuf);
-    fileBuf.Flip();
-
-    if (fileBuf.GetLimit() == 0) return;
-
-    String content;
-    Utf8Encoding().GetString(fileBuf, content);
-
-    StringTokenizer lineTok(content, L"\n");
-    while (lineTok.HasMoreTokens()) {
+    // File::Read(String&) читає рівно один рядок (до '\n' або EOF) - саме
+    // те, що треба для нашого формату "sender\ttext\n" по одному рядку.
+    while (true) {
         String line;
-        lineTok.GetNextToken(line);
+        r = file.Read(line);
+        if (IsFailed(r)) break; // E_END_OF_FILE
+
         line.Trim();
         if (line.IsEmpty()) continue;
 
@@ -220,51 +213,51 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_BTN_NUDGE: {
-        	SendNudgeNow();
+            SendNudgeNow();
             break;
         }
 
         case ID_OPTIONKEY_CHAT: {
-                    OptionMenu* pMenu = new OptionMenu();
-                    pMenu->Construct();
-                    pMenu->AddItem(L"Розбудити", ID_MENU_NUDGE);
-                    pMenu->AddItem(L"Інформація про контакт", ID_MENU_INFO);
-                    pMenu->AddItem(L"Очистити історію", ID_MENU_CLEAR_HISTORY);
-                    pMenu->AddActionEventListener(*this);
-                    pMenu->SetShowState(true);
-                    pMenu->Show();
-                    break;
-                }
+            OptionMenu* pMenu = new OptionMenu();
+            pMenu->Construct();
+            pMenu->AddItem(L"Розбудити", ID_MENU_NUDGE);
+            pMenu->AddItem(L"Інформація про контакт", ID_MENU_INFO);
+            pMenu->AddItem(L"Очистити історію", ID_MENU_CLEAR_HISTORY);
+            pMenu->AddActionEventListener(*this);
+            pMenu->SetShowState(true);
+            pMenu->Show();
+            break;
+        }
 
         case ID_MENU_NUDGE: {
-                    SendNudgeNow();
-                    break;
-                }
+            SendNudgeNow();
+            break;
+        }
 
-                case ID_MENU_INFO: {
-                    MessageBox infoBox;
-                    infoBox.Construct(L"Інформація про контакт", contactName + L"\n" + contactEmail, MSGBOX_STYLE_OK, 0);
-                    int modalResult = 0;
-                    infoBox.ShowAndWait(modalResult);
-                    break;
-                }
+        case ID_MENU_INFO: {
+            MessageBox infoBox;
+            infoBox.Construct(L"Інформація про контакт", contactName + L"\n" + contactEmail, MSGBOX_STYLE_OK, 0);
+            int modalResult = 0;
+            infoBox.ShowAndWait(modalResult);
+            break;
+        }
 
-                case ID_MENU_CLEAR_HISTORY: {
-                    if (pCustomListHistory != null) {
-                        pCustomListHistory->RemoveAllItems();
-                        if (GetParent() != null) {
-                            pCustomListHistory->RequestRedraw(true);
-                            pCustomListHistory->Draw();
-                            pCustomListHistory->Show();
-                        }
-                    }
-                    File::Remove(GetHistoryFilePath());
-                    break;
+        case ID_MENU_CLEAR_HISTORY: {
+            if (pCustomListHistory != null) {
+                pCustomListHistory->RemoveAllItems();
+                if (GetParent() != null) {
+                    pCustomListHistory->RequestRedraw(true);
+                    pCustomListHistory->Draw();
+                    pCustomListHistory->Show();
                 }
+            }
+            File::Remove(GetHistoryFilePath());
+            break;
+        }
 
         case ID_SOFTKEY_BACK: {
             if (pConnection != null) {
-                pConnection->SetMessageListener(null);
+                pConnection->ClearActiveChatListener();
             }
 
             ContactListForm* pContactForm = new ContactListForm();
@@ -295,18 +288,23 @@ void ChatForm::OnMessageReceived(const String& sender, const String& text, bool 
     cleanSender.ToLower();
 
     if (cleanSender.Equals(contactEmail, true)) {
+        // saveToHistory=false: MessageRouter вже зберіг це повідомлення
+        // в історію (він тепер єдине джерело правди для вхідних
+        // повідомлень, незалежно від того, чи відкритий цей чат) - тут
+        // лише показуємо його наживо.
         if (isNudge) {
             Vibrator vibrator;
             vibrator.Construct();
             vibrator.Start(1000, 100);
-            AppendMessageToChat(contactName, L"🔔 ВАМ НАДІСЛАНО БУДИЛЬНИК!", true);
+            AppendMessageToChat(contactName, L"🔔 ВАМ НАДІСЛАНО БУДИЛЬНИК!", true, false);
         } else if (!text.IsEmpty()) {
-            AppendMessageToChat(contactName, text, true);
+            AppendMessageToChat(contactName, text, true, false);
         }
     }
 }
 
 void ChatForm::OnMessageDeliveryStatus(unsigned long status) {
+    // Системні сповіщення про доставку - ефемерні, в історію чату не пишемо.
     if (status == MRIM_DELIVERY_STATUS_OK) {
         return; // Доставлено успішно — попереджень не потрібно
     } else if (status == MRIM_DELIVERY_STATUS_USER_NOT_FOUND) {

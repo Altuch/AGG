@@ -1,5 +1,6 @@
 #include "AggConnection.h"
 #include "MRIM/MrimUtils.h"
+#include "MessageRouter.h"
 #include <FText.h>
 
 using namespace Osp::Net;
@@ -12,7 +13,7 @@ using namespace Osp::Text;
 AggConnection::AggConnection(void) :
     pSocket(null), pTxBuffer(null), pRxBuffer(null), pPingTimer(null),
     isRedirected(false), isTimerStarted(false), pingIntervalMsec(0),
-    pAuthMgr(null), pContactMgr(null), pMessageMgr(null)
+    pAuthMgr(null), pContactMgr(null), pMessageMgr(null), pMessageRouter(null)
 {
     pAuthMgr = new MrimAuth(this);
     pContactMgr = new MrimContacts(this);
@@ -34,6 +35,7 @@ AggConnection::~AggConnection(void) {
     delete pAuthMgr;
     delete pContactMgr;
     delete pMessageMgr;
+    delete pMessageRouter;
 }
 
 result AggConnection::Construct(void) {
@@ -48,7 +50,19 @@ result AggConnection::Construct(void) {
 
     pPingTimer = new Timer();
     pPingTimer->Construct(*this);
+    pMessageRouter = new MessageRouter();
+        if (pMessageMgr != null) {
+            pMessageMgr->SetListener(pMessageRouter);
+        }
     return r;
+}
+
+void AggConnection::SetActiveChatListener(IMessageListener* pListener, const String& email) {
+    if (pMessageRouter != null) pMessageRouter->SetActiveChat(pListener, email);
+}
+
+void AggConnection::ClearActiveChatListener(void) {
+    if (pMessageRouter != null) pMessageRouter->ClearActiveChat();
 }
 
 result AggConnection::InitSocket(void) {

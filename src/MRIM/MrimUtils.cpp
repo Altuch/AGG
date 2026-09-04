@@ -3,6 +3,10 @@
 using namespace Osp::Base;
 using namespace Osp::Base::Utility;
 
+// Таблиця CP1251 (Windows-1251) <-> Unicode. MRIM історично передає всі
+// "класичні" LPS-поля (логін, email, телефон, xstatus, client) саме в
+// CP1251, а не в UTF-8 — автовизначення тут не потрібне й лише вносило
+// плутанину: кожне поле пакета має наперед відомий, фіксований формат.
 static mchar Cp1251ByteToUnicode(byte b) {
     if (b < 0x80) return (mchar)b;
     if (b >= 0xC0 && b <= 0xFF) return (mchar)(0x0410 + (b - 0xC0)); // А-Я, а-я
@@ -19,12 +23,12 @@ static mchar Cp1251ByteToUnicode(byte b) {
         case 0xB4: return 0x0491; // ґ
         case 0xA1: return 0x040E; // Ў
         case 0xA2: return 0x045E; // ў
-        case 0x90: return 0x0402;
-        case 0x93: return 0x201C;
-        case 0x94: return 0x201D;
-        case 0x96: return 0x2013;
-        case 0x97: return 0x2014;
-        case 0xA0: return 0x00A0;
+        case 0x90: return 0x0402; // Ђ
+        case 0x93: return 0x201C; // "
+        case 0x94: return 0x201D; // "
+        case 0x96: return 0x2013; // –
+        case 0x97: return 0x2014; // —
+        case 0xA0: return 0x00A0; // non-breaking space
         default:   return (mchar)b;
     }
 }

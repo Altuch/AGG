@@ -47,7 +47,7 @@ all: AGG.exe
 AGG.exe: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: bada C++ Linker'
-	@echo 'ldflags: -march=armv7-a -mlittle-endian -mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=hard -Xlinker -lm -Xlinker -lc -L"C:/bada/2.0.6/Model/WaveWVGA/Target" -L"C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/lib" -shared -o"AGG.exe" ./src/AGG.o ./src/AGGEntry.o ./src/AggConnection.o ./src/CONTACT.o ./src/ChatForm.o ./src/ContactListForm.o ./src/Form1.o ./src/Settings.o ./src/MRIM/MrimAuth.o ./src/MRIM/MrimContacts.o ./src/MRIM/MrimMessages.o ./src/MRIM/MrimUtils.o '
+	@echo 'ldflags: -march=armv7-a -mlittle-endian -mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=hard -Xlinker -lm -Xlinker -lc -L"C:/bada/2.0.6/Model/WaveWVGA/Target" -L"C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/lib" -shared -o"AGG.exe" ./src/AGG.o ./src/AGGEntry.o ./src/AggConnection.o ./src/CONTACT.o ./src/ChatForm.o ./src/ContactListForm.o ./src/Form1.o ./src/MessageRouter.o ./src/Settings.o ./src/MRIM/MrimAuth.o ./src/MRIM/MrimContacts.o ./src/MRIM/MrimMessages.o ./src/MRIM/MrimUtils.o '
 	arm-samsung-nucleuseabi-g++ @ldflags @ldobjs  $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '

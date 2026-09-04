@@ -6,6 +6,12 @@
 	<ManifestVersion>1.2</ManifestVersion>
 	<Privileges>
         <Privilege>
+            <Name>NOTIFICATION</Name>
+        </Privilege>
+        <Privilege>
+            <Name>NOTIFICATION_WITH_DATA</Name>
+        </Privilege>
+        <Privilege>
             <Name>LOCAL_CONTENT</Name>
         </Privilege>
         <Privilege>
