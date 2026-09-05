@@ -11,8 +11,10 @@ REPOSITORY_ROOT := C:/Users/Vitaliy/Documents/bada/IDE/workspace/repository/AGG/
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir.mk
--include src/subdir.mk
+-include src/Ui/subdir.mk
 -include src/MRIM/subdir.mk
+-include src/Core/subdir.mk
+-include src/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -47,7 +49,7 @@ all: AGG.exe
 AGG.exe: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: bada C++ Linker'
-	@echo 'ldflags: -march=armv7-a -mlittle-endian -mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=hard -Xlinker -lm -Xlinker -lc -L"C:/bada/2.0.6/Model/WaveWVGA/Target" -L"C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/lib" -shared -o"AGG.exe" ./src/AGG.o ./src/AGGEntry.o ./src/AggConnection.o ./src/CONTACT.o ./src/ChatForm.o ./src/ContactListForm.o ./src/Form1.o ./src/MessageRouter.o ./src/Settings.o ./src/MRIM/MrimAuth.o ./src/MRIM/MrimContacts.o ./src/MRIM/MrimMessages.o ./src/MRIM/MrimUtils.o '
+	@echo 'ldflags: -march=armv7-a -mlittle-endian -mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=hard -Xlinker -lm -Xlinker -lc -L"C:/bada/2.0.6/Model/WaveWVGA/Target" -L"C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/lib" -shared -o"AGG.exe" ./src/Ui/ChatForm.o ./src/Ui/ContactListForm.o ./src/Ui/FormNavigator.o ./src/Ui/LoginForm.o ./src/Ui/ProfileForm.o ./src/Ui/SettingsForm.o ./src/MRIM/MrimAuth.o ./src/MRIM/MrimContacts.o ./src/MRIM/MrimMessages.o ./src/MRIM/MrimProfile.o ./src/MRIM/MrimUtils.o ./src/Core/AggConnection.o ./src/Core/AppSettings.o ./src/Core/ChatHistory.o ./src/Core/MessageRouter.o ./src/AGG.o ./src/AGGEntry.o '
 	arm-samsung-nucleuseabi-g++ @ldflags @ldobjs  $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '

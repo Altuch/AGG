@@ -86,7 +86,8 @@ src/MRIM/MrimUtils.d src/MRIM/MrimUtils.o: ../src/MRIM/MrimUtils.cpp \
  C:/bada/2.0.6/Include/FBaseUtilFileZipper.h \
  C:/bada/2.0.6/Include/FBaseUtilFileUnzipper.h \
  C:/bada/2.0.6/Include/FBaseUtilZipEntry.h \
- C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h
+ C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProtocol.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
 
@@ -285,3 +286,5 @@ C:/bada/2.0.6/Include/FBaseUtilFileUnzipper.h:
 C:/bada/2.0.6/Include/FBaseUtilZipEntry.h:
 
 C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProtocol.h:

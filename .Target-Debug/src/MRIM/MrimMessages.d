@@ -88,8 +88,9 @@ src/MRIM/MrimMessages.d src/MRIM/MrimMessages.o: \
  C:/bada/2.0.6/Include/FBaseUtilFileUnzipper.h \
  C:/bada/2.0.6/Include/FBaseUtilZipEntry.h \
  C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProtocol.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h \
- C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AggConnection.h \
  C:/bada/2.0.6/Include/FNet.h C:/bada/2.0.6/Include/FNetNetTypes.h \
  C:/bada/2.0.6/Include/FNetNetAccountManager.h \
  C:/bada/2.0.6/Include/FNetNetAccountInfo.h \
@@ -195,7 +196,7 @@ src/MRIM/MrimMessages.d src/MRIM/MrimMessages.o: \
  C:/bada/2.0.6/Include/FNetNfcINdefTagConnectionListener.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
- C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
@@ -395,9 +396,11 @@ C:/bada/2.0.6/Include/FBaseUtilZipEntry.h:
 
 C:/bada/2.0.6/Include/FBaseUtilRegularExpression.h:
 
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProtocol.h:
+
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
 
-C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AggConnection.h:
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AggConnection.h:
 
 C:/bada/2.0.6/Include/FNet.h:
 
@@ -621,4 +624,4 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 
-C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h:

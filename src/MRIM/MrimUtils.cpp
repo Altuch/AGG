@@ -1,4 +1,5 @@
 #include "MRIM/MrimUtils.h"
+#include "MRIM/MrimProtocol.h"
 
 using namespace Osp::Base;
 using namespace Osp::Base::Utility;
@@ -61,15 +62,15 @@ void MrimUtils::AppendUL(ByteBuffer& buffer, unsigned long value) {
 }
 
 void MrimUtils::BuildHeader(ByteBuffer& buffer, unsigned long command, unsigned long dataLen) {
-    AppendUL(buffer, 0xDEADBEEF);
-    AppendUL(buffer, 0x00010008);
-    AppendUL(buffer, 0x0000000A);
+    AppendUL(buffer, Mrim::MAGIC);
+    AppendUL(buffer, Mrim::PROTO_VERSION);
+    AppendUL(buffer, 0x0000000A); // номер пакета - серверу байдуже
     AppendUL(buffer, command);
     AppendUL(buffer, dataLen);
-    AppendUL(buffer, 0);
-    AppendUL(buffer, 0);
-    byte zeros[16] = {0};
-    buffer.SetArray(zeros, 0, 16);
+    AppendUL(buffer, 0);          // адреса відправника - не використовується
+    AppendUL(buffer, 0);          // порт відправника - не використовується
+    byte reserved[16] = {0};
+    buffer.SetArray(reserved, 0, 16);
 }
 
 void MrimUtils::AppendLPS(ByteBuffer& buffer, const String& text) {
@@ -202,14 +203,6 @@ void MrimUtils::SkipFormattedRecord(ByteBuffer& buffer, const String& mask, int 
     }
 }
 
-String MrimUtils::GetHistoryFilePath(const String& email) {
-    String safeName = email;
-    safeName.Trim();
-    safeName.ToLower();
-    safeName.Replace(L"@", L"_");
-    safeName.Replace(L".", L"_");
-    return L"/Home/hist_" + safeName + L".dat";
-}
 
 bool MrimUtils::IsValidIpAddress(const String& ip) {
     String trimmedIp = ip;

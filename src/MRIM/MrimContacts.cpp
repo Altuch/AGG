@@ -1,6 +1,7 @@
 #include "MRIM/MrimContacts.h"
+#include "MRIM/MrimProtocol.h"
 #include "MRIM/MrimUtils.h"
-#include "AggConnection.h"
+#include "Core/AggConnection.h"
 
 using namespace Osp::Base;
 using namespace Osp::Base::Collection;
@@ -40,22 +41,22 @@ void MrimContacts::SetListener(IContactListListener* pListener) {
 
 bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     switch (command) {
-        case 0x1015: { // MRIM_CS_USER_INFO
+        case Mrim::Cmd::USER_INFO: {
             while (payload.GetRemaining() >= 8) {
                 String key = MrimUtils::ReadLPS(payload);
                 String val = MrimUtils::ReadLPS(payload);
                 if (key == L"MRIM.NICKNAME") {
-                    pConnection->userNickname = val;
+                    pConnection->SetNickname(val);
                     AppLog("Знайдено нікнейм: %S", val.GetPointer());
                 }
             }
             return true;
         }
-        case 0x1037: { // MRIM_CS_CONTACT_LIST2
+        case Mrim::Cmd::CONTACT_LIST2: {
             ParseContactList2(payload);
             return true;
         }
-        case 0x100f: { // MRIM_CS_USER_STATUS
+        case Mrim::Cmd::USER_STATUS: {
             ParseUserStatus(payload);
             return true;
         }
@@ -123,13 +124,11 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
     String contactMask = MrimUtils::ReadLPS(payload);
     int contactMaskLen = contactMask.GetLength();
 
-    const unsigned long FLAG_NAME_UNICODE = 0x200; // прапорець "ім'я/нік в юнікоді" (рідко використовується)
-
     for (unsigned long i = 0; i < groupsCount; i++) {
         if (payload.GetRemaining() < 8) break;
         GroupInfo* pGroup = new GroupInfo();
         pGroup->flags = MrimUtils::ReadUL(payload);
-        pGroup->name = (pGroup->flags & FLAG_NAME_UNICODE)
+        pGroup->name = (pGroup->flags & Mrim::ContactFlag::UNICODE_NICKNAME)
                      ? MrimUtils::ReadLPSUcs2(payload)
                      : MrimUtils::ReadLPS(payload);
         MrimUtils::SkipFormattedRecord(payload, groupMask, 2);
@@ -141,7 +140,7 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
         pContact->flags = MrimUtils::ReadUL(payload);
         pContact->groupId = MrimUtils::ReadUL(payload);
         pContact->email = MrimUtils::ReadLPS(payload); // CP1251
-        pContact->nickname = (pContact->flags & FLAG_NAME_UNICODE)
+        pContact->nickname = (pContact->flags & Mrim::ContactFlag::UNICODE_NICKNAME)
                             ? MrimUtils::ReadLPSUcs2(payload)
                             : MrimUtils::ReadLPS(payload);
 

@@ -7,18 +7,21 @@ CPP_SRCS += \
 ../src/MRIM/MrimAuth.cpp \
 ../src/MRIM/MrimContacts.cpp \
 ../src/MRIM/MrimMessages.cpp \
+../src/MRIM/MrimProfile.cpp \
 ../src/MRIM/MrimUtils.cpp 
 
 OBJS += \
 ./src/MRIM/MrimAuth.o \
 ./src/MRIM/MrimContacts.o \
 ./src/MRIM/MrimMessages.o \
+./src/MRIM/MrimProfile.o \
 ./src/MRIM/MrimUtils.o 
 
 CPP_DEPS += \
 ./src/MRIM/MrimAuth.d \
 ./src/MRIM/MrimContacts.d \
 ./src/MRIM/MrimMessages.d \
+./src/MRIM/MrimProfile.d \
 ./src/MRIM/MrimUtils.d 
 
 

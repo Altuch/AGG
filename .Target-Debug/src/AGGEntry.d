@@ -288,7 +288,109 @@ src/AGGEntry.d src/AGGEntry.o: ../src/AGGEntry.cpp \
  C:/bada/2.0.6/Include/FUiHorizontalBoxLayout.h \
  C:/bada/2.0.6/Include/FUiRelativeLayout.h \
  C:/bada/2.0.6/Include/FUiGridLayout.h \
- C:/bada/2.0.6/Include/FUiCustomControlBase.h
+ C:/bada/2.0.6/Include/FUiCustomControlBase.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AggConnection.h \
+ C:/bada/2.0.6/Include/FNet.h \
+ C:/bada/2.0.6/Include/FNetNetConnectionManager.h \
+ C:/bada/2.0.6/Include/FNetNetConnection.h \
+ C:/bada/2.0.6/Include/FNetNetConnectionInfo.h \
+ C:/bada/2.0.6/Include/FNetINetConnectionEventListener.h \
+ C:/bada/2.0.6/Include/FNetManagedNetConnection.h \
+ C:/bada/2.0.6/Include/FNetIManagedNetConnectionEventListener.h \
+ C:/bada/2.0.6/Include/FNetNetStatistics.h \
+ C:/bada/2.0.6/Include/FNetNetFastDormancy.h \
+ C:/bada/2.0.6/Include/FNetDns.h C:/bada/2.0.6/Include/FNetIPHostEntry.h \
+ C:/bada/2.0.6/Include/FNetIDnsEventListener.h \
+ C:/bada/2.0.6/Include/FNetLocalDhcpServer.h \
+ C:/bada/2.0.6/Include/FNetILocalDhcpServerEventListener.h \
+ C:/bada/2.0.6/Include/FNetDhcpClientInfo.h \
+ C:/bada/2.0.6/Include/FNetSockets.h \
+ C:/bada/2.0.6/Include/FNetSockSocket.h \
+ C:/bada/2.0.6/Include/FNetSockSocketLingerOption.h \
+ C:/bada/2.0.6/Include/FNetSockSocketIpMulticastRequestOption.h \
+ C:/bada/2.0.6/Include/FNetSockISocketEventListener.h \
+ C:/bada/2.0.6/Include/FNetSockSecureSocket.h \
+ C:/bada/2.0.6/Include/FNetSockISecureSocketEventListener.h \
+ C:/bada/2.0.6/Include/FNetSockSocketUtility.h \
+ C:/bada/2.0.6/Include/FNetHttp.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpHeader.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpTypes.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpMessage.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpRequest.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpTransaction.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpResponse.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpCookie.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpSession.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpCookieStorageManager.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpAuthentication.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpCredentials.h \
+ C:/bada/2.0.6/Include/FNetHttpIHttpTransactionEventListener.h \
+ C:/bada/2.0.6/Include/FNetHttpIHttpEntity.h \
+ C:/bada/2.0.6/Include/FNetHttpIHttpProgressEventListener.h \
+ C:/bada/2.0.6/Include/FNetHttpOspServerUtil.h \
+ C:/bada/2.0.6/Include/FNetHttpHttpMultipartEntity.h \
+ C:/bada/2.0.6/Include/FText.h C:/bada/2.0.6/Include/FTextEncoding.h \
+ C:/bada/2.0.6/Include/FTextEncoder.h C:/bada/2.0.6/Include/FTextConfig.h \
+ C:/bada/2.0.6/Include/FTextDecoder.h \
+ C:/bada/2.0.6/Include/FTextUtf8Encoding.h \
+ C:/bada/2.0.6/Include/FTextUtf8Encoder.h \
+ C:/bada/2.0.6/Include/FTextUtf8Decoder.h \
+ C:/bada/2.0.6/Include/FTextAsciiEncoding.h \
+ C:/bada/2.0.6/Include/FTextLatin1Encoding.h \
+ C:/bada/2.0.6/Include/FTextGsmEncoding.h \
+ C:/bada/2.0.6/Include/FTextUcs2Encoding.h \
+ C:/bada/2.0.6/Include/FNetBluetooth.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothTypes.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothDevice.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothManager.h \
+ C:/bada/2.0.6/Include/FNetBtIBluetoothDeviceEventListener.h \
+ C:/bada/2.0.6/Include/FNetBtIBluetoothManagerEventListener.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothOppServer.h \
+ C:/bada/2.0.6/Include/FNetBtIBluetoothOppServerEventListener.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothOppClient.h \
+ C:/bada/2.0.6/Include/FNetBtIBluetoothOppClientEventListener.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothSppAcceptor.h \
+ C:/bada/2.0.6/Include/FNetBtIBluetoothSppAcceptorEventListener.h \
+ C:/bada/2.0.6/Include/FNetBtBluetoothSppInitiator.h \
+ C:/bada/2.0.6/Include/FNetBtIBluetoothSppInitiatorEventListener.h \
+ C:/bada/2.0.6/Include/FNetWifi.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiTypes.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiManager.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiBssInfo.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiSecurityInfo.h \
+ C:/bada/2.0.6/Include/FNetWifiIWifiManagerEventListener.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiNetAccountInfo.h \
+ C:/bada/2.0.6/Include/FNetWifiAdhocService.h \
+ C:/bada/2.0.6/Include/FNetWifiIAdhocServiceEventListener.h \
+ C:/bada/2.0.6/Include/FNetWifiAdhocPeerInfo.h \
+ C:/bada/2.0.6/Include/FNet.h \
+ C:/bada/2.0.6/Include/FNetWifiIWifiDirectDeviceListener.h \
+ C:/bada/2.0.6/Include/FNetWifiIWifiDirectGroupOwnerListener.h \
+ C:/bada/2.0.6/Include/FNetWifiIWifiDirectGroupClientListener.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectDevice.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectDeviceInfo.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectDeviceManager.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupClient.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupMember.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupInfo.h \
+ C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupOwner.h \
+ C:/bada/2.0.6/Include/FNetNfc.h C:/bada/2.0.6/Include/FNetNfcNfcTypes.h \
+ C:/bada/2.0.6/Include/FNetNfcNdefRecordType.h \
+ C:/bada/2.0.6/Include/FNetNfcNdefRecord.h \
+ C:/bada/2.0.6/Include/FNetNfcNdefMessage.h \
+ C:/bada/2.0.6/Include/FNetNfcNfcTag.h \
+ C:/bada/2.0.6/Include/FNetNfcTagConnection.h \
+ C:/bada/2.0.6/Include/FNetNfcNdefTagConnection.h \
+ C:/bada/2.0.6/Include/FNetNfcNfcManager.h \
+ C:/bada/2.0.6/Include/FNetNfcINfcTagDiscoveryEventListener.h \
+ C:/bada/2.0.6/Include/FNetNfcINdefMessageDiscoveryEventListener.h \
+ C:/bada/2.0.6/Include/FNetNfcINfcManagerEventListener.h \
+ C:/bada/2.0.6/Include/FNetNfcITagConnectionListener.h \
+ C:/bada/2.0.6/Include/FNetNfcINdefTagConnectionListener.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AGG.h:
 
@@ -925,3 +1027,215 @@ C:/bada/2.0.6/Include/FUiRelativeLayout.h:
 C:/bada/2.0.6/Include/FUiGridLayout.h:
 
 C:/bada/2.0.6/Include/FUiCustomControlBase.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AggConnection.h:
+
+C:/bada/2.0.6/Include/FNet.h:
+
+C:/bada/2.0.6/Include/FNetNetConnectionManager.h:
+
+C:/bada/2.0.6/Include/FNetNetConnection.h:
+
+C:/bada/2.0.6/Include/FNetNetConnectionInfo.h:
+
+C:/bada/2.0.6/Include/FNetINetConnectionEventListener.h:
+
+C:/bada/2.0.6/Include/FNetManagedNetConnection.h:
+
+C:/bada/2.0.6/Include/FNetIManagedNetConnectionEventListener.h:
+
+C:/bada/2.0.6/Include/FNetNetStatistics.h:
+
+C:/bada/2.0.6/Include/FNetNetFastDormancy.h:
+
+C:/bada/2.0.6/Include/FNetDns.h:
+
+C:/bada/2.0.6/Include/FNetIPHostEntry.h:
+
+C:/bada/2.0.6/Include/FNetIDnsEventListener.h:
+
+C:/bada/2.0.6/Include/FNetLocalDhcpServer.h:
+
+C:/bada/2.0.6/Include/FNetILocalDhcpServerEventListener.h:
+
+C:/bada/2.0.6/Include/FNetDhcpClientInfo.h:
+
+C:/bada/2.0.6/Include/FNetSockets.h:
+
+C:/bada/2.0.6/Include/FNetSockSocket.h:
+
+C:/bada/2.0.6/Include/FNetSockSocketLingerOption.h:
+
+C:/bada/2.0.6/Include/FNetSockSocketIpMulticastRequestOption.h:
+
+C:/bada/2.0.6/Include/FNetSockISocketEventListener.h:
+
+C:/bada/2.0.6/Include/FNetSockSecureSocket.h:
+
+C:/bada/2.0.6/Include/FNetSockISecureSocketEventListener.h:
+
+C:/bada/2.0.6/Include/FNetSockSocketUtility.h:
+
+C:/bada/2.0.6/Include/FNetHttp.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpHeader.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpTypes.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpMessage.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpRequest.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpTransaction.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpResponse.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpCookie.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpSession.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpCookieStorageManager.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpAuthentication.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpCredentials.h:
+
+C:/bada/2.0.6/Include/FNetHttpIHttpTransactionEventListener.h:
+
+C:/bada/2.0.6/Include/FNetHttpIHttpEntity.h:
+
+C:/bada/2.0.6/Include/FNetHttpIHttpProgressEventListener.h:
+
+C:/bada/2.0.6/Include/FNetHttpOspServerUtil.h:
+
+C:/bada/2.0.6/Include/FNetHttpHttpMultipartEntity.h:
+
+C:/bada/2.0.6/Include/FText.h:
+
+C:/bada/2.0.6/Include/FTextEncoding.h:
+
+C:/bada/2.0.6/Include/FTextEncoder.h:
+
+C:/bada/2.0.6/Include/FTextConfig.h:
+
+C:/bada/2.0.6/Include/FTextDecoder.h:
+
+C:/bada/2.0.6/Include/FTextUtf8Encoding.h:
+
+C:/bada/2.0.6/Include/FTextUtf8Encoder.h:
+
+C:/bada/2.0.6/Include/FTextUtf8Decoder.h:
+
+C:/bada/2.0.6/Include/FTextAsciiEncoding.h:
+
+C:/bada/2.0.6/Include/FTextLatin1Encoding.h:
+
+C:/bada/2.0.6/Include/FTextGsmEncoding.h:
+
+C:/bada/2.0.6/Include/FTextUcs2Encoding.h:
+
+C:/bada/2.0.6/Include/FNetBluetooth.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothTypes.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothDevice.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothManager.h:
+
+C:/bada/2.0.6/Include/FNetBtIBluetoothDeviceEventListener.h:
+
+C:/bada/2.0.6/Include/FNetBtIBluetoothManagerEventListener.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothOppServer.h:
+
+C:/bada/2.0.6/Include/FNetBtIBluetoothOppServerEventListener.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothOppClient.h:
+
+C:/bada/2.0.6/Include/FNetBtIBluetoothOppClientEventListener.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothSppAcceptor.h:
+
+C:/bada/2.0.6/Include/FNetBtIBluetoothSppAcceptorEventListener.h:
+
+C:/bada/2.0.6/Include/FNetBtBluetoothSppInitiator.h:
+
+C:/bada/2.0.6/Include/FNetBtIBluetoothSppInitiatorEventListener.h:
+
+C:/bada/2.0.6/Include/FNetWifi.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiTypes.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiManager.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiBssInfo.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiSecurityInfo.h:
+
+C:/bada/2.0.6/Include/FNetWifiIWifiManagerEventListener.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiNetAccountInfo.h:
+
+C:/bada/2.0.6/Include/FNetWifiAdhocService.h:
+
+C:/bada/2.0.6/Include/FNetWifiIAdhocServiceEventListener.h:
+
+C:/bada/2.0.6/Include/FNetWifiAdhocPeerInfo.h:
+
+C:/bada/2.0.6/Include/FNet.h:
+
+C:/bada/2.0.6/Include/FNetWifiIWifiDirectDeviceListener.h:
+
+C:/bada/2.0.6/Include/FNetWifiIWifiDirectGroupOwnerListener.h:
+
+C:/bada/2.0.6/Include/FNetWifiIWifiDirectGroupClientListener.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectDevice.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectDeviceInfo.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectDeviceManager.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupClient.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupMember.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupInfo.h:
+
+C:/bada/2.0.6/Include/FNetWifiWifiDirectGroupOwner.h:
+
+C:/bada/2.0.6/Include/FNetNfc.h:
+
+C:/bada/2.0.6/Include/FNetNfcNfcTypes.h:
+
+C:/bada/2.0.6/Include/FNetNfcNdefRecordType.h:
+
+C:/bada/2.0.6/Include/FNetNfcNdefRecord.h:
+
+C:/bada/2.0.6/Include/FNetNfcNdefMessage.h:
+
+C:/bada/2.0.6/Include/FNetNfcNfcTag.h:
+
+C:/bada/2.0.6/Include/FNetNfcTagConnection.h:
+
+C:/bada/2.0.6/Include/FNetNfcNdefTagConnection.h:
+
+C:/bada/2.0.6/Include/FNetNfcNfcManager.h:
+
+C:/bada/2.0.6/Include/FNetNfcINfcTagDiscoveryEventListener.h:
+
+C:/bada/2.0.6/Include/FNetNfcINdefMessageDiscoveryEventListener.h:
+
+C:/bada/2.0.6/Include/FNetNfcINfcManagerEventListener.h:
+
+C:/bada/2.0.6/Include/FNetNfcITagConnectionListener.h:
+
+C:/bada/2.0.6/Include/FNetNfcINdefTagConnectionListener.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h:

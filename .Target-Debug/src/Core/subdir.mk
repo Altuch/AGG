@@ -4,20 +4,26 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/AGG.cpp \
-../src/AGGEntry.cpp 
+../src/Core/AggConnection.cpp \
+../src/Core/AppSettings.cpp \
+../src/Core/ChatHistory.cpp \
+../src/Core/MessageRouter.cpp 
 
 OBJS += \
-./src/AGG.o \
-./src/AGGEntry.o 
+./src/Core/AggConnection.o \
+./src/Core/AppSettings.o \
+./src/Core/ChatHistory.o \
+./src/Core/MessageRouter.o 
 
 CPP_DEPS += \
-./src/AGG.d \
-./src/AGGEntry.d 
+./src/Core/AggConnection.d \
+./src/Core/AppSettings.d \
+./src/Core/ChatHistory.d \
+./src/Core/MessageRouter.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/%.o: ../src/%.cpp
+src/Core/%.o: ../src/Core/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: bada C++ Compiler'
 	arm-samsung-nucleuseabi-g++ -D_DEBUG -DSHP -I"C:/bada/2.0.6/Include" -I"C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc" -O0 -g -Wall -c -fpic -fshort-wchar -march=armv7-a -mlittle-endian -mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=hard -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"

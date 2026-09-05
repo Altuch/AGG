@@ -1,22 +1,15 @@
 /**
- * Name        : AGG
- * Version     : 
- * Vendor      : 
- * Description : 
+ * AGG - клієнт Mail.ru Агента (протокол MRIM) для bada 1.0.
  */
 
 #include "AGG.h"
-#include "Form1.h"
-#include "ContactListForm.h"
-#include "AggConnection.h"
-#include "MessageRouter.h"
-#include <FApp.h>
-#include <FBase.h>
+#include "Core/AppSettings.h"
+#include "Core/MessageRouter.h"
+#include "Ui/FormNavigator.h"
 
 using namespace Osp::App;
 using namespace Osp::Base;
 using namespace Osp::System;
-using namespace Osp::Ui;
 using namespace Osp::Ui::Controls;
 
 AGG::AGG() {}
@@ -26,54 +19,32 @@ Application* AGG::CreateInstance(void) {
     return new AGG();
 }
 
+void AGG::AttachForcedLogoutHandler(AggConnection* pConnection) {
+    if (pConnection == null) return;
+
+    AGG* pApp = static_cast<AGG*>(Application::GetInstance());
+    if (pApp != null) pConnection->SetForcedLogoutListener(pApp);
+}
+
 bool AGG::OnAppInitializing(AppRegistry& appRegistry) {
-    Frame* pFrame = GetAppFrame()->GetFrame();
-
-    String savedEmail = L"";
-    String savedPassword = L"";
-    appRegistry.Get(L"UserEmail", savedEmail);
-    appRegistry.Get(L"UserPassword", savedPassword);
-
-    savedEmail.Trim();
-    savedPassword.Trim();
-
-    if (!savedEmail.IsEmpty() && !savedPassword.IsEmpty()) {
-        AppLog("Автологін: знайдено збережені дані, підключаємося...");
-
-        AggConnection* pConnection = new AggConnection();
-        pConnection->Construct();
-
-        ContactListForm* pContactForm = new ContactListForm();
-        pContactForm->Initialize(pConnection);
-
-        String serverIp = L"103.71.21.140";
-        String serverPortStr = L"2041";
-        int serverPort = 2041;
-
-        appRegistry.Get(L"ServerIP", serverIp);
-        appRegistry.Get(L"ServerPort", serverPortStr);
-        Integer::Parse(serverPortStr, serverPort);
-
-        pConnection->userLogin = savedEmail;
-        pConnection->userPassword = savedPassword;
-        pConnection->ConnectToDirectServer(serverIp, serverPort);
-
-        pFrame->AddControl(*pContactForm);
-        pFrame->SetCurrentForm(*pContactForm);
-        pContactForm->Draw();
-        pContactForm->Show();
-        pContactForm->ScheduleAttachContactListener();
-    } else {
+    if (!AppSettings::HasSavedCredentials()) {
         AppLog("Збережених даних немає: відкриваємо форму авторизації...");
-
-        Form1* pForm1 = new Form1();
-        pForm1->Initialize();
-
-        pFrame->AddControl(*pForm1);
-        pFrame->SetCurrentForm(*pForm1);
-        pForm1->Draw();
-        pForm1->Show();
+        FormNavigator::GoToLogin(null, null);
+        return true;
     }
+
+    AppLog("Автологін: знайдено збережені дані, підключаємося...");
+
+    AggConnection* pConnection = new AggConnection();
+    pConnection->Construct();
+    AttachForcedLogoutHandler(pConnection);
+
+    pConnection->SetCredentials(AppSettings::GetUserEmail(), AppSettings::GetUserPassword());
+
+    // Список контактів показуємо одразу: він сам підхопить дані, коли
+    // сервер їх надішле.
+    FormNavigator::GoToContactList(pConnection, null);
+    pConnection->ConnectToServer(AppSettings::GetServerIp(), AppSettings::GetServerPort());
 
     return true;
 }
@@ -82,14 +53,31 @@ bool AGG::OnAppTerminating(AppRegistry& appRegistry, bool forcedTermination) {
     return true;
 }
 
+void AGG::OnForcedLogout(void) {
+    MessageBox msgBox;
+    msgBox.Construct(L"Сеанс завершено",
+                     L"Ви увійшли в цей акаунт з іншого пристрою. MRIM дозволяє лише один активний сеанс - увійдіть знову, коли будете готові.",
+                     MSGBOX_STYLE_OK);
+    int modalResult = 0;
+    msgBox.ShowAndWait(modalResult);
+
+    // Те саме з'єднання передаємо формі входу - вона його скине й
+    // перевикористає, тож зайвого об'єкта з живим сокетом не лишиться.
+    FormNavigator::GoToLogin(AggConnection::GetActive(), FormNavigator::GetCurrentForm());
+}
+
 void AGG::OnForeground(void) {
     MessageRouter::SetAppForeground(true);
     AggConnection::NotifyAppForegroundState(true);
 }
+
 void AGG::OnBackground(void) {
+    // Згорнутий застосунок = "Відійшов" для контактів; сповіщення при
+    // цьому лишаються потрібними, тож router теж має знати.
     MessageRouter::SetAppForeground(false);
     AggConnection::NotifyAppForegroundState(false);
 }
+
 void AGG::OnLowMemory(void) {}
 void AGG::OnBatteryLevelChanged(BatteryLevel batteryLevel) {}
 void AGG::OnScreenOn(void) {}
