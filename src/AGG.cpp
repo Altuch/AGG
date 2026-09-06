@@ -41,8 +41,6 @@ bool AGG::OnAppInitializing(AppRegistry& appRegistry) {
 
     pConnection->SetCredentials(AppSettings::GetUserEmail(), AppSettings::GetUserPassword());
 
-    // Список контактів показуємо одразу: він сам підхопить дані, коли
-    // сервер їх надішле.
     FormNavigator::GoToContactList(pConnection, null);
     pConnection->ConnectToServer(AppSettings::GetServerIp(), AppSettings::GetServerPort());
 
@@ -61,8 +59,6 @@ void AGG::OnForcedLogout(void) {
     int modalResult = 0;
     msgBox.ShowAndWait(modalResult);
 
-    // Те саме з'єднання передаємо формі входу - вона його скине й
-    // перевикористає, тож зайвого об'єкта з живим сокетом не лишиться.
     FormNavigator::GoToLogin(AggConnection::GetActive(), FormNavigator::GetCurrentForm());
 }
 
@@ -72,8 +68,6 @@ void AGG::OnForeground(void) {
 }
 
 void AGG::OnBackground(void) {
-    // Згорнутий застосунок = "Відійшов" для контактів; сповіщення при
-    // цьому лишаються потрібними, тож router теж має знати.
     MessageRouter::SetAppForeground(false);
     AggConnection::NotifyAppForegroundState(false);
 }

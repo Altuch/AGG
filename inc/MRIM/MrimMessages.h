@@ -5,8 +5,6 @@
 
 class AggConnection;
 
-// Отримувач вхідних подій листування. Реалізує MessageRouter (постійно)
-// і ChatForm (через router - лише для свого контакту).
 class IMessageListener {
 public:
     virtual ~IMessageListener(void) {}
@@ -15,8 +13,6 @@ public:
     virtual void OnTypingReceived(const Osp::Base::String& sender) = 0;
 };
 
-// Листування: надсилання, розбір вхідних, офлайн-повідомлення.
-// Коди команд і прапорці - у MRIM/MrimProtocol.h.
 class MrimMessages {
 public:
     MrimMessages(AggConnection* pConn);
@@ -31,18 +27,10 @@ public:
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
 
 private:
-    // Підтвердження отримання: без нього сервер вважає повідомлення
-    // недоставленим.
     void SendMessageRecv(const Osp::Base::String& from, unsigned long msgId);
 
-    // Сервер чистить чергу офлайн-повідомлень цілком, щойно клієнт
-    // надішле цю команду (конкретний id він ігнорує), тож викликати її
-    // після кожного отриманого повідомлення безпечно.
     void SendOfflineMessageDelete(void);
 
-    // Офлайн-повідомлення приходить не як звичайне, а "конвертом" на
-    // кшталт листа: заголовки From/Date/Content-Type, порожній рядок,
-    // далі тіло в base64(UTF-16LE).
     void HandleOfflineMessageEnvelope(const Osp::Base::String& envelope);
 
     AggConnection* pConnection;

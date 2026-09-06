@@ -32,7 +32,6 @@ void MrimContacts::ClearCache(void) {
 void MrimContacts::SetListener(IContactListListener* pListener) {
     this->pListener = pListener;
 
-    // Якщо кеш є, передаємо його слухачу напряму
     if (this->pListener != null && pCachedGroups != null && pCachedContacts != null) {
         AppLog("MrimContacts: Відновлюємо список контактів з кешу напряму!");
         this->pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
@@ -75,11 +74,11 @@ void MrimContacts::ParseUserStatus(ByteBuffer& payload) {
     if (atIndex >= 0) {
         email = str1;
     } else {
-        MrimUtils::ReadLPS(payload);   // xstatus title
-        MrimUtils::ReadLPS(payload);   // xstatus desc
+        MrimUtils::ReadLPS(payload);
+        MrimUtils::ReadLPS(payload);
         email = MrimUtils::ReadLPS(payload);
-        MrimUtils::ReadUL(payload);    // clientCaps
-        MrimUtils::ReadLPS(payload);   // useragent
+        MrimUtils::ReadUL(payload);
+        MrimUtils::ReadLPS(payload);
     }
 
     email.Trim();
@@ -144,26 +143,26 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
                             ? MrimUtils::ReadLPSUcs2(payload)
                             : MrimUtils::ReadLPS(payload);
 
-        MrimUtils::ReadUL(payload); // "чи авторизований" (0/1) - не використовується
+        MrimUtils::ReadUL(payload);
         pContact->status = MrimUtils::ReadUL(payload);
 
         if (contactMaskLen >= 7) {
-            MrimUtils::ReadLPS(payload); // телефон (CP1251)
+            MrimUtils::ReadLPS(payload);
         }
         if (contactMaskLen >= 12) {
-            MrimUtils::ReadLPS(payload); // xstatus (CP1251)
-            MrimUtils::ReadLPS(payload); // заголовок xstatus (CP1251)
-            MrimUtils::ReadLPS(payload); // опис xstatus (CP1251)
-            MrimUtils::ReadUL(payload);  // маска функцій
-            MrimUtils::ReadLPS(payload); // useragent (CP1251)
+            MrimUtils::ReadLPS(payload);
+            MrimUtils::ReadLPS(payload);
+            MrimUtils::ReadLPS(payload);
+            MrimUtils::ReadUL(payload);
+            MrimUtils::ReadLPS(payload);
         }
         if (contactMaskLen >= 19) {
-            MrimUtils::ReadUL(payload);  // айді мікроблог-поста, частина 1
-            MrimUtils::ReadUL(payload);  // айді мікроблог-поста, частина 2
-            MrimUtils::ReadUL(payload);  // unix-time поста
-            MrimUtils::ReadLPS(payload); // текст поста
-            MrimUtils::ReadLPS(payload); // зарезервовано
-            MrimUtils::ReadLPS(payload); // "ReplyTo" (?)
+            MrimUtils::ReadUL(payload);
+            MrimUtils::ReadUL(payload);
+            MrimUtils::ReadUL(payload);
+            MrimUtils::ReadLPS(payload);
+            MrimUtils::ReadLPS(payload);
+            MrimUtils::ReadLPS(payload);
         }
 
         MrimUtils::SkipFormattedRecord(payload, contactMask, 19);

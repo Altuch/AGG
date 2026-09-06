@@ -5,10 +5,6 @@
 
 class AggConnection;
 
-// Анкета користувача - те, що повертає MRIM_CS_ANKETA_INFO для одного
-// рядка результату пошуку. Сервер (mrimsu/mrim-server) не вміє
-// редагувати ці поля, лише повертати вже наявні - тож у AGG це
-// виключно перегляд.
 class ProfileInfo : public Osp::Base::Object {
 public:
     ProfileInfo(void) {}
@@ -33,10 +29,6 @@ public:
     virtual void OnProfileNotFound(void) = 0;
 };
 
-// Анкета (MRIM_CS_WP_REQUEST / MRIM_CS_ANKETA_INFO): пошук за логіном,
-// щоб дістати власний профіль. Формат відповіді сервер оголошує сам -
-// спершу шле NAME кожного поля, потім значення в тому самому порядку,
-// тож розбір іде за оголошеною схемою, а не за фіксованими офсетами.
 class MrimProfile {
 public:
     MrimProfile(AggConnection* pConn);
@@ -44,7 +36,6 @@ public:
 
     void SetListener(IProfileListener* pListener);
 
-    // login - повний, "ім'я@домен"; розбивається на два поля пошуку.
     void RequestOwnProfile(const Osp::Base::String& login);
 
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);

@@ -48,17 +48,14 @@ bool MrimProfile::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     unsigned long status = MrimUtils::ReadUL(payload);
     unsigned long fieldCount = MrimUtils::ReadUL(payload);
     unsigned long rowCount = MrimUtils::ReadUL(payload);
-    MrimUtils::ReadUL(payload); // час на сервері - не потрібен
+    MrimUtils::ReadUL(payload);
 
     if (status != Mrim::Anketa::Status::OK || rowCount == 0 || fieldCount == 0) {
         if (pListener != null) pListener->OnProfileNotFound();
         return true;
     }
 
-    // Сервер спершу оголошує НАЗВИ полів у довільному порядку, тоді
-    // йдуть значення в тому самому порядку для кожного рядка - тож
-    // розбір мусить триматись назв, а не фіксованої позиції.
-    if (fieldCount > 32) fieldCount = 32; // розумна стеля про всяк випадок
+    if (fieldCount > 32) fieldCount = 32;
     String fieldNames[32];
     for (unsigned long i = 0; i < fieldCount; i++) {
         fieldNames[i] = MrimUtils::ReadLPS(payload);
@@ -68,7 +65,7 @@ bool MrimProfile::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     for (unsigned long row = 0; row < rowCount; row++) {
         for (unsigned long i = 0; i < fieldCount; i++) {
             String value = MrimUtils::ReadLPS(payload);
-            if (row != 0) continue; // цікавить лише перший (наш) рядок
+            if (row != 0) continue;
 
             const String& name = fieldNames[i];
             if (name == L"Username") info.username = value;

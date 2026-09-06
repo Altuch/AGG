@@ -11,8 +11,6 @@ using namespace Osp::Net::Sockets;
 
 AggConnection* AggConnection::pActiveInstance = null;
 
-// Паузи між спробами перепідключення (мс). Остання повторюється далі -
-// не заливаємо мережу спробами, поки Wi-Fi не повернеться.
 static const int RECONNECT_DELAYS_MSEC[] = { 3000, 6000, 12000, 20000 };
 static const int RECONNECT_DELAY_COUNT = 4;
 
@@ -67,10 +65,6 @@ result AggConnection::Construct(void) {
     pReconnectTimer = new Timer();
     pReconnectTimer->Construct(*this);
 
-    // MessageRouter - ЄДИНИЙ постійний слухач повідомлень. Раніше цю
-    // роль по черзі перехоплював кожен ChatForm, і все, що приходило
-    // без відкритого чату, губилося: не потрапляло ні в історію, ні у
-    // сповіщення. Тепер ChatForm лише позначає себе "активним чатом".
     pMessageRouter = new MessageRouter();
     if (pMessageMgr != null) pMessageMgr->SetListener(pMessageRouter);
 
@@ -80,11 +74,6 @@ result AggConnection::Construct(void) {
 void AggConnection::Reset(void) {
     StopTimers();
 
-    // Сокет тут НАВМИСНО не чіпаємо: Reset() може бути викликаний з
-    // обробника сокет-події (примусовий вихід), а знищувати сокет
-    // зсередини його ж колбека - вірний спосіб отримати крах. Старий
-    // сокет прибере InitSocket() під час наступного ConnectToServer(),
-    // тобто вже з дії користувача.
     SetLoginListener(null);
     SetContactListListener(null);
     SetConnectionStateListener(null);
@@ -96,12 +85,6 @@ void AggConnection::Reset(void) {
     reconnectAttempt = 0;
     pingIntervalMsec = 0;
 
-    // isForceLoggedOut НЕ скидаємо: Reset() відпрацьовує ще під час
-    // розбору пакета LOGOUT, а сокет сервер закриє за мить після нього.
-    // Скинутий прапорець змусив би OnSocketClosed() визнати це збоєм
-    // мережі й показати на щойно відкритій формі входу зайву помилку.
-    // Знімає його ConnectToServer() - тобто справді новий сеанс.
-
     if (pRxBuffer != null) pRxBuffer->Clear();
 }
 
@@ -109,8 +92,6 @@ void AggConnection::SetCredentials(const String& login, const String& password) 
     userLogin = login;
     userPassword = password;
 }
-
-// --- Фасад над MessageRouter ---
 
 void AggConnection::SetActiveChatListener(IMessageListener* pListener, const String& email) {
     if (pMessageRouter != null) pMessageRouter->SetActiveChat(pListener, email);
@@ -135,8 +116,6 @@ void AggConnection::SetKnownContactEmails(IList* pEmails) {
 IList* AggConnection::GetStrangerEmails(void) const {
     return (pMessageRouter != null) ? pMessageRouter->GetStrangerEmails() : null;
 }
-
-// --- Сокет ---
 
 void AggConnection::CloseSocket(void) {
     if (pSocket == null) return;
@@ -165,11 +144,9 @@ result AggConnection::InitSocket(void) {
 result AggConnection::ConnectToServer(const String& serverIp, int port) {
     if (!MrimUtils::IsValidIpAddress(serverIp)) return E_INVALID_ARG;
 
-    // Запам'ятовуємо ціль - за нею перепідключаємось після втрати Wi-Fi.
     lastServerIp = serverIp;
     lastServerPort = port;
 
-    // Новий сеанс: попереднє "вас вибили" більше не діє.
     isForceLoggedOut = false;
 
     result r = InitSocket();
@@ -217,8 +194,6 @@ void AggConnection::ChangeStatus(unsigned long status) {
     SendPacket(Mrim::Cmd::CHANGE_STATUS, payload);
 }
 
-// --- Події сокета ---
-
 void AggConnection::OnSocketConnected(Socket& socket) {
     SendHello();
 }
@@ -227,14 +202,10 @@ void AggConnection::OnSocketClosed(Socket& socket, NetSocketClosedReason reason)
     StopTimers();
 
     if (isForceLoggedOut) {
-        // Нас вибив інший пристрій: користувача вже повернуто на форму
-        // входу. Перепідключатись не можна - той сеанс вибив би знову.
         return;
     }
 
     if (!hasLoggedInOnce) {
-        // Обрив ще до першого входу - це невдала спроба авторизації,
-        // а не втрата мережі посеред роботи. Мовчки не повторюємо.
         if (pAuthMgr != null) {
             pAuthMgr->NotifyLoginFailed(L"З'єднання розірвано. Перевірте мережу.");
         }
@@ -265,13 +236,11 @@ void AggConnection::OnSocketReadyToReceive(Socket& socket) {
     if (IsFailed(socket.Receive(chunk)) || chunk.GetPosition() == 0) return;
     chunk.Flip();
 
-    // Дописуємо в кінець: TCP ріже пакети як йому зручно.
     pRxBuffer->SetArray(chunk.GetPointer(), 0, chunk.GetLimit());
     pRxBuffer->Flip();
 
     ProcessInbox();
 
-    // Недочитаний "хвіст" зсуваємо на початок - склеїться з наступною порцією.
     pRxBuffer->Compact();
 }
 
@@ -280,17 +249,14 @@ void AggConnection::ProcessInbox(void) {
         int packetStart = pRxBuffer->GetPosition();
 
         if (MrimUtils::ReadUL(*pRxBuffer) != Mrim::MAGIC) {
-            // Не межа пакета - зсуваємось на байт і шукаємо далі.
             pRxBuffer->SetPosition(packetStart + 1);
             continue;
         }
 
-        // Версія (4) і номер пакета (4) нам не потрібні - одразу до команди.
         pRxBuffer->SetPosition(packetStart + 12);
         unsigned long command = MrimUtils::ReadUL(*pRxBuffer);
         unsigned long dataLen = MrimUtils::ReadUL(*pRxBuffer);
 
-        // Лишок заголовка (24) + тіло ще не прийшли - чекаємо наступної порції.
         if (static_cast<unsigned long>(pRxBuffer->GetRemaining()) < 24 + dataLen) {
             pRxBuffer->SetPosition(packetStart);
             break;
@@ -316,8 +282,6 @@ void AggConnection::ProcessInbox(void) {
 }
 
 void AggConnection::DispatchPacket(unsigned long command, ByteBuffer& payload) {
-    // Кожен менеджер сам каже, чи це його команда. Позицію перед
-    // наступною спробою скидаємо: попередній міг щось вичитати.
     if (pAuthMgr != null && pAuthMgr->ProcessCommand(command, payload)) return;
 
     payload.SetPosition(0);
@@ -332,7 +296,6 @@ void AggConnection::DispatchPacket(unsigned long command, ByteBuffer& payload) {
     payload.SetPosition(0);
     switch (command) {
         case Mrim::Cmd::HELLO_ACK: {
-            // Сервер диктує період ping у секундах.
             pingIntervalMsec = MrimUtils::ReadUL(payload) * 1000;
             if (pPingTimer != null && pingIntervalMsec > 0) {
                 if (isPingTimerStarted) pPingTimer->Cancel();
@@ -344,8 +307,6 @@ void AggConnection::DispatchPacket(unsigned long command, ByteBuffer& payload) {
         }
 
         case Mrim::Cmd::LOGOUT: {
-            // MRIM тримає один активний сеанс на акаунт: нас вибило
-            // входом з іншого пристрою. Сокет сервер закриє сам.
             isForceLoggedOut = true;
             StopTimers();
             if (pForcedLogoutListener != null) pForcedLogoutListener->OnForcedLogout();
@@ -374,8 +335,6 @@ void AggConnection::NotifyAppForegroundState(bool foreground) {
     pActiveInstance->ChangeStatus(foreground ? Mrim::Status::ONLINE : Mrim::Status::AWAY);
 }
 
-// --- Таймери ---
-
 void AggConnection::StopTimers(void) {
     if (pPingTimer != null && isPingTimerStarted) pPingTimer->Cancel();
     isPingTimerStarted = false;
@@ -399,7 +358,6 @@ void AggConnection::AttemptReconnect(void) {
 }
 
 void AggConnection::OnTimerExpired(Timer& timer) {
-    // Обидва таймери слухає цей самий метод - розрізняємо за об'єктом.
     if (&timer == pReconnectTimer) {
         AttemptReconnect();
         return;

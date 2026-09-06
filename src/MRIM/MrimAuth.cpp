@@ -40,10 +40,6 @@ bool MrimAuth::ProcessCommand(unsigned long command, ByteBuffer& payload) {
         case Mrim::Cmd::LOGIN_ACK: {
             AppLog("MRIM_CS_LOGIN_ACK - вхід успішний.");
 
-            // З'єднання має дізнатись про це завжди: після
-            // автоматичного перепідключення слухача входу вже немає
-            // (форма входу знялась після першого успіху), але скинути
-            // лічильник повторних спроб усе одно потрібно.
             if (pConnection != null) pConnection->NotifyLoggedIn();
 
             if (pListener != null) pListener->OnLoginSuccess();

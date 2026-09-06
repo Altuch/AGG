@@ -54,8 +54,6 @@ private:
     int AddStrangersGroup(int groupIndex);
     void PublishKnownContacts(void);
 
-    // null, якщо потрібної іконки немає в ресурсах - рядок просто
-    // намалюється без неї.
     const Osp::Graphics::Bitmap* GetStatusBitmap(unsigned long status) const;
 
     static const int ID_SOFTKEY_PROFILE = 101;
@@ -71,7 +69,6 @@ private:
     static const long USER_EVENT_POPULATE        = 2001;
     static const long USER_EVENT_ATTACH_LISTENER = 2002;
 
-    // Елементи рядка у CustomListItemFormat.
     static const int ELEM_NAME  = 1;
     static const int ELEM_ICON  = 2;
     static const int ELEM_BADGE = 3;
@@ -84,10 +81,6 @@ private:
     Osp::Base::Collection::ArrayList* pSavedGroups;
     Osp::Base::Collection::ArrayList* pSavedContacts;
 
-    // Індекс групи "Невідомі" у поточному списку (-1 - її зараз немає).
-    // За ним у OnItemStateChanged відрізняємо тап по невідомому
-    // відправнику від тапу по звичайному контакту: у них різні
-    // простори itemId.
     int strangersGroupIndex;
 
     Osp::Graphics::Bitmap* pBitmapOnline;
