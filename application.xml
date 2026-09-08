@@ -5,36 +5,40 @@
         <English>AGG</English>
         <eng-GB>AGG</eng-GB>
         <rus-RU>АБС</rus-RU>
+        <ukr-UA>АБП</ukr-UA>
     </Name>
-    <Vendor/>
+    <Vendor>Renaissance</Vendor>
     <Description>An application for communication via the Agent@Mail.ru protocol</Description>
     <Icons>
         <MainMenu>80x80.png<Type1>100x96.png</Type1>
             <Type2>50x47.png</Type2>
             <Type3>50x50.png</Type3>
             <Type4>80x80.png</Type4>
-            <Type5/>
+            <Type5>42x42.png</Type5>
         </MainMenu>
         <Setting>80x80.png<Type1>52x52.png</Type1>
             <Type2>26x26.png</Type2>
             <Type3>26x26.png</Type3>
             <Type4>52x52.png</Type4>
-            <Type5/>
+            <Type5>26x26.png</Type5>
         </Setting>
         <Ticker>32x32.png<Type1>32x32.png</Type1>
             <Type2>18x18.png</Type2>
             <Type3>18x18.png</Type3>
             <Type4>32x32.png</Type4>
-            <Type5/>
+            <Type5>18x18.png</Type5>
         </Ticker>
         <QuickPanel>52x52.png<Type1>68x74.png</Type1>
-            <Type2/>
+            <Type2>34x37.png</Type2>
             <Type3>26x26.png</Type3>
             <Type4>52x52.png</Type4>
-            <Type5/>
+            <Type5>26x26.png</Type5>
         </QuickPanel>
         <LaunchImage>Splash_type4.png<Type1>Splash_type4.png</Type1>
             <Type2>Splash_type5.png</Type2>
+            <Type3>Splash_type3.png</Type3>
+            <Type4>Splash_type4.png</Type4>
+            <Type5>Splash_type5.png</Type5>
         </LaunchImage>
     </Icons>
     <AutoScaling>

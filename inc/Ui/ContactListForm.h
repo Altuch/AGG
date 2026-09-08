@@ -44,17 +44,19 @@ private:
                                                  const Osp::Graphics::Bitmap* pIcon);
     int AddStrangersGroup(int groupIndex);
     void PublishKnownContacts(void);
+    void ShowStatusMenu(void);
 
     const Osp::Graphics::Bitmap* GetStatusBitmap(unsigned long status) const;
+
+    static const int ID_STATUS_ONLINE    = 501;
+    static const int ID_STATUS_AWAY      = 502;
+    static const int ID_STATUS_INVISIBLE = 503;
 
     static const int ID_SOFTKEY_PROFILE    = 101;
     static const int ID_SOFTKEY_LOGOUT     = 102;
     static const int ID_OPTIONKEY_MENU     = 103;
     static const int ID_MENU_CHANGE_STATUS = 104;
     static const int ID_MENU_ADD           = 105;
-    static const int ID_STATUS_ONLINE      = 106;
-    static const int ID_STATUS_AWAY        = 107;
-    static const int ID_STATUS_INVISIBLE   = 108;
     static const int ID_MENU_SETTINGS      = 109;
 
     static const long USER_EVENT_POPULATE        = 2001;
@@ -70,6 +72,7 @@ private:
     AggConnection* pConnection;
     Osp::Ui::Controls::GroupedList* pGroupedList;
     Osp::Ui::Controls::CustomListItemFormat* pItemFormat;
+    Osp::Ui::Controls::ContextMenu* pStatusContextMenu;
 
     Osp::Base::Collection::ArrayList* pSavedGroups;
     Osp::Base::Collection::ArrayList* pSavedContacts;

@@ -12,10 +12,20 @@ using namespace Osp::Ui;
 using namespace Osp::Ui::Controls;
 
 ContactListForm::ContactListForm(void) :
-    pConnection(null), pGroupedList(null), pItemFormat(null),
-    pSavedGroups(null), pSavedContacts(null), strangersGroupIndex(-1),
-    pBitmapOnline(null), pBitmapAway(null), pBitmapBusy(null), pBitmapOffline(null),
-    myStatus(Mrim::Status::ONLINE) {}
+    pConnection(null),
+    pGroupedList(null),
+    pItemFormat(null),
+    pStatusContextMenu(null),
+    pSavedGroups(null),
+    pSavedContacts(null),
+    strangersGroupIndex(-1),
+    pBitmapOnline(null),
+    pBitmapAway(null),
+    pBitmapBusy(null),
+    pBitmapOffline(null),
+    myStatus(Mrim::Status::ONLINE)
+{
+}
 
 ContactListForm::~ContactListForm(void) {
     DetachListeners();
@@ -23,6 +33,10 @@ ContactListForm::~ContactListForm(void) {
     delete pItemFormat;
     if (pSavedGroups != null) { pSavedGroups->RemoveAll(true); delete pSavedGroups; }
     if (pSavedContacts != null) { pSavedContacts->RemoveAll(true); delete pSavedContacts; }
+    if (pStatusContextMenu != null) {
+            delete pStatusContextMenu;
+            pStatusContextMenu = null;
+    }
 
     delete pBitmapOnline;
     delete pBitmapAway;
@@ -324,14 +338,23 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_MENU_CHANGE_STATUS: {
-            OptionMenu* pMenu = new OptionMenu();
-            pMenu->Construct();
-            pMenu->AddItem(L"Онлайн", ID_STATUS_ONLINE);
-            pMenu->AddItem(L"Відійшов", ID_STATUS_AWAY);
-            pMenu->AddItem(L"Невидимка", ID_STATUS_INVISIBLE);
-            pMenu->AddActionEventListener(*this);
-            pMenu->SetShowState(true);
-            pMenu->Show();
+        	if (pStatusContextMenu != null) {
+        		delete pStatusContextMenu;
+        	    pStatusContextMenu = null;
+        	}
+        	int screenHeight = GetClientAreaBounds().height > 0 ? GetClientAreaBounds().height : 800;
+            Osp::Graphics::Point anchorPos(20, screenHeight - 80);
+
+            pStatusContextMenu = new Osp::Ui::Controls::ContextMenu();
+            pStatusContextMenu->Construct(anchorPos, Osp::Ui::Controls::CONTEXT_MENU_STYLE_LIST);
+            pStatusContextMenu->AddActionEventListener(*this);
+
+            pStatusContextMenu->AddItem(L"Онлайн", ID_STATUS_ONLINE);
+            pStatusContextMenu->AddItem(L"Відійшов", ID_STATUS_AWAY);
+            pStatusContextMenu->AddItem(L"Невидимка", ID_STATUS_INVISIBLE);
+
+            pStatusContextMenu->SetShowState(true);
+            pStatusContextMenu->Show();
             break;
         }
 

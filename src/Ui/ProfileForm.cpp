@@ -48,14 +48,42 @@ result ProfileForm::OnInitializing(void) {
 
     pIdentityFormat = new CustomListItemFormat();
     pIdentityFormat->Construct();
-    pIdentityFormat->AddElement(ELEM_AVATAR, Rectangle(15, 20, 56, 56));
-    pIdentityFormat->AddElement(ELEM_TITLE,  Rectangle(85, 18, 375, 36));
-    pIdentityFormat->AddElement(ELEM_SUB,    Rectangle(85, 56, 375, 30));
+
+    pIdentityFormat->AddElement(ELEM_AVATAR, Rectangle(15, 14, 68, 68));
+
+    pIdentityFormat->AddElement(
+        ELEM_TITLE,
+        Rectangle(92, 8, 375, 44),
+        40,
+        Osp::Graphics::Color(255, 255, 255),
+        Osp::Graphics::Color(255, 255, 255)
+    );
+
+    pIdentityFormat->AddElement(
+        ELEM_SUB,
+        Rectangle(92, 54, 375, 38),
+        30,
+        Osp::Graphics::Color(175, 195, 235),
+        Osp::Graphics::Color(255, 255, 255)
+    );
 
     pFieldFormat = new CustomListItemFormat();
     pFieldFormat->Construct();
-    pFieldFormat->AddElement(ELEM_LABEL, Rectangle(15, 8, 190, 40));
-    pFieldFormat->AddElement(ELEM_VALUE, Rectangle(210, 8, 255, 40));
+    pFieldFormat->AddElement(
+            ELEM_LABEL,
+            Rectangle(16, 8, 448, 28),
+            22,
+            Osp::Graphics::Color(60, 165, 240),
+            Osp::Graphics::Color(60, 165, 240)
+        );
+
+    pFieldFormat->AddElement(
+            ELEM_VALUE,
+            Rectangle(16, 38, 448, 36),
+            32,
+            Osp::Graphics::Color(255, 255, 255),
+            Osp::Graphics::Color(255, 255, 255)
+        );
 
     AppResource* pRes = Application::GetInstance()->GetAppResource();
     if (pRes != null) {
@@ -140,11 +168,11 @@ CustomListItem* ProfileForm::CreateIdentityRow(void) const {
 }
 
 CustomListItem* ProfileForm::CreateFieldRow(const String& label, const String& value) const {
-    CustomListItem* pItem = new CustomListItem();
-    pItem->Construct(FIELD_ROW_HEIGHT);
-    pItem->SetItemFormat(*pFieldFormat);
-    pItem->SetElement(ELEM_LABEL, label);
-    pItem->SetElement(ELEM_VALUE, value);
+	CustomListItem* pItem = new CustomListItem();
+	pItem->Construct(80);
+	pItem->SetItemFormat(*pFieldFormat);
+	pItem->SetElement(ELEM_LABEL, label);
+	pItem->SetElement(ELEM_VALUE, value);
     return pItem;
 }
 
