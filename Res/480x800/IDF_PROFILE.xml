@@ -10,9 +10,9 @@
         <layout mode="Portrait" style="FORM_STYLE_INDICATOR|FORM_STYLE_TITLE|FORM_STYLE_SOFTKEY_0"/>
         <layout mode="Landscape" style="FORM_STYLE_INDICATOR|FORM_STYLE_TITLE|FORM_STYLE_SOFTKEY_0"/>
     </Form>
-    <EditArea id="IDC_PROFILE_TEXT" parent="IDF_PROFILE">
-        <property InputStyle="INPUT_STYLE_FULLSCREEN" LimitLength="1000000" disabledBGBitmapPath="" disabledColor="" disabledColorOpacity="100" disabledTextColor="" guideText="" guideTextColor="" highlightedBGBitmapPath="" highlightedColor="" highlightedColorOpacity="100" highlightedTextColor="" horizontalMargin="10" keypadAction="" keypadStyle="KEYPAD_STYLE_NORMAL" linkTextColor="" lowerCaseMode="FALSE" normalBGBitmapPath="" normalColor="" normalColorOpacity="100" normalTextColor="" pressedBGBitmapPath="" pressedColor="" pressedColorOpacity="100" text="" textHorizontalAlignment="ALIGNMENT_LEFT" textSize="34" verticalMargin="10" viewMode="FALSE"/>
-        <layout height="642" mode="Portrait" width="480" x="0" y="0"/>
-        <layout height="354" mode="Landscape" width="800" x="0" y="0"/>
-    </EditArea>
+    <GroupedList id="IDC_PROFILE_LIST" parent="IDF_PROFILE">
+        <property colorOfEmptyListText="" fastScroll="FALSE" itemDivider="TRUE" textOfEmptyList=""/>
+        <layout height="712" mode="Portrait" style="CUSTOM_LIST_STYLE_NORMAL" width="480" x="0" y="0"/>
+        <layout height="354" mode="Landscape" style="CUSTOM_LIST_STYLE_NORMAL" width="800" x="0" y="0"/>
+    </GroupedList>
 </Scene>

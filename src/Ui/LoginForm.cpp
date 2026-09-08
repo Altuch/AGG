@@ -11,15 +11,12 @@ LoginForm::LoginForm(void) :
     pEditEmail(null), pEditPassword(null), pConnection(null) {}
 
 LoginForm::~LoginForm(void) {
-    // Не null лише якщо вхід так і не відбувся - тоді з'єднання наше.
     delete pConnection;
     pConnection = null;
 }
 
 result LoginForm::Initialize(AggConnection* pExisting) {
     if (pExisting != null) {
-        // Повернення сюди після виходу: чистимо стан сеансу й слухачів,
-        // але лишаємо сам об'єкт - сокет перестворить ConnectToServer().
         pExisting->Reset();
         pConnection = pExisting;
     }
@@ -54,7 +51,6 @@ result LoginForm::OnInitializing(void) {
     pEditEmail = static_cast<EditField*>(GetControl(L"IDC_EDITFIELD_EMAIL"));
     pEditPassword = static_cast<EditField*>(GetControl(L"IDC_EDITFIELD_PASSWORD"));
 
-    // Підставляємо збережене, щоб не набирати вручну.
     String savedEmail = AppSettings::GetUserEmail();
     String savedPassword = AppSettings::GetUserPassword();
     if (pEditEmail != null && !savedEmail.IsEmpty()) pEditEmail->SetText(savedEmail);
@@ -104,8 +100,6 @@ void LoginForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_BTN_SETTINGS: {
-            // null - цю форму не прибираємо: налаштування лягають зверху,
-            // а "Назад" повертає сюди ж.
             FormNavigator::GoToSettings(null, null);
             break;
         }
@@ -121,8 +115,6 @@ void LoginForm::OnLoginSuccess(void) {
     AggConnection* pConn = pConnection;
     pConn->SetLoginListener(null);
 
-    // Володіння з'єднанням переходить далі - інакше наш деструктор
-    // (спрацює при видаленні форми) знищив би живий сокет.
     pConnection = null;
 
     FormNavigator::GoToContactList(pConn, this);
@@ -131,8 +123,6 @@ void LoginForm::OnLoginSuccess(void) {
 void LoginForm::OnLoginFailed(const String& reason) {
     AppLog("Авторизація не вдалася: %S", reason.GetPointer());
 
-    // Пароль явно відхилено - прибираємо його, щоб автологін не бився
-    // об ту саму стіну при кожному запуску.
     if (reason.StartsWith(L"Вхід відхилено", 0) || reason.StartsWith(L"Невірний логін", 0)) {
         AppSettings::ClearPassword();
     }

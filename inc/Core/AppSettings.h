@@ -9,7 +9,6 @@ public:
     static Osp::Base::String GetUserPassword(void);
     static bool HasSavedCredentials(void);
     static void SaveCredentials(const Osp::Base::String& email, const Osp::Base::String& password);
-
     static void ClearCredentials(void);
     static void ClearPassword(void);
 

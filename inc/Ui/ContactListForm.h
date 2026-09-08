@@ -25,21 +25,12 @@ public:
 
     virtual result OnInitializing(void);
     virtual result OnTerminating(void);
-
     virtual void OnActionPerformed(const Osp::Ui::Control& source, int actionId);
     virtual void OnUserEventReceivedN(long requestId, Osp::Base::Collection::IList* pArgs);
-
-    // --- IGroupedItemEventListener ---
     virtual void OnItemStateChanged(const Osp::Ui::Control& source, int groupIndex, int itemIndex, int itemId, Osp::Ui::ItemStatus status);
     virtual void OnItemStateChanged(const Osp::Ui::Control& source, int groupIndex, int itemIndex, int elementId, int itemId, Osp::Ui::ItemStatus status);
-
-    // --- IContactListListener ---
     virtual void OnContactListReceived(Osp::Base::Collection::IList* pGroups, Osp::Base::Collection::IList* pContacts);
-
-    // --- IUnreadCountListener ---
     virtual void OnUnreadCountChanged(void);
-
-    // --- IConnectionStateListener ---
     virtual void OnConnectionStateChanged(bool connected);
 
 private:
@@ -56,15 +47,15 @@ private:
 
     const Osp::Graphics::Bitmap* GetStatusBitmap(unsigned long status) const;
 
-    static const int ID_SOFTKEY_PROFILE = 101;
-    static const int ID_SOFTKEY_EXIT       = 102;
+    static const int ID_SOFTKEY_PROFILE    = 101;
+    static const int ID_SOFTKEY_LOGOUT     = 102;
     static const int ID_OPTIONKEY_MENU     = 103;
     static const int ID_MENU_CHANGE_STATUS = 104;
-    static const int ID_MENU_LOGOUT        = 105;
+    static const int ID_MENU_ADD           = 105;
     static const int ID_STATUS_ONLINE      = 106;
     static const int ID_STATUS_AWAY        = 107;
     static const int ID_STATUS_INVISIBLE   = 108;
-    static const int ID_MENU_SETTINGS       = 109;
+    static const int ID_MENU_SETTINGS      = 109;
 
     static const long USER_EVENT_POPULATE        = 2001;
     static const long USER_EVENT_ATTACH_LISTENER = 2002;
@@ -73,6 +64,8 @@ private:
     static const int ELEM_ICON  = 2;
     static const int ELEM_BADGE = 3;
     static const int ROW_HEIGHT = 60;
+
+    static const int GROUP_MY_STATUS = 0;
 
     AggConnection* pConnection;
     Osp::Ui::Controls::GroupedList* pGroupedList;
@@ -87,6 +80,8 @@ private:
     Osp::Graphics::Bitmap* pBitmapAway;
     Osp::Graphics::Bitmap* pBitmapBusy;
     Osp::Graphics::Bitmap* pBitmapOffline;
+
+    unsigned long myStatus;
 };
 
 #endif

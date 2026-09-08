@@ -1,20 +1,31 @@
-PC: 0x4000740A LR: 0x401AA1AF Stack PTR : 0x0AFBDF6C 
-0x4000740A [Platform Fns]
-0x401AA1AE [Platform Fns]
-0x401AA93C [Platform Fns]
-0x401AAE10 [Platform Fns]
-0x401AAEC2 [Platform Fns]
-0x6E9CB80C Osp::Base::Runtime::Event::Fire(Osp::Base::Runtime::IEventArg const&)
-0x6D030154 __SocketHandleEvent(void*, WmEvent*)
-0x4002007C [Platform Fns]
-0x40028402 [Platform Fns]
-0x69E679F4 Event_processPi
-0x400B5C9C [Platform Fns]
-0x6EA949FC Osp::App::__AppExecutable::OnStart(Osp::Base::Runtime::_EventDispatcherEventArg const&)
-0x6EA95F46 virtual thunk to Osp::App::__AppExecutable::OnStart(Osp::Base::Runtime::_EventDispatcherEventArg const&)
-0x6E9CC684 Osp::Base::Runtime::__EventDispatcherCore::Start()
-0x6EA934A0 Osp::App::__AppExecutable::Run()
-0x6EA9B130 Osp::App::Application::Execute(Osp::App::Application* (*)(), Osp::Base::Collection::IList const*, Osp::App::AppAttributeType)
-0x400538DC [Platform Fns]
-0x4006D300 [Platform Fns]
-0x402070CC [Platform Fns]
+PC: 0x40107084 LR: 0x40286EC5 Stack PTR : 0x09F3D1E4 
+0x9B0C3460 operator delete[](void*)
+0x9B0B367B Osp::Base::String::AllocateCapacity(int)
+0x9B0B367B Osp::Base::String::AllocateCapacity(int)
+0x9B0C3460 operator delete[](void*)
+0x9B0B367B Osp::Base::String::AllocateCapacity(int)
+0x9B0C3460 operator delete[](void*)
+0x9B0C35AF Mem_callocAppEx
+0x976AF9A7 _ZN15ContactListForm17OnActionPerformedERKN3Osp2Ui7Control
+0x976AF9A7 _ZN15ContactListForm17OnActionPerformedERKN3Osp2Ui7Control
+0x9B0C3460 operator delete[](void*)
+0x9B0C0713 Osp::Base::Collection::LinkedList::GetEnumeratorN() const
+0x9B0C0713 Osp::Base::Collection::LinkedList::GetEnumeratorN() const
+0x9B0C3460 operator delete[](void*)
+0x9577A869 Actor_getCurrentIDPi
+0x9B1896D3 _ZN3Osp2Ui13__ActionEvent8FireImplEPNS_4Base7Runtime14IEve
+0x9B0B631D _ZN3Osp4Base7Runtime5Event16ProcessListenersERKNS1_9IEvent
+0x9B0B64FF Osp::Base::Runtime::Event::Fire(Osp::Base::Runtime::IEventArg const&)
+0x9B1B0D25 _ZN3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6NotifyEPvRK
+0x9B1B0D4F _ZN3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6NotifyEPvRK
+0x9B1B0D57 _ZThn4_N3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6Notify
+0x9B1B0D4D _ZN3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6NotifyEPvRK
+0x9B1B0D4F _ZN3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6NotifyEPvRK
+0x9B1B0D57 _ZThn4_N3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6Notify
+0x9B1B0D4D _ZN3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6NotifyEPvRK
+0x9B1B0D4F _ZN3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6NotifyEPvRK
+0x9B1B0D57 _ZThn4_N3Osp2Ui8Controls25__FormSoftkeyEventAdaptor6Notify
+0x9B1B101F Osp::Ui::Controls::__FormEventAdaptor::Draw(void*, WmEvent const&)
+0x9B194E01 Osp::Ui::__WindowEventAdaptor::Notify(void*, WmEvent const&)
+0x9B194E0B non-virtual thunk to Osp::Ui::__WindowEventAdaptor::Notify(void*, WmEvent const&)
+0x9B19174D Osp::Ui::__NotifyEventAdaptor::ProcessScrollPanelEvent

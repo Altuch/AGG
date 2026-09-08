@@ -3,11 +3,6 @@
 
 #include <FBase.h>
 
-// Кодування/декодування полів протоколу MRIM.
-//
-// LPS - рядок у форматі "довжина (4 байти) + байти". Для протоколу 1.8
-// байти завжди CP1251; UCS2-варіант лишається для полів, які сервер
-// може прислати в юнікоді (нікнейми з відповідним прапорцем).
 class MrimUtils {
 public:
     static void AppendUL(Osp::Base::ByteBuffer& buffer, unsigned long value);
@@ -23,7 +18,8 @@ public:
     static void BuildHeader(Osp::Base::ByteBuffer& buffer, unsigned long command, unsigned long dataLen);
     static bool IsValidIpAddress(const Osp::Base::String& ip);
 
-    // Пропускає решту запису за маскою полів ("u" - число, "s" - LPS).
+    static bool IsValidHost(const Osp::Base::String& host);
+
     static void SkipFormattedRecord(Osp::Base::ByteBuffer& buffer, const Osp::Base::String& mask, int startIndex);
 };
 

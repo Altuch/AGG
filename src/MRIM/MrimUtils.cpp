@@ -8,24 +8,24 @@ static mchar Cp1251ByteToUnicode(byte b) {
     if (b < 0x80) return (mchar)b;
     if (b >= 0xC0 && b <= 0xFF) return (mchar)(0x0410 + (b - 0xC0)); // А-Я, а-я
     switch (b) {
-        case 0xA8: return 0x0401; // Ё
-        case 0xB8: return 0x0451; // ё
-        case 0xAA: return 0x0404; // Є
-        case 0xBA: return 0x0454; // є
-        case 0xAF: return 0x0407; // Ї
-        case 0xBF: return 0x0457; // ї
-        case 0xB2: return 0x0406; // І
-        case 0xB3: return 0x0456; // і
-        case 0xA5: return 0x0490; // Ґ
-        case 0xB4: return 0x0491; // ґ
-        case 0xA1: return 0x040E; // Ў
-        case 0xA2: return 0x045E; // ў
-        case 0x90: return 0x0402; // Ђ
-        case 0x93: return 0x201C; // "
-        case 0x94: return 0x201D; // "
-        case 0x96: return 0x2013; // –
-        case 0x97: return 0x2014; // —
-        case 0xA0: return 0x00A0; // non-breaking space
+        case 0xA8: return 0x0401;
+        case 0xB8: return 0x0451;
+        case 0xAA: return 0x0404;
+        case 0xBA: return 0x0454;
+        case 0xAF: return 0x0407;
+        case 0xBF: return 0x0457;
+        case 0xB2: return 0x0406;
+        case 0xB3: return 0x0456;
+        case 0xA5: return 0x0490;
+        case 0xB4: return 0x0491;
+        case 0xA1: return 0x040E;
+        case 0xA2: return 0x045E;
+        case 0x90: return 0x0402;
+        case 0x93: return 0x201C;
+        case 0x94: return 0x201D;
+        case 0x96: return 0x2013;
+        case 0x97: return 0x2014;
+        case 0xA0: return 0x00A0;
         default:   return (mchar)b;
     }
 }
@@ -34,19 +34,19 @@ static byte UnicodeToCp1251Byte(mchar ch) {
     if (ch < 0x80) return (byte)ch;
     if (ch >= 0x0410 && ch <= 0x044F) return (byte)(0xC0 + (ch - 0x0410));
     switch (ch) {
-        case 0x0401: return 0xA8; // Ё
-        case 0x0451: return 0xB8; // ё
-        case 0x0404: return 0xAA; // Є
-        case 0x0454: return 0xBA; // є
-        case 0x0407: return 0xAF; // Ї
-        case 0x0457: return 0xBF; // ї
-        case 0x0406: return 0xB2; // І
-        case 0x0456: return 0xB3; // і
-        case 0x0490: return 0xA5; // Ґ
-        case 0x0491: return 0xB4; // ґ
-        case 0x040E: return 0xA1; // Ў
-        case 0x045E: return 0xA2; // ў
-        case 0x0402: return 0x90; // Ђ
+        case 0x0401: return 0xA8;
+        case 0x0451: return 0xB8;
+        case 0x0404: return 0xAA;
+        case 0x0454: return 0xBA;
+        case 0x0407: return 0xAF;
+        case 0x0457: return 0xBF;
+        case 0x0406: return 0xB2;
+        case 0x0456: return 0xB3;
+        case 0x0490: return 0xA5;
+        case 0x0491: return 0xB4;
+        case 0x040E: return 0xA1;
+        case 0x045E: return 0xA2;
+        case 0x0402: return 0x90;
         case 0x00A0: return 0xA0;
         default:     return '?';
     }
@@ -64,11 +64,11 @@ void MrimUtils::AppendUL(ByteBuffer& buffer, unsigned long value) {
 void MrimUtils::BuildHeader(ByteBuffer& buffer, unsigned long command, unsigned long dataLen) {
     AppendUL(buffer, Mrim::MAGIC);
     AppendUL(buffer, Mrim::PROTO_VERSION);
-    AppendUL(buffer, 0x0000000A); // номер пакета - серверу байдуже
+    AppendUL(buffer, 0x0000000A);
     AppendUL(buffer, command);
     AppendUL(buffer, dataLen);
-    AppendUL(buffer, 0);          // адреса відправника - не використовується
-    AppendUL(buffer, 0);          // порт відправника - не використовується
+    AppendUL(buffer, 0);
+    AppendUL(buffer, 0);
     byte reserved[16] = {0};
     buffer.SetArray(reserved, 0, 16);
 }
@@ -229,4 +229,26 @@ bool MrimUtils::IsValidIpAddress(const String& ip) {
         if (val < 0 || val > 255) return false;
     }
     return true;
+}
+
+bool MrimUtils::IsValidHost(const String& host) {
+    String trimmed = host;
+    trimmed.Trim();
+    if (trimmed.IsEmpty() || trimmed.GetLength() > 253) return false;
+
+    if (IsValidIpAddress(trimmed)) return true;
+
+    int len = trimmed.GetLength();
+    for (int i = 0; i < len; i++) {
+        mchar c;
+        trimmed.GetCharAt(i, c);
+        bool ok = (c >= L'a' && c <= L'z') || (c >= L'A' && c <= L'Z')
+                || (c >= L'0' && c <= L'9') || c == L'.' || c == L'-';
+        if (!ok) return false;
+    }
+
+    mchar first, last;
+    trimmed.GetCharAt(0, first);
+    trimmed.GetCharAt(len - 1, last);
+    return first != L'.' && first != L'-' && last != L'.' && last != L'-';
 }

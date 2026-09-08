@@ -1,26 +1,13 @@
 #ifndef _MRIM_PROTOCOL_H_
 #define _MRIM_PROTOCOL_H_
 
-// Єдине місце для всіх констант протоколу MRIM.
-//
-// Значення звірені з реальним сервером mrimsu/mrim-server
-// (src/servers/mrim/globals.js) та документацією mrimsu/mrim-docs.
-// Раніше ці числа були розкидані шістнадцятковими літералами по
-// шести файлах - через це, наприклад, коди статусів дублювались у
-// трьох місцях і легко розходились.
-
 namespace Mrim {
 
-// --- Заголовок пакета (44 байти) ---
 static const unsigned long MAGIC        = 0xDEADBEEF;
 static const int           HEADER_SIZE  = 44;
 
-// AGG заявляє протокол 1.8. Це НЕ косметика: від версії залежить
-// формат даних на дроті - для <= 1.15 рядки в CP1251 і короткі
-// записи контактів, UTF-16LE з'являється лише з 1.16.
-static const unsigned long PROTO_VERSION = 0x00010008; // 1.8
+static const unsigned long PROTO_VERSION = 0x00010008;
 
-// --- Команди клієнт -> сервер ---
 namespace Cmd {
     static const unsigned long HELLO                  = 0x1001;
     static const unsigned long HELLO_ACK              = 0x1002;
@@ -39,16 +26,11 @@ namespace Cmd {
     static const unsigned long CHANGE_STATUS          = 0x1022;
     static const unsigned long CONTACT_LIST2          = 0x1037;
     static const unsigned long LOGIN2                 = 0x1038;
-    static const unsigned long ANKETA_INFO            = 0x1028; // S->C: результат пошуку/профіль
-    static const unsigned long WP_REQUEST             = 0x1029; // C->S: пошук за анкетою
+    static const unsigned long ANKETA_INFO            = 0x1028;
+    static const unsigned long WP_REQUEST             = 0x1029;
 }
 
-// Пошук анкети (MRIM_CS_WP_REQUEST) і відповідь (MRIM_CS_ANKETA_INFO).
-// Звірено з mrim-server (processors/anketa.js): сервер не вміє
-// РЕДАГУВАТИ ці поля - лише шукати/повертати, тож профіль у AGG
-// показуємо, а не редагуємо.
 namespace Anketa {
-    // Поле пошуку - лише ідентифікатор власного логіна нам і треба.
     namespace SearchField {
         static const unsigned long USER   = 0;
         static const unsigned long DOMAIN = 1;
@@ -57,13 +39,10 @@ namespace Anketa {
         static const unsigned long NO_USER  = 0x0;
         static const unsigned long OK       = 0x1;
         static const unsigned long DB_ERROR = 0x2;
-        static const unsigned long LIMIT    = 0x3; // забагато запитів
+        static const unsigned long LIMIT    = 0x3;
     }
 }
 
-// --- Статуси користувача ---
-// 0x4 (xstatus) сервер приймає лише з протоколу 1.15+, тож AGG його
-// не надсилає - лише розпізнає у чужих статусах.
 namespace Status {
     static const unsigned long OFFLINE   = 0x00000000;
     static const unsigned long ONLINE    = 0x00000001;
@@ -72,7 +51,6 @@ namespace Status {
     static const unsigned long INVISIBLE = 0x80000001;
 }
 
-// --- Прапорці повідомлень ---
 namespace MsgFlag {
     static const unsigned long OFFLINE   = 0x00000001;
     static const unsigned long NORECV    = 0x00000004;
@@ -80,13 +58,12 @@ namespace MsgFlag {
     static const unsigned long SYSTEM    = 0x00000040;
     static const unsigned long RTF       = 0x00000080;
     static const unsigned long CONTACT   = 0x00000200;
-    static const unsigned long TYPING    = 0x00000400; // у сервера зветься NOTIFY
+    static const unsigned long TYPING    = 0x00000400;
     static const unsigned long MULTICAST = 0x00001000;
-    static const unsigned long ALARM     = 0x00004000; // у сервера зветься WAKEUP
+    static const unsigned long ALARM     = 0x00004000;
     static const unsigned long FLASH     = 0x00008000;
 }
 
-// --- Коди доставки (MRIM_CS_MESSAGE_STATUS) ---
 namespace Delivery {
     static const unsigned long SUCCESS          = 0x0000;
     static const unsigned long NO_USER          = 0x8001;
@@ -96,11 +73,10 @@ namespace Delivery {
     static const unsigned long OFFLINE_DISABLED = 0x8006;
 }
 
-// --- Прапорці записів списку контактів ---
 namespace ContactFlag {
     static const unsigned long UNICODE_NICKNAME = 0x00000200;
 }
 
-} // namespace Mrim
+}
 
 #endif

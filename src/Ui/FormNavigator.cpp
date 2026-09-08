@@ -3,6 +3,7 @@
 #include "Ui/ContactListForm.h"
 #include "Ui/ChatForm.h"
 #include "Ui/SettingsForm.h"
+#include "Ui/ProfileForm.h"
 #include <FApp.h>
 
 using namespace Osp::App;
@@ -10,8 +11,8 @@ using namespace Osp::Base;
 using namespace Osp::Ui::Controls;
 
 static Frame* GetFrame(void) {
-	Application* pApp = Application::GetInstance();
-	return (pApp != null && pApp->GetAppFrame() != null) ? pApp->GetAppFrame()->GetFrame() : null;
+    Application* pApp = Application::GetInstance();
+    return (pApp != null && pApp->GetAppFrame() != null) ? pApp->GetAppFrame()->GetFrame() : null;
 }
 
 Form* FormNavigator::GetCurrentForm(void) {
@@ -60,10 +61,23 @@ void FormNavigator::GoToChat(AggConnection* pConnection,
 }
 
 void FormNavigator::GoToSettings(AggConnection* pConnection, Form* pFrom) {
+
     Form* pReturnTo = (pFrom == null) ? GetCurrentForm() : null;
 
     SettingsForm* pForm = new SettingsForm();
     pForm->Initialize(pConnection, pReturnTo);
+    Show(pForm, pFrom);
+}
+
+void FormNavigator::GoToProfile(AggConnection* pConnection,
+                                const String& contactName,
+                                const String& contactEmail,
+                                Form* pFrom) {
+
+    Form* pReturnTo = (pFrom == null) ? GetCurrentForm() : null;
+
+    ProfileForm* pForm = new ProfileForm();
+    pForm->Initialize(pConnection, contactName, contactEmail, pReturnTo);
     Show(pForm, pFrom);
 }
 

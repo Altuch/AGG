@@ -26,7 +26,7 @@ void MrimAuth::SendLogin2(const String& login, const String& password) {
     MrimUtils::AppendLPS(payload, L"STATUS_ONLINE");
     MrimUtils::AppendLPS(payload, L"Онлайн");
     MrimUtils::AppendLPS(payload, L"");
-    MrimUtils::AppendUL(payload, 0x0000FF03); // маска підтримуваних можливостей
+    MrimUtils::AppendUL(payload, 0x0000FF03);
     MrimUtils::AppendLPS(payload, L"client=\"magent\" version=\"5.0\" build=\"2094\"");
     MrimUtils::AppendLPS(payload, L"MRA 5.0 (build 2094);");
     payload.Flip();

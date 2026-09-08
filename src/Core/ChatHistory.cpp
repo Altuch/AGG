@@ -45,7 +45,7 @@ String ChatHistory::LoadRecentAsText(const String& email, int maxLines) {
 
     while (true) {
         String line;
-        if (IsFailed(file.Read(line))) break; // E_END_OF_FILE
+        if (IsFailed(file.Read(line))) break;
 
         line.Trim();
         if (line.IsEmpty()) continue;

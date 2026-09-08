@@ -23,6 +23,7 @@ public:
 
     void SetKnownContacts(Osp::Base::Collection::IList* pContactEmails);
     Osp::Base::Collection::IList* GetStrangerEmails(void) const;
+
     static void SetAppForeground(bool foreground);
 
     virtual void OnMessageReceived(const Osp::Base::String& sender, const Osp::Base::String& text, bool isNudge);

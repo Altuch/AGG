@@ -25,7 +25,8 @@ public:
 };
 
 class AggConnection : public Osp::Net::Sockets::ISocketEventListener,
-                      public Osp::Base::Runtime::ITimerEventListener
+                      public Osp::Base::Runtime::ITimerEventListener,
+                      public Osp::Net::IDnsEventListener
 {
 public:
     AggConnection(void);
@@ -40,7 +41,7 @@ public:
     Osp::Base::String GetNickname(void) const { return userNickname; }
     void SetNickname(const Osp::Base::String& nickname) { userNickname = nickname; }
 
-    result ConnectToServer(const Osp::Base::String& serverIp, int port);
+    result ConnectToServer(const Osp::Base::String& serverHost, int port);
     void SendPacket(unsigned long command, Osp::Base::ByteBuffer& payload);
 
     void SetLoginListener(ILoginListener* pListener) { if (pAuthMgr != null) pAuthMgr->SetListener(pListener); }
@@ -53,7 +54,7 @@ public:
     void SetContactListVisibleListener(IUnreadCountListener* pListener);
 
     void SetProfileListener(IProfileListener* pListener) { if (pProfileMgr != null) pProfileMgr->SetListener(pListener); }
-    void RequestOwnProfile(void) { if (pProfileMgr != null) pProfileMgr->RequestOwnProfile(userLogin); }
+    void RequestProfile(const Osp::Base::String& login) { if (pProfileMgr != null) pProfileMgr->RequestProfileFor(login.IsEmpty() ? userLogin : login); }
 
     void SendMessageTo(const Osp::Base::String& to, const Osp::Base::String& text) { if (pMessageMgr != null) pMessageMgr->SendMessageTo(to, text); }
     void SendNudge(const Osp::Base::String& to) { if (pMessageMgr != null) pMessageMgr->SendNudge(to); }
@@ -77,10 +78,13 @@ public:
 
     virtual void OnTimerExpired(Osp::Base::Runtime::Timer& timer);
 
+    virtual void OnDnsResolutionCompletedN(Osp::Net::IpHostEntry* pIpHostEntry, result r);
+
 private:
     result InitSocket(void);
     void CloseSocket(void);
     void SendHello(void);
+    result ConnectToAddress(const Osp::Net::IpAddress& address, int port);
     void SendPing(void);
 
     void DispatchPacket(unsigned long command, Osp::Base::ByteBuffer& payload);
@@ -91,6 +95,7 @@ private:
     void StopTimers(void);
 
     Osp::Net::Sockets::Socket* pSocket;
+    Osp::Net::Dns* pDns;
     Osp::Base::ByteBuffer* pTxBuffer;
     Osp::Base::ByteBuffer* pRxBuffer;
 
@@ -103,7 +108,7 @@ private:
     Osp::Base::String userPassword;
     Osp::Base::String userNickname;
 
-    Osp::Base::String lastServerIp;
+    Osp::Base::String lastServerHost;
     int lastServerPort;
 
     bool hasLoggedInOnce;

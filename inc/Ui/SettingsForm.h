@@ -22,7 +22,6 @@ public:
 private:
     void Leave(void);
     void ApplyDefaults(void);
-
     bool ReadAndValidate(Osp::Base::String& outIp, int& outPort);
 
     static const int ID_SOFTKEY_BACK = 201;

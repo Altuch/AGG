@@ -160,7 +160,7 @@ void MessageRouter::RememberStranger(const String& email) {
 
     for (int i = 0; i < pStrangerEmails->GetCount(); i++) {
         String* pExisting = static_cast<String*>(pStrangerEmails->GetAt(i));
-        if (pExisting != null && pExisting->Equals(email, true)) return;
+        if (pExisting != null && pExisting->Equals(email, true)) return; // уже знаємо
     }
 
     pStrangerEmails->Add(*(new String(email)));
@@ -244,7 +244,7 @@ void MessageRouter::OnMessageReceived(const String& sender, const String& text, 
     if (cleanSender.IsEmpty()) return;
     if (!isNudge && text.IsEmpty()) return;
 
-    String displayText = isNudge ? String(L"🔔 ВАМ НАДІСЛАНО БУДИЛЬНИК!") : text;
+    String displayText = isNudge ? String(L"ВАМ НАДІСЛАНО БУДИЛЬНИК!") : text;
 
     ChatHistory::Append(cleanSender, cleanSender, displayText);
 

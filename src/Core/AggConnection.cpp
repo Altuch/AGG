@@ -15,7 +15,7 @@ static const int RECONNECT_DELAYS_MSEC[] = { 3000, 6000, 12000, 20000 };
 static const int RECONNECT_DELAY_COUNT = 4;
 
 AggConnection::AggConnection(void) :
-    pSocket(null), pTxBuffer(null), pRxBuffer(null),
+    pSocket(null), pDns(null), pTxBuffer(null), pRxBuffer(null),
     pPingTimer(null), pReconnectTimer(null),
     isPingTimerStarted(false), pingIntervalMsec(0),
     lastServerPort(0),
@@ -35,6 +35,7 @@ AggConnection::~AggConnection(void) {
 
     StopTimers();
     CloseSocket();
+    delete pDns;
 
     delete pTxBuffer;
     delete pRxBuffer;
@@ -141,20 +142,58 @@ result AggConnection::InitSocket(void) {
     return r;
 }
 
-result AggConnection::ConnectToServer(const String& serverIp, int port) {
-    if (!MrimUtils::IsValidIpAddress(serverIp)) return E_INVALID_ARG;
+result AggConnection::ConnectToServer(const String& serverHost, int port) {
+    if (!MrimUtils::IsValidHost(serverHost)) return E_INVALID_ARG;
 
-    lastServerIp = serverIp;
+    lastServerHost = serverHost;
     lastServerPort = port;
 
     isForceLoggedOut = false;
 
+    if (MrimUtils::IsValidIpAddress(serverHost)) {
+        Ip4Address peerAddr(serverHost);
+        return ConnectToAddress(peerAddr, port);
+    }
+
+    delete pDns;
+    pDns = new Dns();
+    result r = pDns->Construct(*this);
+    if (IsFailed(r)) return r;
+
+    return pDns->GetHostByName(serverHost);
+}
+
+result AggConnection::ConnectToAddress(const IpAddress& address, int port) {
     result r = InitSocket();
     if (IsFailed(r)) return r;
 
-    Ip4Address peerAddr(serverIp);
-    NetEndPoint peerEndPoint(peerAddr, port);
+    NetEndPoint peerEndPoint(address, (unsigned short)port);
     return pSocket->Connect(peerEndPoint);
+}
+
+void AggConnection::OnDnsResolutionCompletedN(IpHostEntry* pIpHostEntry, result r) {
+    if (IsFailed(r) || pIpHostEntry == null) {
+        delete pIpHostEntry;
+        AppLog("DNS: не вдалося визначити адресу '%S'.", lastServerHost.GetPointer());
+        if (pAuthMgr != null) pAuthMgr->NotifyLoginFailed(L"Не вдалося визначити адресу сервера.");
+        return;
+    }
+
+    IList* pAddresses = pIpHostEntry->GetAddressList();
+    if (pAddresses == null || pAddresses->GetCount() == 0) {
+        delete pIpHostEntry;
+        AppLog("DNS: жодної адреси для '%S'.", lastServerHost.GetPointer());
+        if (pAuthMgr != null) pAuthMgr->NotifyLoginFailed(L"DNS не повернув жодної адреси сервера.");
+        return;
+    }
+
+    IpAddress* pAddr = static_cast<IpAddress*>(pAddresses->GetAt(0));
+    if (pAddr != null) {
+        AppLog("DNS: '%S' -> %S", lastServerHost.GetPointer(), pAddr->ToString().GetPointer());
+        ConnectToAddress(*pAddr, lastServerPort);
+    }
+
+    delete pIpHostEntry;
 }
 
 void AggConnection::SendPacket(unsigned long command, ByteBuffer& payload) {
@@ -352,9 +391,9 @@ void AggConnection::ScheduleReconnect(void) {
 }
 
 void AggConnection::AttemptReconnect(void) {
-    if (lastServerIp.IsEmpty()) return;
+    if (lastServerHost.IsEmpty()) return;
     AppLog("Спроба перепідключення #%d...", reconnectAttempt);
-    ConnectToServer(lastServerIp, lastServerPort);
+    ConnectToServer(lastServerHost, lastServerPort);
 }
 
 void AggConnection::OnTimerExpired(Timer& timer) {

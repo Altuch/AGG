@@ -12,7 +12,7 @@ void MrimProfile::SetListener(IProfileListener* pListener) {
     this->pListener = pListener;
 }
 
-void MrimProfile::RequestOwnProfile(const Osp::Base::String& login) {
+void MrimProfile::RequestProfileFor(const Osp::Base::String& login) {
     String user = login;
     String domain;
 
@@ -78,6 +78,7 @@ bool MrimProfile::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             else if (name == L"Zodiac") info.zodiac = value;
             else if (name == L"Phone") info.phone = value;
             else if (name == L"Sex") info.sex = value;
+            else if (name == L"mrim_status" || name == L"Status") info.status = value;
         }
     }
 

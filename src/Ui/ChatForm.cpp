@@ -44,8 +44,6 @@ result ChatForm::OnInitializing(void) {
 
     pHistoryArea = static_cast<EditArea*>(GetControl(L"IDC_HISTORY"));
     if (pHistoryArea != null) {
-        // Історія - для читання. У bada 1.x немає ViewMode (це з 2.0),
-        // тож просто не даємо контролу піднімати клавіатуру.
         pHistoryArea->SetKeypadEnabled(false);
     }
 
@@ -62,9 +60,6 @@ result ChatForm::OnTerminating(void) {
 }
 
 void ChatForm::RedrawHistory(void) {
-    // GetParent() != null - форма вже приєднана до Frame. Без цієї
-    // перевірки перемальовування "на льоту" (повідомлення прийшло, поки
-    // екран ще будується) валиться з E_INVALID_OPERATION.
     if (pHistoryArea == null || GetParent() == null) return;
 
     pHistoryArea->RequestRedraw(true);
@@ -75,9 +70,6 @@ void ChatForm::RedrawHistory(void) {
 void ChatForm::LoadHistory(void) {
     if (pHistoryArea == null) return;
 
-    // Один SetText замість сотні AppendText: раніше історія
-    // додавалась порядково, тобто до 200 звернень до контролу на
-    // кожне відкриття чату.
     String text = ChatHistory::LoadRecentAsText(contactEmail, MAX_LOADED_HISTORY_LINES);
     if (!text.IsEmpty()) pHistoryArea->SetText(text);
 }
@@ -92,7 +84,6 @@ void ChatForm::AppendLine(const String& sender, const String& text, bool saveToH
 }
 
 void ChatForm::ShowSystemLine(const String& text) {
-    // Системні попередження ефемерні - в історію не пишемо.
     AppendLine(L"Система", text, false);
 }
 
@@ -100,7 +91,7 @@ void ChatForm::SendNudgeNow(void) {
     if (pConnection == null) return;
 
     pConnection->SendNudge(contactEmail);
-    AppendLine(ChatHistory::SELF_LABEL, L"🔔 Будильник відправлено!", true);
+    AppendLine(ChatHistory::SELF_LABEL, L"Будильник відправлено!", true);
 }
 
 void ChatForm::OnActionPerformed(const Control& source, int actionId) {
@@ -128,7 +119,7 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
             OptionMenu* pMenu = new OptionMenu();
             pMenu->Construct();
             pMenu->AddItem(L"Розбудити", ID_MENU_NUDGE);
-            pMenu->AddItem(L"Інформація про контакт", ID_MENU_INFO);
+            pMenu->AddItem(L"Профіль", ID_MENU_INFO);
             pMenu->AddItem(L"Очистити історію", ID_MENU_CLEAR_HISTORY);
             pMenu->AddActionEventListener(*this);
             pMenu->SetShowState(true);
@@ -142,10 +133,7 @@ void ChatForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_MENU_INFO: {
-            MessageBox infoBox;
-            infoBox.Construct(L"Інформація про контакт", contactName + L"\n" + contactEmail, MSGBOX_STYLE_OK, 0);
-            int modalResult = 0;
-            infoBox.ShowAndWait(modalResult);
+            FormNavigator::GoToProfile(pConnection, contactName, contactEmail, null);
             break;
         }
 
@@ -187,7 +175,7 @@ void ChatForm::OnMessageReceived(const String& sender, const String& text, bool 
         Vibrator vibrator;
         vibrator.Construct();
         vibrator.Start(1000, 100);
-        AppendLine(contactName, L"🔔 ВАМ НАДІСЛАНО БУДИЛЬНИК!", false);
+        AppendLine(contactName, L"ВАМ НАДІСЛАНО БУДИЛЬНИК!", false);
     } else if (!text.IsEmpty()) {
         AppendLine(contactName, text, false);
     }
@@ -196,21 +184,21 @@ void ChatForm::OnMessageReceived(const String& sender, const String& text, bool 
 void ChatForm::OnMessageDeliveryStatus(unsigned long status) {
     switch (status) {
         case Mrim::Delivery::SUCCESS:
-            break; // доставлено - мовчимо
+            break;
         case Mrim::Delivery::NO_USER:
-            ShowSystemLine(L"⚠ Користувача не знайдено на сервері.");
+            ShowSystemLine(L"Користувача не знайдено на сервері.");
             break;
         case Mrim::Delivery::OFFLINE_DISABLED:
-            ShowSystemLine(L"⚠ Отримувач офлайн (повідомлення не доставлено).");
+            ShowSystemLine(L"Отримувач офлайн (повідомлення не доставлено).");
             break;
         case Mrim::Delivery::OFFLINE_LIMIT:
-            ShowSystemLine(L"⚠ Перевищено ліміт офлайн-повідомлень.");
+            ShowSystemLine(L"Перевищено ліміт офлайн-повідомлень.");
             break;
         case Mrim::Delivery::TOO_LARGE:
-            ShowSystemLine(L"⚠ Повідомлення завелике.");
+            ShowSystemLine(L"Повідомлення завелике.");
             break;
         case Mrim::Delivery::INTERNAL_ERROR:
-            ShowSystemLine(L"⚠ Помилка сервера під час доставки.");
+            ShowSystemLine(L"Помилка сервера під час доставки.");
             break;
         default:
             break;

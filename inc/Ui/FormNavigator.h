@@ -15,7 +15,11 @@ public:
                          const Osp::Base::String& contactEmail,
                          Osp::Ui::Controls::Form* pFrom);
     static void GoToSettings(AggConnection* pConnection, Osp::Ui::Controls::Form* pFrom);
-    static void GoToProfile(AggConnection* pConnection, Osp::Ui::Controls::Form* pFrom);
+
+    static void GoToProfile(AggConnection* pConnection,
+                            const Osp::Base::String& contactName,
+                            const Osp::Base::String& contactEmail,
+                            Osp::Ui::Controls::Form* pFrom);
 
     static void Back(Osp::Ui::Controls::Form* pTarget, Osp::Ui::Controls::Form* pFrom);
 

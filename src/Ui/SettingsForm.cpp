@@ -22,11 +22,9 @@ result SettingsForm::OnInitializing(void) {
     pEditIp = static_cast<EditField*>(GetControl(L"IDC_EDIT_IP"));
     pEditPort = static_cast<EditField*>(GetControl(L"IDC_EDIT_PORT"));
 
-    SetSoftkeyText(SOFTKEY_0, L"Назад");
     SetSoftkeyActionId(SOFTKEY_0, ID_SOFTKEY_BACK);
     AddSoftkeyActionListener(SOFTKEY_0, *this);
 
-    SetSoftkeyText(SOFTKEY_1, L"Зберегти");
     SetSoftkeyActionId(SOFTKEY_1, ID_SOFTKEY_SAVE);
     AddSoftkeyActionListener(SOFTKEY_1, *this);
 
@@ -48,9 +46,9 @@ bool SettingsForm::ReadAndValidate(String& outIp, int& outPort) {
     outIp.Trim();
     portStr.Trim();
 
-    if (!MrimUtils::IsValidIpAddress(outIp)) {
+    if (!MrimUtils::IsValidHost(outIp)) {
         MessageBox msgBox;
-        msgBox.Construct(L"Помилка", L"Некоректний формат IP-адреси!\nПриклад: 103.71.21.140", MSGBOX_STYLE_OK);
+        msgBox.Construct(L"Помилка", L"Некоректна адреса сервера!\nПриклад: 103.71.21.140 або mrim.su", MSGBOX_STYLE_OK);
         int modalResult = 0;
         msgBox.ShowAndWait(modalResult);
         return false;
@@ -91,9 +89,6 @@ void SettingsForm::ApplyDefaults(void) {
 
 void SettingsForm::Leave(void) {
     if (pReturnTo != null) {
-        // Форма, з якої прийшли, ще жива під нами - просто повертаємось
-        // до неї. Раніше тут створювалась ЩЕ ОДНА форма входу, і стара
-        // лишалась висіти у Frame назавжди.
         FormNavigator::Back(pReturnTo, this);
         return;
     }

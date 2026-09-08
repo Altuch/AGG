@@ -29,6 +29,7 @@ private:
 
     Osp::Ui::Controls::EditField* pEditEmail;
     Osp::Ui::Controls::EditField* pEditPassword;
+
     AggConnection* pConnection;
 };
 

@@ -20,6 +20,7 @@ public:
     Osp::Base::String zodiac;
     Osp::Base::String phone;
     Osp::Base::String sex;
+    Osp::Base::String status;
 };
 
 class IProfileListener {
@@ -36,7 +37,7 @@ public:
 
     void SetListener(IProfileListener* pListener);
 
-    void RequestOwnProfile(const Osp::Base::String& login);
+    void RequestProfileFor(const Osp::Base::String& login);
 
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
 

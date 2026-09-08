@@ -9,7 +9,7 @@ static const wchar_t* KEY_PASSWORD    = L"UserPassword";
 static const wchar_t* KEY_SERVER_IP   = L"ServerIP";
 static const wchar_t* KEY_SERVER_PORT = L"ServerPort";
 
-static const wchar_t* DEFAULT_IP   = L"103.71.21.140";
+static const wchar_t* DEFAULT_IP   = L"proto.mrim.su";
 static const int      DEFAULT_PORT = 2041;
 
 String AppSettings::GetDefaultServerIp(void) {
