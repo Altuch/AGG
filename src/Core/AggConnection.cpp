@@ -3,6 +3,7 @@
 #include "MRIM/MrimProtocol.h"
 #include "MRIM/MrimUtils.h"
 
+
 using namespace Osp::Base;
 using namespace Osp::Base::Collection;
 using namespace Osp::Base::Runtime;
@@ -341,7 +342,7 @@ void AggConnection::DispatchPacket(unsigned long command, ByteBuffer& payload) {
                 pPingTimer->Start(pingIntervalMsec);
                 isPingTimerStarted = true;
             }
-            if (pAuthMgr != null) pAuthMgr->SendLogin2(userLogin, userPassword);
+            if (pAuthMgr != null) pAuthMgr->SendLogin3(userLogin, userPassword);
             break;
         }
 

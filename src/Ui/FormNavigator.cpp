@@ -45,9 +45,11 @@ void FormNavigator::GoToLogin(AggConnection* pConnection, Form* pFrom) {
 
 void FormNavigator::GoToContactList(AggConnection* pConnection, Form* pFrom) {
     ContactListForm* pForm = new ContactListForm();
-    pForm->Initialize(pConnection);
+    if (IsFailed(pForm->Initialize(pConnection))) {
+        delete pForm;
+        return;
+    }
     Show(pForm, pFrom);
-
     pForm->ScheduleAttachContactListener();
 }
 

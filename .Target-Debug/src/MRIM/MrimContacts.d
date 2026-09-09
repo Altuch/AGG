@@ -195,6 +195,67 @@ src/MRIM/MrimContacts.d src/MRIM/MrimContacts.o: \
  C:/bada/2.0.6/Include/FNetNfcITagConnectionListener.h \
  C:/bada/2.0.6/Include/FNetNfcINdefTagConnectionListener.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h \
+ C:/bada/2.0.6/Include/FSecurity.h \
+ C:/bada/2.0.6/Include/FSecAesSecureRandom.h \
+ C:/bada/2.0.6/Include/FSecISecureRandom.h \
+ C:/bada/2.0.6/Include/FSecConfig.h \
+ C:/bada/2.0.6/Include/FSecDesEdeSecureRandom.h \
+ C:/bada/2.0.6/Include/FSecDesSecureRandom.h \
+ C:/bada/2.0.6/Include/FSecIKey.h \
+ C:/bada/2.0.6/Include/FSecIKeyPairGenerator.h \
+ C:/bada/2.0.6/Include/FSecKeyPair.h \
+ C:/bada/2.0.6/Include/FSecIPublicKey.h \
+ C:/bada/2.0.6/Include/FSecIPrivateKey.h \
+ C:/bada/2.0.6/Include/FSecISecretKey.h \
+ C:/bada/2.0.6/Include/FSecISecretKeyGenerator.h \
+ C:/bada/2.0.6/Include/FSecKeyPairGenerator.h \
+ C:/bada/2.0.6/Include/FSecIKeyParameters.h \
+ C:/bada/2.0.6/Include/FSecCryptoTypes.h \
+ C:/bada/2.0.6/Include/FSecPrivateKey.h \
+ C:/bada/2.0.6/Include/FSecPublicKey.h \
+ C:/bada/2.0.6/Include/FSecSecretKey.h \
+ C:/bada/2.0.6/Include/FSecSecretKeyGenerator.h \
+ C:/bada/2.0.6/Include/FSecCryptoIKeyExchange.h \
+ C:/bada/2.0.6/Include/FSecCryptoKeaKeyExchange.h \
+ C:/bada/2.0.6/Include/FSecCryptoDhKeyExchange.h \
+ C:/bada/2.0.6/Include/FSecKeaKeyParameters.h \
+ C:/bada/2.0.6/Include/FSecDhKeyParameters.h \
+ C:/bada/2.0.6/Include/FSecCrypto.h \
+ C:/bada/2.0.6/Include/FSecCryptoAesCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoISymmetricCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoDesCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoDesEdeCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoRc2Cipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoRc4Cipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoRc5Cipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoCastCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoSkipJackCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoIAsymmetricCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoIHash.h \
+ C:/bada/2.0.6/Include/FSecCryptoIHmac.h \
+ C:/bada/2.0.6/Include/FSecCryptoISignature.h \
+ C:/bada/2.0.6/Include/FSecCryptoMd5Hash.h \
+ C:/bada/2.0.6/Include/FSecCryptoMd5Hmac.h \
+ C:/bada/2.0.6/Include/FSecCryptoRsaCipher.h \
+ C:/bada/2.0.6/Include/FSecCryptoRsaSignature.h \
+ C:/bada/2.0.6/Include/FSecCryptoSha1Hash.h \
+ C:/bada/2.0.6/Include/FSecCryptoSha1Hmac.h \
+ C:/bada/2.0.6/Include/FSecCryptoSha2Hash.h \
+ C:/bada/2.0.6/Include/FSecCryptoSha2Hmac.h \
+ C:/bada/2.0.6/Include/FSecCert.h \
+ C:/bada/2.0.6/Include/FSecCertICertificate.h \
+ C:/bada/2.0.6/Include/FSecCertICertificatePath.h \
+ C:/bada/2.0.6/Include/FSecCertICertificatePathValidationParameter.h \
+ C:/bada/2.0.6/Include/FSecCertTypes.h \
+ C:/bada/2.0.6/Include/FSecCertICertificateSelector.h \
+ C:/bada/2.0.6/Include/FSecCertICertificateStore.h \
+ C:/bada/2.0.6/Include/FSecCertX509Certificate.h \
+ C:/bada/2.0.6/Include/FSecCertX509CertificatePath.h \
+ C:/bada/2.0.6/Include/FSecCertX509CertificatePathValidationParameter.h \
+ C:/bada/2.0.6/Include/FSecCertX509CertificateSelector.h \
+ C:/bada/2.0.6/Include/FSecCertX509CertificateStore.h \
+ C:/bada/2.0.6/Include/FSecIdentity.h \
+ C:/bada/2.0.6/Include/FSecIdentityInfo.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h
 
@@ -621,6 +682,128 @@ C:/bada/2.0.6/Include/FNetNfcITagConnectionListener.h:
 C:/bada/2.0.6/Include/FNetNfcINdefTagConnectionListener.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h:
+
+C:/bada/2.0.6/Include/FSecurity.h:
+
+C:/bada/2.0.6/Include/FSecAesSecureRandom.h:
+
+C:/bada/2.0.6/Include/FSecISecureRandom.h:
+
+C:/bada/2.0.6/Include/FSecConfig.h:
+
+C:/bada/2.0.6/Include/FSecDesEdeSecureRandom.h:
+
+C:/bada/2.0.6/Include/FSecDesSecureRandom.h:
+
+C:/bada/2.0.6/Include/FSecIKey.h:
+
+C:/bada/2.0.6/Include/FSecIKeyPairGenerator.h:
+
+C:/bada/2.0.6/Include/FSecKeyPair.h:
+
+C:/bada/2.0.6/Include/FSecIPublicKey.h:
+
+C:/bada/2.0.6/Include/FSecIPrivateKey.h:
+
+C:/bada/2.0.6/Include/FSecISecretKey.h:
+
+C:/bada/2.0.6/Include/FSecISecretKeyGenerator.h:
+
+C:/bada/2.0.6/Include/FSecKeyPairGenerator.h:
+
+C:/bada/2.0.6/Include/FSecIKeyParameters.h:
+
+C:/bada/2.0.6/Include/FSecCryptoTypes.h:
+
+C:/bada/2.0.6/Include/FSecPrivateKey.h:
+
+C:/bada/2.0.6/Include/FSecPublicKey.h:
+
+C:/bada/2.0.6/Include/FSecSecretKey.h:
+
+C:/bada/2.0.6/Include/FSecSecretKeyGenerator.h:
+
+C:/bada/2.0.6/Include/FSecCryptoIKeyExchange.h:
+
+C:/bada/2.0.6/Include/FSecCryptoKeaKeyExchange.h:
+
+C:/bada/2.0.6/Include/FSecCryptoDhKeyExchange.h:
+
+C:/bada/2.0.6/Include/FSecKeaKeyParameters.h:
+
+C:/bada/2.0.6/Include/FSecDhKeyParameters.h:
+
+C:/bada/2.0.6/Include/FSecCrypto.h:
+
+C:/bada/2.0.6/Include/FSecCryptoAesCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoISymmetricCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoDesCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoDesEdeCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoRc2Cipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoRc4Cipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoRc5Cipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoCastCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoSkipJackCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoIAsymmetricCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoIHash.h:
+
+C:/bada/2.0.6/Include/FSecCryptoIHmac.h:
+
+C:/bada/2.0.6/Include/FSecCryptoISignature.h:
+
+C:/bada/2.0.6/Include/FSecCryptoMd5Hash.h:
+
+C:/bada/2.0.6/Include/FSecCryptoMd5Hmac.h:
+
+C:/bada/2.0.6/Include/FSecCryptoRsaCipher.h:
+
+C:/bada/2.0.6/Include/FSecCryptoRsaSignature.h:
+
+C:/bada/2.0.6/Include/FSecCryptoSha1Hash.h:
+
+C:/bada/2.0.6/Include/FSecCryptoSha1Hmac.h:
+
+C:/bada/2.0.6/Include/FSecCryptoSha2Hash.h:
+
+C:/bada/2.0.6/Include/FSecCryptoSha2Hmac.h:
+
+C:/bada/2.0.6/Include/FSecCert.h:
+
+C:/bada/2.0.6/Include/FSecCertICertificate.h:
+
+C:/bada/2.0.6/Include/FSecCertICertificatePath.h:
+
+C:/bada/2.0.6/Include/FSecCertICertificatePathValidationParameter.h:
+
+C:/bada/2.0.6/Include/FSecCertTypes.h:
+
+C:/bada/2.0.6/Include/FSecCertICertificateSelector.h:
+
+C:/bada/2.0.6/Include/FSecCertICertificateStore.h:
+
+C:/bada/2.0.6/Include/FSecCertX509Certificate.h:
+
+C:/bada/2.0.6/Include/FSecCertX509CertificatePath.h:
+
+C:/bada/2.0.6/Include/FSecCertX509CertificatePathValidationParameter.h:
+
+C:/bada/2.0.6/Include/FSecCertX509CertificateSelector.h:
+
+C:/bada/2.0.6/Include/FSecCertX509CertificateStore.h:
+
+C:/bada/2.0.6/Include/FSecIdentity.h:
+
+C:/bada/2.0.6/Include/FSecIdentityInfo.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 

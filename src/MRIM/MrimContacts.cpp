@@ -31,11 +31,8 @@ void MrimContacts::ClearCache(void) {
 
 void MrimContacts::SetListener(IContactListListener* pListener) {
     this->pListener = pListener;
-
-    if (this->pListener != null && pCachedGroups != null && pCachedContacts != null) {
-        AppLog("MrimContacts: Відновлюємо список контактів з кешу напряму!");
+    if (this->pListener != null && pCachedGroups != null && pCachedContacts != null)
         this->pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
-    }
 }
 
 bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
@@ -44,10 +41,8 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             while (payload.GetRemaining() >= 8) {
                 String key = MrimUtils::ReadLPS(payload);
                 String val = MrimUtils::ReadLPS(payload);
-                if (key == L"MRIM.NICKNAME") {
+                if (key == L"MRIM.NICKNAME")
                     pConnection->SetNickname(val);
-                    AppLog("Знайдено нікнейм: %S", val.GetPointer());
-                }
             }
             return true;
         }
@@ -59,20 +54,45 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             ParseUserStatus(payload);
             return true;
         }
+        case Mrim::Cmd::ADD_CONTACT_ACK: {
+            ParseAddContactAck(payload);
+            return true;
+        }
+        case Mrim::Cmd::MODIFY_CONTACT_ACK: {
+            unsigned long err = MrimUtils::ReadUL(payload);
+            if (err == Mrim::ContactError::SUCCESS && pListener != null && pCachedGroups != null)
+                pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+            return true;
+        }
+        case Mrim::Cmd::AUTHORIZE_ACK: {
+            String email = MrimUtils::ReadLPS(payload);
+            if (pCachedContacts != null) {
+                for (int i = 0; i < pCachedContacts->GetCount(); i++) {
+                    ContactInfo* p = static_cast<ContactInfo*>(pCachedContacts->GetAt(i));
+                    if (p == null) continue;
+                    String e = p->email; e.ToLower();
+                    String eq = email;   eq.ToLower();
+                    if (e.Equals(eq, true)) { p->flags |= Mrim::ContactFlag::AUTHORIZED; break; }
+                }
+                if (pListener != null)
+                    pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+            }
+            return true;
+        }
     }
     return false;
 }
 
 void MrimContacts::ParseUserStatus(ByteBuffer& payload) {
     unsigned long status = MrimUtils::ReadUL(payload);
-    String str1 = MrimUtils::ReadLPS(payload);
+    String first = MrimUtils::ReadLPS(payload);
 
     String email;
-    int atIndex = -1;
-    str1.IndexOf(L"@", 0, atIndex);
+    int atIdx = -1;
+    first.IndexOf(L'@', 0, atIdx);
 
-    if (atIndex >= 0) {
-        email = str1;
+    if (atIdx >= 0) {
+        email = first;
     } else {
         MrimUtils::ReadLPS(payload);
         MrimUtils::ReadLPS(payload);
@@ -85,78 +105,64 @@ void MrimContacts::ParseUserStatus(ByteBuffer& payload) {
     email.ToLower();
     if (email.IsEmpty() || pCachedContacts == null) return;
 
-    AppLog("MrimContacts: Контакт %S змінив статус на 0x%X", email.GetPointer(), status);
-
     for (int i = 0; i < pCachedContacts->GetCount(); i++) {
-        ContactInfo* pContact = static_cast<ContactInfo*>(pCachedContacts->GetAt(i));
-        if (pContact == null) continue;
-
-        String cEmail = pContact->email;
-        cEmail.Trim();
-        cEmail.ToLower();
-
-        if (cEmail.Equals(email, true)) {
-            pContact->status = status;
-            break;
-        }
+        ContactInfo* p = static_cast<ContactInfo*>(pCachedContacts->GetAt(i));
+        if (p == null) continue;
+        String e = p->email; e.Trim(); e.ToLower();
+        if (e.Equals(email, true)) { p->status = status; break; }
     }
 
-    if (pListener != null) {
+    if (pListener != null)
         pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
-    }
 }
 
 void MrimContacts::ParseContactList2(ByteBuffer& payload) {
-    unsigned long errorCode = MrimUtils::ReadUL(payload);
-    if (errorCode != 0) return;
+    if (MrimUtils::ReadUL(payload) != 0) return;
 
     ClearCache();
-
-    pCachedGroups = new ArrayList();
-    pCachedGroups->Construct();
-
-    pCachedContacts = new ArrayList();
-    pCachedContacts->Construct();
+    pCachedGroups   = new ArrayList(); pCachedGroups->Construct();
+    pCachedContacts = new ArrayList(); pCachedContacts->Construct();
 
     unsigned long groupsCount = MrimUtils::ReadUL(payload);
-    String groupMask = MrimUtils::ReadLPS(payload);
+    String groupMask   = MrimUtils::ReadLPS(payload);
     String contactMask = MrimUtils::ReadLPS(payload);
-    int contactMaskLen = contactMask.GetLength();
+    int cmLen = contactMask.GetLength();
 
-    for (unsigned long i = 0; i < groupsCount; i++) {
+    for (unsigned long i = 0; i < groupsCount && i < 20; i++) {
         if (payload.GetRemaining() < 8) break;
         GroupInfo* pGroup = new GroupInfo();
         pGroup->flags = MrimUtils::ReadUL(payload);
-        pGroup->name = (pGroup->flags & Mrim::ContactFlag::UNICODE_NICKNAME)
-                     ? MrimUtils::ReadLPSUcs2(payload)
-                     : MrimUtils::ReadLPS(payload);
+        pGroup->name  = (pGroup->flags & Mrim::ContactFlag::UNICODE_NICKNAME)
+                        ? MrimUtils::ReadLPSUcs2(payload)
+                        : MrimUtils::ReadLPS(payload);
         MrimUtils::SkipFormattedRecord(payload, groupMask, 2);
         pCachedGroups->Add(*pGroup);
     }
 
     while (payload.GetRemaining() >= 8) {
         ContactInfo* pContact = new ContactInfo();
-        pContact->flags = MrimUtils::ReadUL(payload);
-        pContact->groupId = MrimUtils::ReadUL(payload);
-        pContact->email = MrimUtils::ReadLPS(payload); // CP1251
-        pContact->nickname = (pContact->flags & Mrim::ContactFlag::UNICODE_NICKNAME)
-                            ? MrimUtils::ReadLPSUcs2(payload)
-                            : MrimUtils::ReadLPS(payload);
 
+        pContact->flags   = MrimUtils::ReadUL(payload);
+        pContact->groupId = MrimUtils::ReadUL(payload);
+        pContact->email   = MrimUtils::ReadLPS(payload);
+        pContact->nickname = (pContact->flags & Mrim::ContactFlag::UNICODE_NICKNAME)
+                             ? MrimUtils::ReadLPSUcs2(payload)
+                             : MrimUtils::ReadLPS(payload);
         MrimUtils::ReadUL(payload);
         pContact->status = MrimUtils::ReadUL(payload);
 
-        if (contactMaskLen >= 7) {
+        if (cmLen >= 7)
             MrimUtils::ReadLPS(payload);
-        }
-        if (contactMaskLen >= 12) {
+
+        if (cmLen >= 12) {
             MrimUtils::ReadLPS(payload);
             MrimUtils::ReadLPS(payload);
             MrimUtils::ReadLPS(payload);
             MrimUtils::ReadUL(payload);
             MrimUtils::ReadLPS(payload);
         }
-        if (contactMaskLen >= 19) {
+
+        if (cmLen >= 18) {
             MrimUtils::ReadUL(payload);
             MrimUtils::ReadUL(payload);
             MrimUtils::ReadUL(payload);
@@ -165,12 +171,66 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
             MrimUtils::ReadLPS(payload);
         }
 
-        MrimUtils::SkipFormattedRecord(payload, contactMask, 19);
-
+        MrimUtils::SkipFormattedRecord(payload, contactMask, 18);
         pCachedContacts->Add(*pContact);
     }
 
-    if (this->pListener != null) {
-        this->pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
-    }
+    if (pListener != null)
+        pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+}
+
+void MrimContacts::ParseAddContactAck(ByteBuffer& payload) {
+    unsigned long err = MrimUtils::ReadUL(payload);
+    MrimUtils::ReadUL(payload);
+    if (err == Mrim::ContactError::SUCCESS && pListener != null && pCachedGroups != null)
+        pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+}
+
+void MrimContacts::SendAddContact(const String& email, const String& nickname, unsigned long groupIdx) {
+    ByteBuffer payload;
+    payload.Construct(256);
+    MrimUtils::AppendUL(payload, 0x00000000);
+    MrimUtils::AppendUL(payload, groupIdx);
+    MrimUtils::AppendLPS(payload, email);
+    MrimUtils::AppendLPS(payload, nickname.IsEmpty() ? email : nickname);
+    MrimUtils::AppendLPS(payload, L"");
+    MrimUtils::AppendLPS(payload, L"");
+    payload.Flip();
+    pConnection->SendPacket(Mrim::Cmd::ADD_CONTACT, payload);
+}
+
+void MrimContacts::SendAddGroup(const String& name) {
+    ByteBuffer payload;
+    payload.Construct(128);
+    MrimUtils::AppendUL(payload, Mrim::ContactFlag::FL_GROUP);
+    MrimUtils::AppendUL(payload, 0);
+    MrimUtils::AppendLPS(payload, name);
+    MrimUtils::AppendLPS(payload, L"");
+    MrimUtils::AppendLPS(payload, L"");
+    MrimUtils::AppendLPS(payload, L"");
+    payload.Flip();
+    pConnection->SendPacket(Mrim::Cmd::ADD_CONTACT, payload);
+}
+
+void MrimContacts::SendModifyContact(unsigned long contactIdx, const String& email,
+                                     const String& nickname, unsigned long groupIdx,
+                                     unsigned long flags) {
+    ByteBuffer payload;
+    payload.Construct(256);
+    MrimUtils::AppendUL(payload, contactIdx);
+    MrimUtils::AppendUL(payload, flags);
+    MrimUtils::AppendUL(payload, groupIdx);
+    MrimUtils::AppendLPS(payload, email);
+    MrimUtils::AppendLPS(payload, nickname);
+    MrimUtils::AppendLPS(payload, L"");
+    payload.Flip();
+    pConnection->SendPacket(Mrim::Cmd::MODIFY_CONTACT, payload);
+}
+
+void MrimContacts::SendAuthorize(const String& email) {
+    ByteBuffer payload;
+    payload.Construct(128);
+    MrimUtils::AppendLPS(payload, email);
+    payload.Flip();
+    pConnection->SendPacket(Mrim::Cmd::AUTHORIZE, payload);
 }

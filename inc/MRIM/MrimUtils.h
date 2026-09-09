@@ -10,6 +10,8 @@ public:
     static void AppendLPS(Osp::Base::ByteBuffer& buffer, const Osp::Base::String& text);
     static Osp::Base::String ReadLPS(Osp::Base::ByteBuffer& buffer);
 
+    static void AppendRawBytes(Osp::Base::ByteBuffer& buffer, const byte* data, int len);
+
     static void AppendLPSUcs2(Osp::Base::ByteBuffer& buffer, const Osp::Base::String& text);
     static Osp::Base::String ReadLPSUcs2(Osp::Base::ByteBuffer& buffer);
 

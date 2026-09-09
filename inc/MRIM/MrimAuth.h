@@ -2,6 +2,7 @@
 #define _MRIM_AUTH_H_
 
 #include <FBase.h>
+#include <FSecurity.h>
 
 class AggConnection;
 
@@ -18,11 +19,13 @@ public:
     virtual ~MrimAuth(void);
 
     void SetListener(ILoginListener* pListener);
-    void SendLogin2(const Osp::Base::String& login, const Osp::Base::String& password);
+    void SendLogin3(const Osp::Base::String& login, const Osp::Base::String& password);
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
     void NotifyLoginFailed(const Osp::Base::String& reason);
 
 private:
+    static bool ComputeMd5(const Osp::Base::String& password, byte digest[16]);
+
     AggConnection* pConnection;
     ILoginListener* pListener;
 };

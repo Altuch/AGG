@@ -40,6 +40,13 @@ public:
     void SetListener(IContactListListener* pListener);
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
 
+    // Contact management (C -> S)
+    void SendAddContact(const Osp::Base::String& email, const Osp::Base::String& nickname, unsigned long groupIdx);
+    void SendAddGroup(const Osp::Base::String& name);
+    void SendModifyContact(unsigned long contactIdx, const Osp::Base::String& email,
+                           const Osp::Base::String& nickname, unsigned long groupIdx, unsigned long flags);
+    void SendAuthorize(const Osp::Base::String& email);
+
 private:
     AggConnection* pConnection;
     IContactListListener* pListener;
@@ -49,6 +56,7 @@ private:
 
     void ParseContactList2(Osp::Base::ByteBuffer& payload);
     void ParseUserStatus(Osp::Base::ByteBuffer& payload);
+    void ParseAddContactAck(Osp::Base::ByteBuffer& payload);
     void ClearCache(void);
 };
 

@@ -6,7 +6,7 @@ namespace Mrim {
 static const unsigned long MAGIC        = 0xDEADBEEF;
 static const int           HEADER_SIZE  = 44;
 
-static const unsigned long PROTO_VERSION = 0x00010008;
+static const unsigned long PROTO_VERSION = 0x00010016; // minor=22: server treats LOGIN3 password as final MD5 hash
 
 namespace Cmd {
     static const unsigned long HELLO                  = 0x1001;
@@ -21,11 +21,18 @@ namespace Cmd {
     static const unsigned long MESSAGE_STATUS         = 0x1012;
     static const unsigned long LOGOUT                 = 0x1013;
     static const unsigned long USER_INFO              = 0x1015;
+    static const unsigned long ADD_CONTACT            = 0x1019;
+    static const unsigned long ADD_CONTACT_ACK        = 0x101A;
+    static const unsigned long MODIFY_CONTACT         = 0x101B;
+    static const unsigned long MODIFY_CONTACT_ACK     = 0x101C;
+    static const unsigned long AUTHORIZE              = 0x1020;
+    static const unsigned long AUTHORIZE_ACK          = 0x1021;
+    static const unsigned long CHANGE_STATUS          = 0x1022;
     static const unsigned long OFFLINE_MESSAGE_ACK    = 0x101D;
     static const unsigned long OFFLINE_MESSAGE_DELETE = 0x101E;
-    static const unsigned long CHANGE_STATUS          = 0x1022;
     static const unsigned long CONTACT_LIST2          = 0x1037;
     static const unsigned long LOGIN2                 = 0x1038;
+    static const unsigned long LOGIN3                 = 0x1078;
     static const unsigned long ANKETA_INFO            = 0x1028;
     static const unsigned long WP_REQUEST             = 0x1029;
 }
@@ -74,7 +81,27 @@ namespace Delivery {
 }
 
 namespace ContactFlag {
-    static const unsigned long UNICODE_NICKNAME = 0x00000200;
+    static const unsigned long INVISIBLE_ALWAYS  = 0x00000004; // "always invisible for"
+    static const unsigned long VISIBLE_ALWAYS    = 0x00000008; // "always visible for"
+    static const unsigned long IGNORED           = 0x00000010; // in ignore list
+    static const unsigned long AUTHORIZED        = 0x00000040; // authorized (rarely used)
+    static const unsigned long CONFERENCE        = 0x00000080; // conference (not in Renaissance)
+    static const unsigned long UNICODE_NICKNAME  = 0x00000200; // nickname in Unicode
+    static const unsigned long PHONE             = 0x00100000; // contact is a phone number
+    // ADD_CONTACT request flags
+    static const unsigned long FL_DELETE         = 0x00000001;
+    static const unsigned long FL_GROUP          = 0x00000002;
+    static const unsigned long FL_NOT_IN_LIST    = 0x00000020;
+}
+
+namespace ContactError {
+    static const unsigned long SUCCESS           = 0x0;
+    static const unsigned long FAILURE           = 0x1;
+    static const unsigned long INTERNAL_ERROR    = 0x2;
+    static const unsigned long NO_SUCH_USER      = 0x3;
+    static const unsigned long INVALID_DATA      = 0x4;
+    static const unsigned long ALREADY_EXISTS    = 0x5;
+    static const unsigned long GROUP_LIMIT       = 0x6;
 }
 
 }

@@ -88,6 +88,13 @@ void MrimUtils::AppendLPS(ByteBuffer& buffer, const String& text) {
     }
 }
 
+void MrimUtils::AppendRawBytes(ByteBuffer& buffer, const byte* data, int len) {
+    AppendUL(buffer, (unsigned long)len);
+    if (len > 0 && data != null) {
+        buffer.SetArray(data, 0, len);
+    }
+}
+
 void MrimUtils::AppendLPSUcs2(ByteBuffer& buffer, const String& text) {
     int strLen = text.GetLength();
     if (strLen == 0) {
