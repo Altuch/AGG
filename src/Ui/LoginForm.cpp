@@ -1,6 +1,7 @@
 #include "Ui/LoginForm.h"
 #include "Ui/FormNavigator.h"
 #include "Core/AppSettings.h"
+#include "MRIM/MrimUtils.h"
 #include "AGG.h"
 
 using namespace Osp::Base;
@@ -70,7 +71,10 @@ void LoginForm::OnActionPerformed(const Control& source, int actionId) {
 
             String email = (pEditEmail != null) ? pEditEmail->GetText() : String(L"");
             String password = (pEditPassword != null) ? pEditPassword->GetText() : String(L"");
-            email.Trim();
+            // Email is case-insensitive on mail.ru; the server DB is not.
+            // Lowercase it so "User@Mail.Ru" logs in as "user@mail.ru".
+            // Password stays case-sensitive — trim only.
+            email = MrimUtils::NormalizeEmail(email);
             password.Trim();
 
             if (email.IsEmpty() || password.IsEmpty()) {
@@ -110,14 +114,21 @@ void LoginForm::OnActionPerformed(const Control& source, int actionId) {
 }
 
 void LoginForm::OnLoginSuccess(void) {
-    AppLog("Успішний вхід! Переходимо на список контактів...");
-
     AggConnection* pConn = pConnection;
     pConn->SetLoginListener(null);
 
     pConnection = null;
 
-    FormNavigator::GoToContactList(pConn, this);
+    // App was killed, user tapped a notification and logged in manually:
+    // the pending sender survived in a file — open that chat directly.
+    String pending = pConn->ConsumePendingNotificationSender();
+    if (!pending.IsEmpty()) {
+        AppLog("Успішний вхід! Відкриваємо чат з %S...", pending.GetPointer());
+        FormNavigator::GoToChat(pConn, L"", pending, this);
+    } else {
+        AppLog("Успішний вхід! Переходимо на список контактів...");
+        FormNavigator::GoToContactList(pConn, this);
+    }
 }
 
 void LoginForm::OnLoginFailed(const String& reason) {

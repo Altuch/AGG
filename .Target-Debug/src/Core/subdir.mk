@@ -6,18 +6,21 @@
 CPP_SRCS += \
 ../src/Core/AggConnection.cpp \
 ../src/Core/AppSettings.cpp \
+../src/Core/AvatarLoader.cpp \
 ../src/Core/ChatHistory.cpp \
 ../src/Core/MessageRouter.cpp 
 
 OBJS += \
 ./src/Core/AggConnection.o \
 ./src/Core/AppSettings.o \
+./src/Core/AvatarLoader.o \
 ./src/Core/ChatHistory.o \
 ./src/Core/MessageRouter.o 
 
 CPP_DEPS += \
 ./src/Core/AggConnection.d \
 ./src/Core/AppSettings.d \
+./src/Core/AvatarLoader.d \
 ./src/Core/ChatHistory.d \
 ./src/Core/MessageRouter.d 
 

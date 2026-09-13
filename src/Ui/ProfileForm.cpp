@@ -1,6 +1,6 @@
 #include "Ui/ProfileForm.h"
 #include "Ui/FormNavigator.h"
-#include "MRIM/MrimProtocol.h"
+#include "Core/AppSettings.h"
 #include <FApp.h>
 
 using namespace Osp::App;
@@ -12,19 +12,20 @@ using namespace Osp::Ui::Controls;
 
 ProfileForm::ProfileForm(void) :
     pConnection(null), pList(null), pIdentityFormat(null), pFieldFormat(null),
-    pBitmapOnline(null), pBitmapAway(null), pBitmapBusy(null), pBitmapOffline(null),
+    pAvatarBitmap(null), pAvatarLoader(null),
     pReturnTo(null), hasProfile(false), isNotFound(false) {}
 
 ProfileForm::~ProfileForm(void) {
     if (pConnection != null) pConnection->SetProfileListener(null);
 
+    delete pAvatarLoader;
+    pAvatarLoader = null;
+
+    delete pAvatarBitmap;
+    pAvatarBitmap = null;
+
     delete pIdentityFormat;
     delete pFieldFormat;
-
-    delete pBitmapOnline;
-    delete pBitmapAway;
-    delete pBitmapBusy;
-    delete pBitmapOffline;
 }
 
 result ProfileForm::Initialize(AggConnection* pConn,
@@ -85,22 +86,49 @@ result ProfileForm::OnInitializing(void) {
             Osp::Graphics::Color(255, 255, 255)
         );
 
-    AppResource* pRes = Application::GetInstance()->GetAppResource();
-    if (pRes != null) {
-        pBitmapOnline  = pRes->GetBitmapN(L"Statuses/Online.png");
-        pBitmapAway    = pRes->GetBitmapN(L"Statuses/Away.png");
-        pBitmapBusy    = pRes->GetBitmapN(L"Statuses/Busy.png");
-        pBitmapOffline = pRes->GetBitmapN(L"Statuses/Offline.png");
-    }
-
     if (pConnection != null) {
         pConnection->SetProfileListener(this);
         pConnection->RequestProfile(contactEmail);
     }
 
+    RequestAvatar();
+
     SchedulePopulate();
 
     return E_SUCCESS;
+}
+
+void ProfileForm::RequestAvatar(void) {
+    String email = GetDisplayEmail();
+    if (email.IsEmpty()) return;
+
+    delete pAvatarLoader;
+    pAvatarLoader = new AvatarLoader();
+    pAvatarLoader->SetListener(this);
+
+    result r = pAvatarLoader->RequestAvatar(AppSettings::GetAvatarHost(),
+                                            AppSettings::GetAvatarPort(),
+                                            email,
+                                            String(AvatarLoader::TYPE_AVATAR));
+    if (IsFailed(r)) {
+        delete pAvatarLoader;
+        pAvatarLoader = null;
+    }
+}
+
+void ProfileForm::OnAvatarLoaded(const String& email, Bitmap* pBitmap) {
+    if (pBitmap == null) return;
+    if (!email.Equals(GetDisplayEmail(), true)) {
+        delete pBitmap;
+        return;
+    }
+
+    delete pAvatarBitmap;
+    pAvatarBitmap = pBitmap;
+    SchedulePopulate();
+}
+
+void ProfileForm::OnAvatarFailed(const String& email) {
 }
 
 result ProfileForm::OnTerminating(void) {
@@ -138,19 +166,7 @@ String ProfileForm::GetDisplayEmail(void) const {
 }
 
 const Bitmap* ProfileForm::GetAvatarBitmap(void) const {
-    if (!profile.status.IsEmpty()) {
-        int status = 0;
-        if (!IsFailed(Integer::Parse(profile.status, status))) {
-            if (status == (int)Mrim::Status::AWAY) return pBitmapAway;
-            if (status == (int)Mrim::Status::XSTATUS) return pBitmapBusy;
-            if (status == (int)Mrim::Status::OFFLINE) return pBitmapOffline;
-            return pBitmapOnline;
-        }
-    }
-
-    if (contactEmail.IsEmpty()) return pBitmapOnline;
-
-    return null;
+    return pAvatarBitmap;
 }
 
 

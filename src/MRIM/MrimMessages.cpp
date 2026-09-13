@@ -15,23 +15,24 @@ void MrimMessages::SetListener(IMessageListener* pListener) {
 }
 
 static void BuildMessagePayload(ByteBuffer& payload,
-                                unsigned long flags,
-                                const String& to,
-                                const String& text) {
-    String cleanTo = to;
-    cleanTo.Trim();
-    cleanTo.ToLower();
+                                 unsigned long flags,
+                                 const String& to,
+                                 const String& text) {
+    String cleanTo = MrimUtils::NormalizeEmail(to);
 
     MrimUtils::AppendUL(payload, flags);
     MrimUtils::AppendLPS(payload, cleanTo);
-    MrimUtils::AppendLPS(payload, text);
+    // Renaissance with utf16capable=true (always for LOGIN3 / proto 1.22)
+    // reads `message` as UNICODE_STRING (UTF-16LE). CP1251 here garbles
+    // every Cyrillic message (and even-length ASCII is misdecoded).
+    MrimUtils::AppendLPSUcs2(payload, text);
     MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
 }
 
 void MrimMessages::SendMessageTo(const String& to, const String& text) {
     ByteBuffer payload;
-    payload.Construct(2048);
+    payload.Construct(8192);
     BuildMessagePayload(payload, 0, to, text);
     pConnection->SendPacket(Mrim::Cmd::MESSAGE, payload);
 }
@@ -45,15 +46,13 @@ void MrimMessages::SendNudge(const String& to) {
 
 void MrimMessages::SendTyping(const String& to) {
     ByteBuffer payload;
-    payload.Construct(512);
+    payload.Construct(1024);
     BuildMessagePayload(payload, Mrim::MsgFlag::TYPING | Mrim::MsgFlag::NORECV, to, L" ");
     pConnection->SendPacket(Mrim::Cmd::MESSAGE, payload);
 }
 
 void MrimMessages::SendMessageRecv(const String& from, unsigned long msgId) {
-    String cleanFrom = from;
-    cleanFrom.Trim();
-    cleanFrom.ToLower();
+    String cleanFrom = MrimUtils::NormalizeEmail(from);
 
     ByteBuffer payload;
     payload.Construct(1024);
@@ -85,8 +84,11 @@ bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             String sender;
             if (payload.GetRemaining() >= 4) sender = MrimUtils::ReadLPS(payload);
 
+            // Server writes `message` as UNICODE_STRING in UTF-16LE when the
+            // addressee is utf16capable (true for our LOGIN3 session).
+            // ReadLPS (CP1251) here produced mojibake for all Cyrillic text.
             String text;
-            if (payload.GetRemaining() >= 4) text = MrimUtils::ReadLPS(payload);
+            if (payload.GetRemaining() >= 4) text = MrimUtils::ReadLPSUcs2(payload);
 
             if (flags & Mrim::MsgFlag::TYPING) {
                 if (pListener != null) pListener->OnTypingReceived(sender);
@@ -134,10 +136,10 @@ void MrimMessages::HandleOfflineMessageEnvelope(const String& envelope) {
 
     String sender;
     int fromPos = -1;
-    envelope.IndexOf(L"From: ", 0, fromPos);
+    if (!MrimUtils::SafeIndexOf(envelope, String(L"From: "), 0, fromPos)) return;
     if (fromPos >= 0 && fromPos < envLen) {
         int lineEnd = -1;
-        envelope.IndexOf(L"\r\n", fromPos, lineEnd);
+        MrimUtils::SafeIndexOf(envelope, String(L"\r\n"), fromPos, lineEnd);
 
         int start = fromPos + 6;
         if (start >= 0 && start <= envLen && lineEnd > start && lineEnd <= envLen) {
@@ -148,7 +150,7 @@ void MrimMessages::HandleOfflineMessageEnvelope(const String& envelope) {
     if (sender.IsEmpty()) return;
 
     int bodyStart = -1;
-    envelope.IndexOf(L"\r\n\r\n", 0, bodyStart);
+    if (!MrimUtils::SafeIndexOf(envelope, String(L"\r\n\r\n"), 0, bodyStart)) return;
     if (bodyStart < 0) return;
 
     bodyStart += 4;

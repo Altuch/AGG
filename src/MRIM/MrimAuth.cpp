@@ -21,38 +21,23 @@ bool MrimAuth::ComputeMd5(const String& password, byte digest[16]) {
     int strLen = password.GetLength();
 
     ByteBuffer inputBuf;
-    if (IsFailed(inputBuf.Construct(strLen > 0 ? strLen : 1))) {
+    if (IsFailed(inputBuf.Construct(strLen > 0 ? strLen * 3 + 1 : 1))) {
         return false;
     }
 
     for (int i = 0; i < strLen; i++) {
         mchar ch;
         password.GetCharAt(i, ch);
-        byte b;
         if (ch < 0x80) {
-            b = (byte)ch;
-        } else if (ch >= 0x0410 && ch <= 0x044F) {
-            b = (byte)(0xC0 + (ch - 0x0410));
+            inputBuf.SetByte((byte)ch);
+        } else if (ch < 0x800) {
+            inputBuf.SetByte((byte)(0xC0 | (ch >> 6)));
+            inputBuf.SetByte((byte)(0x80 | (ch & 0x3F)));
         } else {
-            switch (ch) {
-                case 0x0401: b = 0xA8; break;
-                case 0x0451: b = 0xB8; break;
-                case 0x0404: b = 0xAA; break;
-                case 0x0454: b = 0xBA; break;
-                case 0x0407: b = 0xAF; break;
-                case 0x0457: b = 0xBF; break;
-                case 0x0406: b = 0xB2; break;
-                case 0x0456: b = 0xB3; break;
-                case 0x0490: b = 0xA5; break;
-                case 0x0491: b = 0xB4; break;
-                case 0x040E: b = 0xA1; break;
-                case 0x045E: b = 0xA2; break;
-                case 0x0402: b = 0x90; break;
-                case 0x00A0: b = 0xA0; break;
-                default:     b = '?';  break;
-            }
+            inputBuf.SetByte((byte)(0xE0 | (ch >> 12)));
+            inputBuf.SetByte((byte)(0x80 | ((ch >> 6) & 0x3F)));
+            inputBuf.SetByte((byte)(0x80 | (ch & 0x3F)));
         }
-        inputBuf.SetByte(b);
     }
     inputBuf.Flip();
 
@@ -79,7 +64,7 @@ void MrimAuth::SendLogin3(const String& login, const String& password) {
     }
 
     ByteBuffer payload;
-    payload.Construct(512);
+    payload.Construct(1024);
 
     MrimUtils::AppendLPS(payload, login);
     MrimUtils::AppendRawBytes(payload, md5Digest, 16);
@@ -99,6 +84,12 @@ bool MrimAuth::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     switch (command) {
         case Mrim::Cmd::LOGIN_ACK: {
             if (pConnection != null) pConnection->NotifyLoggedIn();
+            // Renaissance processLoginThree (LOGIN3 path), unlike processLogin
+            // (LOGIN2 path), never broadcasts our presence to contacts after
+            // login — nobody learns we went offline->online until we change
+            // status manually. Original MRA announces itself, so do it here
+            // (also re-announces after every reconnect, same LOGIN_ACK flow).
+            if (pConnection != null) pConnection->ChangeStatus(Mrim::Status::ONLINE);
             if (pListener != null) pListener->OnLoginSuccess();
             return true;
         }

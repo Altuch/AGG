@@ -5,11 +5,13 @@
 #include <FBase.h>
 #include <FGraphics.h>
 #include "Core/AggConnection.h"
+#include "Core/AvatarLoader.h"
 #include "MRIM/MrimProfile.h"
 
 class ProfileForm : public Osp::Ui::Controls::Form,
                      public Osp::Ui::IActionEventListener,
-                     public IProfileListener
+                     public IProfileListener,
+                     public IAvatarListener
 {
 public:
     ProfileForm(void);
@@ -28,6 +30,9 @@ public:
     virtual void OnProfileReceived(const ProfileInfo& info);
     virtual void OnProfileNotFound(void);
 
+    virtual void OnAvatarLoaded(const Osp::Base::String& email, Osp::Graphics::Bitmap* pBitmap);
+    virtual void OnAvatarFailed(const Osp::Base::String& email);
+
 private:
     void SchedulePopulate(void);
     void PopulateList(void);
@@ -42,6 +47,7 @@ private:
     Osp::Base::String GetDisplayName(void) const;
     Osp::Base::String GetDisplayEmail(void) const;
     const Osp::Graphics::Bitmap* GetAvatarBitmap(void) const;
+    void RequestAvatar(void);
     void Leave(void);
 
     static const int ID_SOFTKEY_BACK = 401;
@@ -64,10 +70,8 @@ private:
     Osp::Ui::Controls::CustomListItemFormat* pIdentityFormat;
     Osp::Ui::Controls::CustomListItemFormat* pFieldFormat;
 
-    Osp::Graphics::Bitmap* pBitmapOnline;
-    Osp::Graphics::Bitmap* pBitmapAway;
-    Osp::Graphics::Bitmap* pBitmapBusy;
-    Osp::Graphics::Bitmap* pBitmapOffline;
+    Osp::Graphics::Bitmap* pAvatarBitmap;
+    AvatarLoader* pAvatarLoader;
 
     Osp::Base::String contactName;
     Osp::Base::String contactEmail;

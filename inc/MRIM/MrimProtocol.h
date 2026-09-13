@@ -6,7 +6,7 @@ namespace Mrim {
 static const unsigned long MAGIC        = 0xDEADBEEF;
 static const int           HEADER_SIZE  = 44;
 
-static const unsigned long PROTO_VERSION = 0x00010016; // minor=22: server treats LOGIN3 password as final MD5 hash
+static const unsigned long PROTO_VERSION = 0x00010016;
 
 namespace Cmd {
     static const unsigned long HELLO                  = 0x1001;
@@ -51,11 +51,22 @@ namespace Anketa {
 }
 
 namespace Status {
+    // Full set for MRIM 1.22 (Renaissance src/servers/mrim/globals.js).
+    // NOTE: there is no separate DND/BUSY — custom "busy" states are
+    // XSTATUS (0x4) with xstatusType/Title/Description attached.
+    // INVISIBLE (0x80000001) is shown to others as OFFLINE, unless they
+    // are in the contact's ALWAYS_VISIBLE list.
     static const unsigned long OFFLINE   = 0x00000000;
     static const unsigned long ONLINE    = 0x00000001;
     static const unsigned long AWAY      = 0x00000002;
     static const unsigned long XSTATUS   = 0x00000004;
     static const unsigned long INVISIBLE = 0x80000001;
+}
+
+// Feature flags advertised in LOGIN3 and CHANGE_STATUS (xstatus features).
+// Must stay in sync with MrimAuth::SendLogin3 (0x7FF).
+namespace Features {
+    static const unsigned long DEFAULT = 0x000007FF;
 }
 
 namespace MsgFlag {

@@ -62,6 +62,7 @@ String ChatHistory::LoadRecentAsText(const String& email, int maxLines) {
         String& line = ring[(start + i) % maxLines];
 
         int tabPos = -1;
+        if (line.IsEmpty()) continue;
         line.IndexOf(L"\t", 0, tabPos);
         if (tabPos < 0) continue;
 

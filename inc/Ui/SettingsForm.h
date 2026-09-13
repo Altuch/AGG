@@ -22,7 +22,8 @@ public:
 private:
     void Leave(void);
     void ApplyDefaults(void);
-    bool ReadAndValidate(Osp::Base::String& outIp, int& outPort);
+    bool ReadAndValidate(Osp::Base::String& outIp, int& outPort,
+                         Osp::Base::String& outAvatarIp, int& outAvatarPort);
 
     static const int ID_SOFTKEY_BACK = 201;
     static const int ID_SOFTKEY_SAVE = 202;
@@ -30,6 +31,8 @@ private:
 
     Osp::Ui::Controls::EditField* pEditIp;
     Osp::Ui::Controls::EditField* pEditPort;
+    Osp::Ui::Controls::EditField* pEditAvatarIp;
+    Osp::Ui::Controls::EditField* pEditAvatarPort;
 
     AggConnection* pConnection;
     Osp::Ui::Controls::Form* pReturnTo;

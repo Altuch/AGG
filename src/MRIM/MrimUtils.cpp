@@ -136,7 +136,7 @@ String MrimUtils::ReadLPS(ByteBuffer& buffer) {
 String MrimUtils::ReadLPSUcs2(ByteBuffer& buffer) {
     if (buffer.GetRemaining() < 4) return String(L"");
     unsigned long len = ReadUL(buffer);
-    if (len == 0 || len > 8192 || (unsigned long)buffer.GetRemaining() < len) return String(L"");
+    if (len == 0 || len > 20000 || (unsigned long)buffer.GetRemaining() < len) return String(L"");
 
     byte* strBytes = new byte[len];
     buffer.GetArray(strBytes, 0, len);
@@ -196,18 +196,47 @@ String MrimUtils::Base64DecodeUtf16LEToString(const String& base64Text) {
 
 void MrimUtils::SkipFormattedRecord(ByteBuffer& buffer, const String& mask, int startIndex) {
     int maskLen = mask.GetLength();
+    if (maskLen <= 0 || startIndex < 0 || startIndex >= maskLen) return;
     for (int i = startIndex; i < maskLen; i++) {
+        if (buffer.GetRemaining() < 4) return;
         mchar c;
         mask.GetCharAt(i, c);
         if (c == L's') {
             unsigned long len = ReadUL(buffer);
-            if (len > 0 && (unsigned long)buffer.GetRemaining() >= len) {
+            if (len > 0 && len <= 20000 && (unsigned long)buffer.GetRemaining() >= len) {
                 buffer.SetPosition(buffer.GetPosition() + len);
+            } else if (len != 0) {
+                return;
             }
         } else {
             ReadUL(buffer);
         }
     }
+}
+
+bool MrimUtils::SafeIndexOf(const String& text, const String& pattern, int startIndex, int& pos) {
+    pos = -1;
+    if (text.IsEmpty() || pattern.IsEmpty()) return false;
+    int textLen = text.GetLength();
+    if (startIndex < 0 || startIndex >= textLen) return false;
+    text.IndexOf(pattern, startIndex, pos);
+    return pos >= 0;
+}
+
+bool MrimUtils::SafeIndexOfChar(const String& text, mchar ch, int& pos) {
+    pos = -1;
+    if (text.IsEmpty()) return false;
+    String pattern;
+    pattern.Append(ch);
+    text.IndexOf(pattern, 0, pos);
+    return pos >= 0;
+}
+
+String MrimUtils::NormalizeEmail(const String& email) {
+    String clean = email;
+    clean.Trim();
+    clean.ToLower();
+    return clean;
 }
 
 

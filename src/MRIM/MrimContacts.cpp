@@ -40,7 +40,7 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
         case Mrim::Cmd::USER_INFO: {
             while (payload.GetRemaining() >= 8) {
                 String key = MrimUtils::ReadLPS(payload);
-                String val = MrimUtils::ReadLPS(payload);
+                String val = MrimUtils::ReadLPSUcs2(payload);
                 if (key == L"MRIM.NICKNAME")
                     pConnection->SetNickname(val);
             }
@@ -84,21 +84,48 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
 }
 
 void MrimContacts::ParseUserStatus(ByteBuffer& payload) {
+    if (payload.GetRemaining() < 4) return;
     unsigned long status = MrimUtils::ReadUL(payload);
-    String first = MrimUtils::ReadLPS(payload);
 
+    int afterStatus = payload.GetPosition();
+    String xstatusType;
+    String xTitle;
+    String xDesc;
     String email;
-    int atIdx = -1;
-    first.IndexOf(L'@', 0, atIdx);
+    bool isExtended = false;
 
-    if (atIdx >= 0) {
-        email = first;
-    } else {
-        MrimUtils::ReadLPS(payload);
-        MrimUtils::ReadLPS(payload);
+    if (payload.GetRemaining() >= 4) {
+        int before = payload.GetPosition();
+        xstatusType = MrimUtils::ReadLPS(payload);
+        int titlePos = payload.GetPosition();
+        xTitle = MrimUtils::ReadLPSUcs2(payload);
+        if (payload.GetPosition() == titlePos && payload.GetRemaining() < 4) {
+            payload.SetPosition(before);
+        } else {
+            xDesc = MrimUtils::ReadLPSUcs2(payload);
+            if (payload.GetRemaining() >= 4) {
+                String candidate = MrimUtils::ReadLPS(payload);
+                int atIdx = -1;
+                if (!candidate.IsEmpty()
+                    && MrimUtils::SafeIndexOfChar(candidate, L'@', atIdx)
+                    && atIdx >= 0) {
+                    email = candidate;
+                    isExtended = true;
+                    if (payload.GetRemaining() >= 4) MrimUtils::ReadUL(payload);
+                    if (payload.GetRemaining() >= 4) MrimUtils::ReadLPS(payload);
+                } else {
+                    payload.SetPosition(afterStatus);
+                }
+            } else {
+                payload.SetPosition(afterStatus);
+            }
+        }
+    }
+
+    if (!isExtended) {
+        payload.SetPosition(afterStatus);
+        if (payload.GetRemaining() < 4) return;
         email = MrimUtils::ReadLPS(payload);
-        MrimUtils::ReadUL(payload);
-        MrimUtils::ReadLPS(payload);
     }
 
     email.Trim();
@@ -151,24 +178,37 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
         MrimUtils::ReadUL(payload);
         pContact->status = MrimUtils::ReadUL(payload);
 
+        bool isUnicode = ((pContact->flags & Mrim::ContactFlag::UNICODE_NICKNAME) != 0);
+
         if (cmLen >= 7)
             MrimUtils::ReadLPS(payload);
 
         if (cmLen >= 12) {
             MrimUtils::ReadLPS(payload);
-            MrimUtils::ReadLPS(payload);
-            MrimUtils::ReadLPS(payload);
+            if (isUnicode) {
+                MrimUtils::ReadLPSUcs2(payload);
+                MrimUtils::ReadLPSUcs2(payload); 
+            } else {
+                MrimUtils::ReadLPS(payload);
+                MrimUtils::ReadLPS(payload);
+            }
             MrimUtils::ReadUL(payload);
-            MrimUtils::ReadLPS(payload);
+            MrimUtils::ReadLPS(payload); 
         }
 
         if (cmLen >= 18) {
             MrimUtils::ReadUL(payload);
+            MrimUtils::ReadUL(payload); 
             MrimUtils::ReadUL(payload);
-            MrimUtils::ReadUL(payload);
-            MrimUtils::ReadLPS(payload);
-            MrimUtils::ReadLPS(payload);
-            MrimUtils::ReadLPS(payload);
+            if (isUnicode) {
+                MrimUtils::ReadLPSUcs2(payload);
+                MrimUtils::ReadLPSUcs2(payload);
+                MrimUtils::ReadLPSUcs2(payload);
+            } else {
+                MrimUtils::ReadLPS(payload);
+                MrimUtils::ReadLPS(payload);
+                MrimUtils::ReadLPS(payload);
+            }
         }
 
         MrimUtils::SkipFormattedRecord(payload, contactMask, 18);
@@ -187,13 +227,16 @@ void MrimContacts::ParseAddContactAck(ByteBuffer& payload) {
 }
 
 void MrimContacts::SendAddContact(const String& email, const String& nickname, unsigned long groupIdx) {
+    // Nickname keeps its case; only the address is normalized.
+    String cleanEmail = MrimUtils::NormalizeEmail(email);
+    if (cleanEmail.IsEmpty()) return;
     ByteBuffer payload;
-    payload.Construct(256);
+    payload.Construct(1024);
     MrimUtils::AppendUL(payload, 0x00000000);
     MrimUtils::AppendUL(payload, groupIdx);
-    MrimUtils::AppendLPS(payload, email);
-    MrimUtils::AppendLPS(payload, nickname.IsEmpty() ? email : nickname);
-    MrimUtils::AppendLPS(payload, L"");
+    MrimUtils::AppendLPS(payload, cleanEmail);
+    MrimUtils::AppendLPSUcs2(payload, nickname.IsEmpty() ? cleanEmail : nickname);
+    MrimUtils::AppendUL(payload, 0);
     MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
     pConnection->SendPacket(Mrim::Cmd::ADD_CONTACT, payload);
@@ -215,22 +258,26 @@ void MrimContacts::SendAddGroup(const String& name) {
 void MrimContacts::SendModifyContact(unsigned long contactIdx, const String& email,
                                      const String& nickname, unsigned long groupIdx,
                                      unsigned long flags) {
+    String cleanEmail = MrimUtils::NormalizeEmail(email);
+    if (cleanEmail.IsEmpty()) return;
     ByteBuffer payload;
-    payload.Construct(256);
+    payload.Construct(1024);
     MrimUtils::AppendUL(payload, contactIdx);
     MrimUtils::AppendUL(payload, flags);
     MrimUtils::AppendUL(payload, groupIdx);
-    MrimUtils::AppendLPS(payload, email);
-    MrimUtils::AppendLPS(payload, nickname);
+    MrimUtils::AppendLPS(payload, cleanEmail);
+    MrimUtils::AppendLPSUcs2(payload, nickname); 
     MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
     pConnection->SendPacket(Mrim::Cmd::MODIFY_CONTACT, payload);
 }
 
 void MrimContacts::SendAuthorize(const String& email) {
+    String cleanEmail = MrimUtils::NormalizeEmail(email);
+    if (cleanEmail.IsEmpty()) return;
     ByteBuffer payload;
     payload.Construct(128);
-    MrimUtils::AppendLPS(payload, email);
+    MrimUtils::AppendLPS(payload, cleanEmail);
     payload.Flip();
     pConnection->SendPacket(Mrim::Cmd::AUTHORIZE, payload);
 }

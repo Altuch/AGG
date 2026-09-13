@@ -19,6 +19,7 @@ ContactListForm::ContactListForm(void) :
     pSavedGroups(null),
     pSavedContacts(null),
     strangersGroupIndex(-1),
+    hasCheckedPendingChat(false),
     pBitmapOnline(null),
     pBitmapAway(null),
     pBitmapBusy(null),
@@ -194,10 +195,41 @@ void ContactListForm::OnContactListReceived(IList* pGroups, IList* pContacts) {
     }
 
     PublishKnownContacts();
+
+    // Autologin after an app kill: a tapped notification's sender survived
+    // in a file and was loaded by the router before the first contact list.
+    // Open that chat directly, once — later lists just refresh in place.
+    if (!hasCheckedPendingChat) {
+        hasCheckedPendingChat = true;
+        if (pConnection != null) {
+            String pending = pConnection->ConsumePendingNotificationSender();
+            if (!pending.IsEmpty() && !pConnection->IsActiveChatWith(pending)) {
+                String name = pending;
+                for (int i = 0; i < pSavedContacts->GetCount(); i++) {
+                    ContactInfo* pContact = static_cast<ContactInfo*>(pSavedContacts->GetAt(i));
+                    if (pContact == null) continue;
+                    String e = pContact->email;
+                    if (!e.IsEmpty() && e.Equals(pending, true) && !pContact->nickname.IsEmpty()) {
+                        name = pContact->nickname;
+                        break;
+                    }
+                }
+                AggConnection* pConn = pConnection;
+                DetachListeners();
+                FormNavigator::GoToChat(pConn, name, pending, this);
+                return;
+            }
+        }
+    }
+
     SchedulePopulate();
 }
 
 const Bitmap* ContactListForm::GetStatusBitmap(unsigned long status) const {
+    // MRIM 1.22 set (Renaissance globals.js): 0 offline, 1 online,
+    // 2 away, 4 xstatus ("busy"), 0x80000001 invisible.
+    // Invisible contacts arrive as OFFLINE (server converts), except for
+    // ALWAYS_VISIBLE watchers who see 0x80000001 — both show offline icon.
     if (status == Mrim::Status::OFFLINE || status == Mrim::Status::INVISIBLE) return pBitmapOffline;
     if (status == Mrim::Status::AWAY) return pBitmapAway;
     if (status == Mrim::Status::XSTATUS) return pBitmapBusy;
@@ -351,6 +383,7 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
 
             pStatusContextMenu->AddItem(L"Онлайн", ID_STATUS_ONLINE);
             pStatusContextMenu->AddItem(L"Відійшов", ID_STATUS_AWAY);
+            pStatusContextMenu->AddItem(L"Зайнятий", ID_STATUS_BUSY);
             pStatusContextMenu->AddItem(L"Невидимка", ID_STATUS_INVISIBLE);
 
             pStatusContextMenu->SetShowState(true);
@@ -367,6 +400,12 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
         case ID_STATUS_AWAY:
             myStatus = Mrim::Status::AWAY;
             if (pConnection != null) pConnection->ChangeStatus(Mrim::Status::AWAY);
+            SchedulePopulate();
+            break;
+
+        case ID_STATUS_BUSY:
+            myStatus = Mrim::Status::XSTATUS;
+            if (pConnection != null) pConnection->ChangeStatus(Mrim::Status::XSTATUS);
             SchedulePopulate();
             break;
 
@@ -396,6 +435,7 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
             AppSettings::ClearCredentials();
 
             AggConnection* pConn = pConnection;
+            if (pConn != null) pConn->ConsumePendingNotificationSender();
             DetachListeners();
 
             FormNavigator::GoToLogin(pConn, this);

@@ -17,7 +17,7 @@ void MrimProfile::RequestProfileFor(const Osp::Base::String& login) {
     String domain;
 
     int atPos = -1;
-    login.IndexOf(L"@", 0, atPos);
+    if (!login.IsEmpty()) login.IndexOf(L"@", 0, atPos);
     if (atPos >= 0) {
         login.SubString(0, atPos, user);
         login.SubString(atPos + 1, domain);
@@ -58,16 +58,21 @@ bool MrimProfile::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     if (fieldCount > 32) fieldCount = 32;
     String fieldNames[32];
     for (unsigned long i = 0; i < fieldCount; i++) {
-        fieldNames[i] = MrimUtils::ReadLPS(payload);
+        fieldNames[i] = MrimUtils::ReadLPS(payload); 
     }
 
     ProfileInfo info;
     for (unsigned long row = 0; row < rowCount; row++) {
         for (unsigned long i = 0; i < fieldCount; i++) {
-            String value = MrimUtils::ReadLPS(payload);
+            const String& name = fieldNames[i];
+            bool isAsciiField = (name == L"Username" || name == L"Domain"
+                || name == L"Phone" || name == L"Birthday" || name == L"Zodiac"
+                || name == L"Sex" || name == L"mrim_status" || name == L"Status");
+            String value = isAsciiField
+                ? MrimUtils::ReadLPS(payload)
+                : MrimUtils::ReadLPSUcs2(payload);
             if (row != 0) continue;
 
-            const String& name = fieldNames[i];
             if (name == L"Username") info.username = value;
             else if (name == L"Nickname") info.nickname = value;
             else if (name == L"Domain") info.domain = value;

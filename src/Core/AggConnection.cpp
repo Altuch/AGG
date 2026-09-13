@@ -53,10 +53,10 @@ result AggConnection::Construct(void) {
     pActiveInstance = this;
 
     pTxBuffer = new ByteBuffer();
-    pTxBuffer->Construct(4096);
+    pTxBuffer->Construct(16384);
 
     pRxBuffer = new ByteBuffer();
-    pRxBuffer->Construct(8192);
+    pRxBuffer->Construct(65536);
 
     result r = InitSocket();
     if (IsFailed(r)) return r;
@@ -91,7 +91,8 @@ void AggConnection::Reset(void) {
 }
 
 void AggConnection::SetCredentials(const String& login, const String& password) {
-    userLogin = login;
+    // Defensive: login normalized even for autologin with old saved data.
+    userLogin = MrimUtils::NormalizeEmail(login);
     userPassword = password;
 }
 
@@ -117,6 +118,18 @@ void AggConnection::SetKnownContactEmails(IList* pEmails) {
 
 IList* AggConnection::GetStrangerEmails(void) const {
     return (pMessageRouter != null) ? pMessageRouter->GetStrangerEmails() : null;
+}
+
+String AggConnection::PeekPendingNotificationSender(void) const {
+    return (pMessageRouter != null) ? pMessageRouter->PeekPendingNotificationSender() : String(L"");
+}
+
+String AggConnection::ConsumePendingNotificationSender(void) {
+    return (pMessageRouter != null) ? pMessageRouter->ConsumePendingNotificationSender() : String(L"");
+}
+
+bool AggConnection::IsActiveChatWith(const String& email) const {
+    return (pMessageRouter != null) ? pMessageRouter->IsActiveChatWith(email) : false;
 }
 
 void AggConnection::CloseSocket(void) {
@@ -227,9 +240,24 @@ void AggConnection::SendPing(void) {
 }
 
 void AggConnection::ChangeStatus(unsigned long status) {
+    ChangeXStatus(status, L"", L"", L"");
+}
+
+void AggConnection::ChangeXStatus(unsigned long status, const String& xstatusType,
+                                  const String& xstatusTitle,
+                                  const String& xstatusDescription) {
+    // MRIM >= 1.15 (we are 1.22) expects the full MrimChangeXStatusRequest:
+    //   UL status, LPS xstatusType (CP1251), UNICODE title (UTF-16LE),
+    //   UNICODE description (UTF-16LE), UL features.
+    // Old code sent only the 4-byte UL: the server tolerated it (missing
+    // fields default to ""/0) but never learned our features/xstatus.
     ByteBuffer payload;
-    payload.Construct(16);
+    payload.Construct(1024);
     MrimUtils::AppendUL(payload, status);
+    MrimUtils::AppendLPS(payload, xstatusType);
+    MrimUtils::AppendLPSUcs2(payload, xstatusTitle);
+    MrimUtils::AppendLPSUcs2(payload, xstatusDescription);
+    MrimUtils::AppendUL(payload, Mrim::Features::DEFAULT);
     payload.Flip();
     SendPacket(Mrim::Cmd::CHANGE_STATUS, payload);
 }
@@ -276,7 +304,13 @@ void AggConnection::OnSocketReadyToReceive(Socket& socket) {
     if (IsFailed(socket.Receive(chunk)) || chunk.GetPosition() == 0) return;
     chunk.Flip();
 
-    pRxBuffer->SetArray(chunk.GetPointer(), 0, chunk.GetLimit());
+    result r = pRxBuffer->SetArray(chunk.GetPointer(), 0, chunk.GetLimit());
+    if (IsFailed(r)) {
+        // Buffer full and nothing consumable: reset to avoid deadlock
+        // (was 8K truncation -> desync -> disconnect after login).
+        pRxBuffer->Clear();
+        return;
+    }
     pRxBuffer->Flip();
 
     ProcessInbox();

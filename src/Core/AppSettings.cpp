@@ -8,6 +8,8 @@ static const wchar_t* KEY_EMAIL       = L"UserEmail";
 static const wchar_t* KEY_PASSWORD    = L"UserPassword";
 static const wchar_t* KEY_SERVER_IP   = L"ServerIP";
 static const wchar_t* KEY_SERVER_PORT = L"ServerPort";
+static const wchar_t* KEY_AVATAR_HOST = L"AvatarHost";
+static const wchar_t* KEY_AVATAR_PORT = L"AvatarPort";
 
 static const wchar_t* DEFAULT_IP   = L"proto.mrim.su";
 static const int      DEFAULT_PORT = 2041;
@@ -95,4 +97,23 @@ int AppSettings::GetServerPort(void) {
 void AppSettings::SaveServer(const String& ip, int port) {
     Put(KEY_SERVER_IP, ip);
     Put(KEY_SERVER_PORT, Integer::ToString(port));
+}
+
+String AppSettings::GetAvatarHost(void) {
+    return Get(KEY_AVATAR_HOST, GetServerIp());
+}
+
+int AppSettings::GetAvatarPort(void) {
+    String portStr = Get(KEY_AVATAR_PORT, L"");
+    if (portStr.IsEmpty()) return 8081;
+
+    int port = 8081;
+    if (IsFailed(Integer::Parse(portStr, port))) return 8081;
+    if (port <= 0 || port > 65535) return 8081;
+    return port;
+}
+
+void AppSettings::SaveAvatarServer(const String& host, int port) {
+    Put(KEY_AVATAR_HOST, host);
+    Put(KEY_AVATAR_PORT, Integer::ToString(port));
 }

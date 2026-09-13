@@ -16,6 +16,10 @@ public:
     static int GetServerPort(void);
     static void SaveServer(const Osp::Base::String& ip, int port);
 
+    static Osp::Base::String GetAvatarHost(void);
+    static int GetAvatarPort(void);
+    static void SaveAvatarServer(const Osp::Base::String& host, int port);
+
     static Osp::Base::String GetDefaultServerIp(void);
     static int GetDefaultServerPort(void);
 

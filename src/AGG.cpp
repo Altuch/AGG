@@ -65,6 +65,23 @@ void AGG::OnForcedLogout(void) {
 void AGG::OnForeground(void) {
     MessageRouter::SetAppForeground(true);
     AggConnection::NotifyAppForegroundState(true);
+
+    // bada 1.0 notifications carry no payload — tapping one only
+    // foregrounds the app. The router remembers which contact the last
+    // notification came from, so open that chat instead of the list.
+    AggConnection* pConn = AggConnection::GetActive();
+    if (pConn == null || pConn->GetLogin().IsEmpty()) return;
+
+    String sender = pConn->PeekPendingNotificationSender();
+    if (sender.IsEmpty()) return;
+
+    if (pConn->IsActiveChatWith(sender)) {
+        pConn->ConsumePendingNotificationSender();
+        return;
+    }
+
+    pConn->ConsumePendingNotificationSender();
+    FormNavigator::GoToChat(pConn, L"", sender, FormNavigator::GetCurrentForm());
 }
 
 void AGG::OnBackground(void) {

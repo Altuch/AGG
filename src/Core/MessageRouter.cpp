@@ -1,5 +1,6 @@
 #include "Core/MessageRouter.h"
 #include "Core/ChatHistory.h"
+#include "MRIM/MrimUtils.h"
 #include <FIo.h>
 #include <FApp.h>
 
@@ -11,6 +12,7 @@ using namespace Osp::Io;
 bool MessageRouter::isAppInForeground = true;
 
 static const wchar_t* STRANGERS_FILE = L"/Home/strangers.dat";
+static const wchar_t* PENDING_NOTI_FILE = L"/Home/pending_noti.dat";
 static const int NOTIFICATION_MAX_LENGTH = 100;
 
 MessageRouter::MessageRouter(void) :
@@ -29,6 +31,7 @@ MessageRouter::MessageRouter(void) :
     pStrangerEmails = new ArrayList();
     pStrangerEmails->Construct();
     LoadStrangers();
+    LoadPendingNotificationSender();
 }
 
 MessageRouter::~MessageRouter(void) {
@@ -61,12 +64,15 @@ void MessageRouter::NotifyUnreadChanged(void) {
 void MessageRouter::SetActiveChat(IMessageListener* pListener, const String& email) {
     pActiveChatListener = pListener;
 
-    activeChatEmail = email;
-    activeChatEmail.Trim();
-    activeChatEmail.ToLower();
+    activeChatEmail = MrimUtils::NormalizeEmail(email);
 
     ClearBadge();
     ResetUnreadCount(activeChatEmail);
+    // Chat with this contact is now open — its notification is handled.
+    if (!pendingNotificationEmail.IsEmpty()
+        && pendingNotificationEmail.Equals(activeChatEmail, true)) {
+        ClearPendingNotificationSender();
+    }
 }
 
 void MessageRouter::ClearActiveChat(void) {
@@ -158,12 +164,15 @@ bool MessageRouter::IsKnownContact(const String& email) const {
 void MessageRouter::RememberStranger(const String& email) {
     if (pStrangerEmails == null) return;
 
+    String clean = MrimUtils::NormalizeEmail(email);
+    if (clean.IsEmpty()) return;
+
     for (int i = 0; i < pStrangerEmails->GetCount(); i++) {
         String* pExisting = static_cast<String*>(pStrangerEmails->GetAt(i));
-        if (pExisting != null && pExisting->Equals(email, true)) return; // уже знаємо
+        if (pExisting != null && pExisting->Equals(clean, true)) return; // уже знаємо
     }
 
-    pStrangerEmails->Add(*(new String(email)));
+    pStrangerEmails->Add(*(new String(clean)));
     SaveStrangers();
     NotifyUnreadChanged();
 }
@@ -197,6 +206,7 @@ void MessageRouter::LoadStrangers(void) {
 
         line.Trim();
         if (line.IsEmpty()) continue;
+        line.ToLower();
         pStrangerEmails->Add(*(new String(line)));
     }
 }
@@ -237,10 +247,57 @@ void MessageRouter::ClearBadge(void) {
     notiMgr.Notify(0);
 }
 
+String MessageRouter::PeekPendingNotificationSender(void) const {
+    return pendingNotificationEmail;
+}
+
+String MessageRouter::ConsumePendingNotificationSender(void) {
+    String sender = pendingNotificationEmail;
+    ClearPendingNotificationSender();
+    return sender;
+}
+
+bool MessageRouter::IsActiveChatWith(const String& email) const {
+    if (activeChatEmail.IsEmpty()) return false;
+    String clean = MrimUtils::NormalizeEmail(email);
+    return !clean.IsEmpty() && clean.Equals(activeChatEmail, true);
+}
+
+void MessageRouter::SetPendingNotificationSender(const String& email) {
+    pendingNotificationEmail = MrimUtils::NormalizeEmail(email);
+    SavePendingNotificationSender();
+}
+
+void MessageRouter::ClearPendingNotificationSender(void) {
+    pendingNotificationEmail = L"";
+    File::Remove(PENDING_NOTI_FILE);
+}
+
+void MessageRouter::LoadPendingNotificationSender(void) {
+    pendingNotificationEmail = L"";
+
+    File file;
+    if (IsFailed(file.Construct(PENDING_NOTI_FILE, L"r"))) return;
+
+    String line;
+    if (IsFailed(file.Read(line))) return;
+
+    pendingNotificationEmail = MrimUtils::NormalizeEmail(line);
+}
+
+void MessageRouter::SavePendingNotificationSender(void) {
+    if (pendingNotificationEmail.IsEmpty()) {
+        File::Remove(PENDING_NOTI_FILE);
+        return;
+    }
+
+    File file;
+    if (IsFailed(file.Construct(PENDING_NOTI_FILE, L"w"))) return;
+    file.Write(pendingNotificationEmail);
+}
+
 void MessageRouter::OnMessageReceived(const String& sender, const String& text, bool isNudge) {
-    String cleanSender = sender;
-    cleanSender.Trim();
-    cleanSender.ToLower();
+    String cleanSender = MrimUtils::NormalizeEmail(sender);
     if (cleanSender.IsEmpty()) return;
     if (!isNudge && text.IsEmpty()) return;
 
@@ -258,6 +315,7 @@ void MessageRouter::OnMessageReceived(const String& sender, const String& text, 
 
     if (!isActiveChat || !isAppInForeground) {
         IncrementUnreadCount(cleanSender);
+        SetPendingNotificationSender(cleanSender);
         ShowNotification(cleanSender, displayText, isNudge);
     }
 }

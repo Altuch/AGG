@@ -51,6 +51,7 @@ private:
     static const int ID_STATUS_ONLINE    = 501;
     static const int ID_STATUS_AWAY      = 502;
     static const int ID_STATUS_INVISIBLE = 503;
+    static const int ID_STATUS_BUSY      = 504;
 
     static const int ID_SOFTKEY_PROFILE    = 101;
     static const int ID_SOFTKEY_LOGOUT     = 102;
@@ -78,6 +79,8 @@ private:
     Osp::Base::Collection::ArrayList* pSavedContacts;
 
     int strangersGroupIndex;
+
+    bool hasCheckedPendingChat;
 
     Osp::Graphics::Bitmap* pBitmapOnline;
     Osp::Graphics::Bitmap* pBitmapAway;

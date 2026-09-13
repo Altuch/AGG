@@ -23,6 +23,16 @@ public:
     static bool IsValidHost(const Osp::Base::String& host);
 
     static void SkipFormattedRecord(Osp::Base::ByteBuffer& buffer, const Osp::Base::String& mask, int startIndex);
+
+    static bool SafeIndexOf(const Osp::Base::String& text, const Osp::Base::String& pattern, int startIndex, int& pos);
+    static bool SafeIndexOfChar(const Osp::Base::String& text, mchar ch, int& pos);
+
+    // MRIM logins/contact emails are case-insensitive (mail.ru treats
+    // User@Mail.Ru == user@mail.ru), but the Renaissance DB lookups are
+    // case-sensitive. Normalize once at every outbound point so an
+    // uppercase-typed address can't break login / messaging / anketa.
+    // NOTE: passwords and nicknames are case-SENSITIVE — never apply here.
+    static Osp::Base::String NormalizeEmail(const Osp::Base::String& email);
 };
 
 #endif

@@ -60,10 +60,17 @@ public:
     void SendNudge(const Osp::Base::String& to) { if (pMessageMgr != null) pMessageMgr->SendNudge(to); }
     void SendTyping(const Osp::Base::String& to) { if (pMessageMgr != null) pMessageMgr->SendTyping(to); }
     void ChangeStatus(unsigned long status);
+    void ChangeXStatus(unsigned long status, const Osp::Base::String& xstatusType,
+                       const Osp::Base::String& xstatusTitle,
+                       const Osp::Base::String& xstatusDescription);
 
     int GetUnreadCount(const Osp::Base::String& email) const;
     void SetKnownContactEmails(Osp::Base::Collection::IList* pEmails);
     Osp::Base::Collection::IList* GetStrangerEmails(void) const;
+
+    Osp::Base::String PeekPendingNotificationSender(void) const;
+    Osp::Base::String ConsumePendingNotificationSender(void);
+    bool IsActiveChatWith(const Osp::Base::String& email) const;
 
     void NotifyLoggedIn(void);
 
