@@ -1,4 +1,5 @@
 #include "MRIM/MrimMessages.h"
+#include "Core/Loc.h"
 #include "MRIM/MrimProtocol.h"
 #include "MRIM/MrimUtils.h"
 #include "Core/AggConnection.h"
@@ -22,9 +23,6 @@ static void BuildMessagePayload(ByteBuffer& payload,
 
     MrimUtils::AppendUL(payload, flags);
     MrimUtils::AppendLPS(payload, cleanTo);
-    // Renaissance with utf16capable=true (always for LOGIN3 / proto 1.22)
-    // reads `message` as UNICODE_STRING (UTF-16LE). CP1251 here garbles
-    // every Cyrillic message (and even-length ASCII is misdecoded).
     MrimUtils::AppendLPSUcs2(payload, text);
     MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
@@ -40,7 +38,7 @@ void MrimMessages::SendMessageTo(const String& to, const String& text) {
 void MrimMessages::SendNudge(const String& to) {
     ByteBuffer payload;
     payload.Construct(1024);
-    BuildMessagePayload(payload, Mrim::MsgFlag::ALARM, to, L"Вам надіслано будильник!");
+    BuildMessagePayload(payload, Mrim::MsgFlag::ALARM, to, LocString(L"IDS_NUDGE_PAYLOAD"));
     pConnection->SendPacket(Mrim::Cmd::MESSAGE, payload);
 }
 
@@ -84,9 +82,6 @@ bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             String sender;
             if (payload.GetRemaining() >= 4) sender = MrimUtils::ReadLPS(payload);
 
-            // Server writes `message` as UNICODE_STRING in UTF-16LE when the
-            // addressee is utf16capable (true for our LOGIN3 session).
-            // ReadLPS (CP1251) here produced mojibake for all Cyrillic text.
             String text;
             if (payload.GetRemaining() >= 4) text = MrimUtils::ReadLPSUcs2(payload);
 
@@ -119,7 +114,6 @@ bool MrimMessages::ProcessCommand(unsigned long command, ByteBuffer& payload) {
             if (payload.GetRemaining() < 4) return true;
 
             unsigned long status = MrimUtils::ReadUL(payload);
-            AppLog("MRIM_CS_MESSAGE_STATUS: 0x%X", status);
 
             if (pListener != null) pListener->OnMessageDeliveryStatus(status);
             return true;

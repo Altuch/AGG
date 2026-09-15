@@ -35,6 +35,8 @@ namespace Cmd {
     static const unsigned long LOGIN3                 = 0x1078;
     static const unsigned long ANKETA_INFO            = 0x1028;
     static const unsigned long WP_REQUEST             = 0x1029;
+    static const unsigned long USER_BLOG_STATUS       = 0x1063;
+    static const unsigned long CHANGE_USER_BLOG_STATUS = 0x1064;
 }
 
 namespace Anketa {
@@ -51,11 +53,6 @@ namespace Anketa {
 }
 
 namespace Status {
-    // Full set for MRIM 1.22 (Renaissance src/servers/mrim/globals.js).
-    // NOTE: there is no separate DND/BUSY — custom "busy" states are
-    // XSTATUS (0x4) with xstatusType/Title/Description attached.
-    // INVISIBLE (0x80000001) is shown to others as OFFLINE, unless they
-    // are in the contact's ALWAYS_VISIBLE list.
     static const unsigned long OFFLINE   = 0x00000000;
     static const unsigned long ONLINE    = 0x00000001;
     static const unsigned long AWAY      = 0x00000002;
@@ -63,8 +60,6 @@ namespace Status {
     static const unsigned long INVISIBLE = 0x80000001;
 }
 
-// Feature flags advertised in LOGIN3 and CHANGE_STATUS (xstatus features).
-// Must stay in sync with MrimAuth::SendLogin3 (0x7FF).
 namespace Features {
     static const unsigned long DEFAULT = 0x000007FF;
 }
@@ -92,14 +87,13 @@ namespace Delivery {
 }
 
 namespace ContactFlag {
-    static const unsigned long INVISIBLE_ALWAYS  = 0x00000004; // "always invisible for"
-    static const unsigned long VISIBLE_ALWAYS    = 0x00000008; // "always visible for"
-    static const unsigned long IGNORED           = 0x00000010; // in ignore list
-    static const unsigned long AUTHORIZED        = 0x00000040; // authorized (rarely used)
-    static const unsigned long CONFERENCE        = 0x00000080; // conference (not in Renaissance)
-    static const unsigned long UNICODE_NICKNAME  = 0x00000200; // nickname in Unicode
-    static const unsigned long PHONE             = 0x00100000; // contact is a phone number
-    // ADD_CONTACT request flags
+    static const unsigned long INVISIBLE_ALWAYS  = 0x00000004;
+    static const unsigned long VISIBLE_ALWAYS    = 0x00000008;
+    static const unsigned long IGNORED           = 0x00000010;
+    static const unsigned long AUTHORIZED        = 0x00000040;
+    static const unsigned long CONFERENCE        = 0x00000080;
+    static const unsigned long UNICODE_NICKNAME  = 0x00000200;
+    static const unsigned long PHONE             = 0x00100000;
     static const unsigned long FL_DELETE         = 0x00000001;
     static const unsigned long FL_GROUP          = 0x00000002;
     static const unsigned long FL_NOT_IN_LIST    = 0x00000020;

@@ -3,6 +3,7 @@
  */
 
 #include "AGG.h"
+#include "Core/Loc.h"
 #include "Core/AppSettings.h"
 #include "Core/MessageRouter.h"
 #include "Ui/FormNavigator.h"
@@ -28,12 +29,9 @@ void AGG::AttachForcedLogoutHandler(AggConnection* pConnection) {
 
 bool AGG::OnAppInitializing(AppRegistry& appRegistry) {
     if (!AppSettings::HasSavedCredentials()) {
-        AppLog("Збережених даних немає: відкриваємо форму авторизації...");
         FormNavigator::GoToLogin(null, null);
         return true;
     }
-
-    AppLog("Автологін: знайдено збережені дані, підключаємося...");
 
     AggConnection* pConnection = new AggConnection();
     pConnection->Construct();
@@ -53,8 +51,8 @@ bool AGG::OnAppTerminating(AppRegistry& appRegistry, bool forcedTermination) {
 
 void AGG::OnForcedLogout(void) {
     MessageBox msgBox;
-    msgBox.Construct(L"Сеанс завершено",
-                     L"Ви увійшли в цей акаунт з іншого пристрою. MRIM дозволяє лише один активний сеанс - увійдіть знову, коли будете готові.",
+    msgBox.Construct(LocString(L"IDS_SESSION_TITLE"),
+                     LocString(L"IDS_SESSION_TEXT"),
                      MSGBOX_STYLE_OK);
     int modalResult = 0;
     msgBox.ShowAndWait(modalResult);
@@ -66,21 +64,24 @@ void AGG::OnForeground(void) {
     MessageRouter::SetAppForeground(true);
     AggConnection::NotifyAppForegroundState(true);
 
-    // bada 1.0 notifications carry no payload — tapping one only
-    // foregrounds the app. The router remembers which contact the last
-    // notification came from, so open that chat instead of the list.
     AggConnection* pConn = AggConnection::GetActive();
     if (pConn == null || pConn->GetLogin().IsEmpty()) return;
 
     String sender = pConn->PeekPendingNotificationSender();
     if (sender.IsEmpty()) return;
 
-    if (pConn->IsActiveChatWith(sender)) {
-        pConn->ConsumePendingNotificationSender();
+    String kind = pConn->PeekPendingNotificationKind();
+    pConn->ConsumePendingNotificationSender();
+
+    if (kind == L"BLOG") {
+        FormNavigator::GoToMicroblog(pConn, FormNavigator::GetCurrentForm());
         return;
     }
 
-    pConn->ConsumePendingNotificationSender();
+    if (pConn->IsActiveChatWith(sender)) {
+        return;
+    }
+
     FormNavigator::GoToChat(pConn, L"", sender, FormNavigator::GetCurrentForm());
 }
 

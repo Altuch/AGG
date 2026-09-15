@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/Core/AppSettings.cpp \
 ../src/Core/AvatarLoader.cpp \
 ../src/Core/ChatHistory.cpp \
+../src/Core/ContactSync.cpp \
 ../src/Core/MessageRouter.cpp 
 
 OBJS += \
@@ -15,6 +16,7 @@ OBJS += \
 ./src/Core/AppSettings.o \
 ./src/Core/AvatarLoader.o \
 ./src/Core/ChatHistory.o \
+./src/Core/ContactSync.o \
 ./src/Core/MessageRouter.o 
 
 CPP_DEPS += \
@@ -22,6 +24,7 @@ CPP_DEPS += \
 ./src/Core/AppSettings.d \
 ./src/Core/AvatarLoader.d \
 ./src/Core/ChatHistory.d \
+./src/Core/ContactSync.d \
 ./src/Core/MessageRouter.d 
 
 

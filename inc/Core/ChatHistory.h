@@ -11,11 +11,12 @@ public:
                        const Osp::Base::String& sender,
                        const Osp::Base::String& text);
 
-    static Osp::Base::String LoadRecentAsText(const Osp::Base::String& email, int maxLines);
+    static int LoadRecentPairs(const Osp::Base::String& email, int maxLines,
+                               Osp::Base::Collection::IList* pOut);
 
     static void Clear(const Osp::Base::String& email);
 
-    static const wchar_t* SELF_LABEL;
+    static Osp::Base::String GetSelfLabel(void);
 
 private:
     static const int MAX_RING = 200;

@@ -4,6 +4,7 @@
 #include "Ui/ChatForm.h"
 #include "Ui/SettingsForm.h"
 #include "Ui/ProfileForm.h"
+#include "Ui/MicroblogForm.h"
 #include <FApp.h>
 
 using namespace Osp::App;
@@ -63,11 +64,19 @@ void FormNavigator::GoToChat(AggConnection* pConnection,
 }
 
 void FormNavigator::GoToSettings(AggConnection* pConnection, Form* pFrom) {
-
     Form* pReturnTo = (pFrom == null) ? GetCurrentForm() : null;
 
     SettingsForm* pForm = new SettingsForm();
     pForm->Initialize(pConnection, pReturnTo);
+    Show(pForm, pFrom);
+}
+
+void FormNavigator::GoToMicroblog(AggConnection* pConnection, Form* pFrom) {
+    MicroblogForm* pForm = new MicroblogForm();
+    if (IsFailed(pForm->Initialize(pConnection))) {
+        delete pForm;
+        return;
+    }
     Show(pForm, pFrom);
 }
 

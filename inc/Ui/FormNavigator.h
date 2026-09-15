@@ -15,6 +15,7 @@ public:
                          const Osp::Base::String& contactEmail,
                          Osp::Ui::Controls::Form* pFrom);
     static void GoToSettings(AggConnection* pConnection, Osp::Ui::Controls::Form* pFrom);
+    static void GoToMicroblog(AggConnection* pConnection, Osp::Ui::Controls::Form* pFrom);
 
     static void GoToProfile(AggConnection* pConnection,
                             const Osp::Base::String& contactName,

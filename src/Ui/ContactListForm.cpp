@@ -1,4 +1,5 @@
 #include "Ui/ContactListForm.h"
+#include "Core/Loc.h"
 #include "Ui/FormNavigator.h"
 #include "Core/AppSettings.h"
 #include "MRIM/MrimProtocol.h"
@@ -20,6 +21,7 @@ ContactListForm::ContactListForm(void) :
     pSavedContacts(null),
     strangersGroupIndex(-1),
     hasCheckedPendingChat(false),
+    populatePending_(false),
     pBitmapOnline(null),
     pBitmapAway(null),
     pBitmapBusy(null),
@@ -51,7 +53,7 @@ result ContactListForm::Initialize(AggConnection* pConn) {
 }
 
 result ContactListForm::OnInitializing(void) {
-    SetTitleText(L"Контакти");
+    SetTitleText(LocString(L"IDS_CONTACTS"));
 
     SetOptionkeyActionId(ID_OPTIONKEY_MENU);
     AddOptionkeyActionListener(*this);
@@ -61,6 +63,8 @@ result ContactListForm::OnInitializing(void) {
 
     SetSoftkeyActionId(SOFTKEY_1, ID_SOFTKEY_LOGOUT);
     AddSoftkeyActionListener(SOFTKEY_1, *this);
+    SetSoftkeyText(SOFTKEY_0, LocString(L"IDS_SK_PROFILE"));
+    SetSoftkeyText(SOFTKEY_1, LocString(L"IDS_SK_SIGNOUT"));
 
     pGroupedList = static_cast<GroupedList*>(GetControl(L"IDC_CONTACT_LIST"));
     if (pGroupedList != null) {
@@ -109,6 +113,8 @@ void ContactListForm::DetachListeners(void) {
 }
 
 void ContactListForm::SchedulePopulate(void) {
+    if (populatePending_) return;
+    populatePending_ = true;
     SendUserEvent(USER_EVENT_POPULATE, null);
 }
 
@@ -116,7 +122,12 @@ void ContactListForm::OnUserEventReceivedN(long requestId, IList* pArgs) {
     if (requestId == USER_EVENT_ATTACH_LISTENER) {
         AttachListeners();
     } else if (requestId == USER_EVENT_POPULATE) {
+        populatePending_ = false;
         PopulateList();
+    } else if (requestId == USER_EVENT_GOTO_BLOG) {
+        AggConnection* pConn = pConnection;
+        DetachListeners();
+        FormNavigator::GoToMicroblog(pConn, this);
     }
 
     if (pArgs != null) {
@@ -130,7 +141,7 @@ void ContactListForm::OnUnreadCountChanged(void) {
 }
 
 void ContactListForm::OnConnectionStateChanged(bool connected) {
-    SetTitleText(connected ? L"Контакти" : L"Контакти (з'єднання...)");
+    SetTitleText(connected ? LocString(L"IDS_CONTACTS") : LocString(L"IDS_CONTACTS_CONNECTING"));
 
     if (GetParent() != null) {
         RequestRedraw(true);
@@ -191,19 +202,25 @@ void ContactListForm::OnContactListReceived(IList* pGroups, IList* pContacts) {
         pCopy->status = pSrc->status;
         pCopy->groupId = pSrc->groupId;
         pCopy->flags = pSrc->flags;
+        pCopy->blogTime = pSrc->blogTime;
+        pCopy->blogText = pSrc->blogText;
         pSavedContacts->Add(*pCopy);
     }
 
     PublishKnownContacts();
 
-    // Autologin after an app kill: a tapped notification's sender survived
-    // in a file and was loaded by the router before the first contact list.
-    // Open that chat directly, once — later lists just refresh in place.
     if (!hasCheckedPendingChat) {
         hasCheckedPendingChat = true;
         if (pConnection != null) {
+            String pendingKind = pConnection->PeekPendingNotificationKind();
             String pending = pConnection->ConsumePendingNotificationSender();
             if (!pending.IsEmpty() && !pConnection->IsActiveChatWith(pending)) {
+                AggConnection* pConn = pConnection;
+                DetachListeners();
+                if (pendingKind == L"BLOG") {
+                    FormNavigator::GoToMicroblog(pConn, this);
+                    return;
+                }
                 String name = pending;
                 for (int i = 0; i < pSavedContacts->GetCount(); i++) {
                     ContactInfo* pContact = static_cast<ContactInfo*>(pSavedContacts->GetAt(i));
@@ -214,8 +231,6 @@ void ContactListForm::OnContactListReceived(IList* pGroups, IList* pContacts) {
                         break;
                     }
                 }
-                AggConnection* pConn = pConnection;
-                DetachListeners();
                 FormNavigator::GoToChat(pConn, name, pending, this);
                 return;
             }
@@ -226,10 +241,6 @@ void ContactListForm::OnContactListReceived(IList* pGroups, IList* pContacts) {
 }
 
 const Bitmap* ContactListForm::GetStatusBitmap(unsigned long status) const {
-    // MRIM 1.22 set (Renaissance globals.js): 0 offline, 1 online,
-    // 2 away, 4 xstatus ("busy"), 0x80000001 invisible.
-    // Invisible contacts arrive as OFFLINE (server converts), except for
-    // ALWAYS_VISIBLE watchers who see 0x80000001 — both show offline icon.
     if (status == Mrim::Status::OFFLINE || status == Mrim::Status::INVISIBLE) return pBitmapOffline;
     if (status == Mrim::Status::AWAY) return pBitmapAway;
     if (status == Mrim::Status::XSTATUS) return pBitmapBusy;
@@ -254,7 +265,7 @@ int ContactListForm::AddStrangersGroup(int groupIndex) {
     IList* pStrangers = (pConnection != null) ? pConnection->GetStrangerEmails() : null;
     if (pStrangers == null || pStrangers->GetCount() == 0) return -1;
 
-    pGroupedList->AddGroup(L"Невідомі", null, groupIndex);
+    pGroupedList->AddGroup(LocString(L"IDS_GROUP_STRANGERS"), null, groupIndex);
 
     for (int i = 0; i < pStrangers->GetCount(); i++) {
         String* pEmail = static_cast<String*>(pStrangers->GetAt(i));
@@ -272,7 +283,7 @@ void ContactListForm::PopulateList(void) {
     pGroupedList->RemoveAllGroups();
     strangersGroupIndex = -1;
 
-    pGroupedList->AddGroup(L"Ви", null, GROUP_MY_STATUS);
+    pGroupedList->AddGroup(LocString(L"IDS_GROUP_ME"), null, GROUP_MY_STATUS);
     String myLogin = (pConnection != null) ? pConnection->GetLogin() : String(L"");
     String myName = (pConnection != null) ? pConnection->GetNickname() : String(L"");
     if (myName.IsEmpty()) myName = myLogin;
@@ -287,16 +298,21 @@ void ContactListForm::PopulateList(void) {
             GroupInfo* pGroup = static_cast<GroupInfo*>(pSavedGroups->GetAt(g));
             String name = (pGroup != null && !pGroup->name.IsEmpty())
                         ? pGroup->name
-                        : (L"Група " + Integer::ToString(g + 1));
+                        : (LocString(L"IDS_GROUP_PREFIX") + Integer::ToString(g + 1));
             pGroupedList->AddGroup(name, null, g + 1);
         }
         listedGroups = groupCount;
     } else if (contactCount > 0) {
-        pGroupedList->AddGroup(L"Всі контакти", null, 1);
+        pGroupedList->AddGroup(LocString(L"IDS_GROUP_ALL"), null, 1);
         listedGroups = 1;
     }
 
-    for (int c = 0; c < contactCount; c++) {
+    ArrayList* pOrder = BuildContactOrder();
+    for (int k = 0; k < pOrder->GetCount(); k++) {
+        Integer* pIdx = static_cast<Integer*>(pOrder->GetAt(k));
+        int c = (pIdx != null) ? pIdx->ToInt() : -1;
+        if (c < 0 || c >= contactCount) continue;
+
         ContactInfo* pContact = static_cast<ContactInfo*>(pSavedContacts->GetAt(c));
         if (pContact == null || listedGroups == 0) continue;
 
@@ -315,6 +331,72 @@ void ContactListForm::PopulateList(void) {
         pGroupedList->Draw();
         pGroupedList->Show();
     }
+
+    pOrder->RemoveAll(true);
+    delete pOrder;
+}
+
+bool ContactListForm::IsOnlineStatus(unsigned long status) {
+    return status != Mrim::Status::OFFLINE && status != Mrim::Status::INVISIBLE;
+}
+
+int ContactListForm::CompareContacts(const ContactInfo* pA, const ContactInfo* pB, int mode) {
+    if (pA == null) return (pB == null) ? 0 : 1;
+    if (pB == null) return -1;
+
+    if (mode == SORT_ONLINE_FIRST || mode == SORT_OFFLINE_FIRST) {
+        bool aOn = IsOnlineStatus(pA->status);
+        bool bOn = IsOnlineStatus(pB->status);
+        if (aOn != bOn) {
+            bool onlineFirst = (mode == SORT_ONLINE_FIRST);
+            if (aOn) return onlineFirst ? -1 : 1;
+            return onlineFirst ? 1 : -1;
+        }
+    }
+
+    String a = pA->nickname.IsEmpty() ? pA->email : pA->nickname;
+    String b = pB->nickname.IsEmpty() ? pB->email : pB->nickname;
+    a.ToLower();
+    b.ToLower();
+    return a.CompareTo(b);
+}
+
+ArrayList* ContactListForm::BuildContactOrder(void) const {
+    ArrayList* pOrder = new ArrayList();
+    pOrder->Construct();
+    if (pSavedContacts == null) return pOrder;
+
+    int count = pSavedContacts->GetCount();
+    int mode = AppSettings::GetContactSortMode();
+
+    for (int i = 0; i < count; i++) pOrder->Add(*(new Integer(i)));
+    if (mode == SORT_AS_RECEIVED || count < 2) return pOrder;
+
+    ArrayList rest;
+    rest.Construct();
+    for (int i = 0; i < pOrder->GetCount(); i++) {
+        Integer* pIdx = static_cast<Integer*>(pOrder->GetAt(i));
+        rest.Add(*(new Integer(pIdx != null ? pIdx->ToInt() : 0)));
+    }
+    pOrder->RemoveAll(true);
+
+    while (rest.GetCount() > 0) {
+        int best = 0;
+        for (int j = 1; j < rest.GetCount(); j++) {
+            Integer* pBestIdx = static_cast<Integer*>(rest.GetAt(best));
+            Integer* pCandIdx = static_cast<Integer*>(rest.GetAt(j));
+            const ContactInfo* pBest = (pBestIdx != null && pBestIdx->ToInt() >= 0 && pBestIdx->ToInt() < count)
+                ? static_cast<const ContactInfo*>(pSavedContacts->GetAt(pBestIdx->ToInt())) : null;
+            const ContactInfo* pCand = (pCandIdx != null && pCandIdx->ToInt() >= 0 && pCandIdx->ToInt() < count)
+                ? static_cast<const ContactInfo*>(pSavedContacts->GetAt(pCandIdx->ToInt())) : null;
+            if (CompareContacts(pCand, pBest, mode) < 0) best = j;
+        }
+        Integer* pWinner = static_cast<Integer*>(rest.GetAt(best));
+        int winnerIdx = (pWinner != null) ? pWinner->ToInt() : 0;
+        rest.RemoveAt(best, true);
+        pOrder->Add(*(new Integer(winnerIdx)));
+    }
+    return pOrder;
 }
 
 void ContactListForm::OnItemStateChanged(const Control& source, int groupIndex, int itemIndex, int itemId, ItemStatus status) {
@@ -360,9 +442,9 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
         case ID_OPTIONKEY_MENU: {
             OptionMenu* pMenu = new OptionMenu();
             pMenu->Construct();
-            pMenu->AddItem(L"Змінити статус", ID_MENU_CHANGE_STATUS);
-            pMenu->AddItem(L"Додати", ID_MENU_ADD);
-            pMenu->AddItem(L"Налаштування", ID_MENU_SETTINGS);
+            pMenu->AddItem(LocString(L"IDS_MENU_STATUS"), ID_MENU_CHANGE_STATUS);
+            pMenu->AddItem(LocString(L"IDS_MENU_BLOG"), ID_MENU_ADD);
+            pMenu->AddItem(LocString(L"IDS_MENU_SETTINGS"), ID_MENU_SETTINGS);
             pMenu->AddActionEventListener(*this);
             pMenu->SetShowState(true);
             pMenu->Show();
@@ -381,10 +463,10 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
             pStatusContextMenu->Construct(anchorPos, Osp::Ui::Controls::CONTEXT_MENU_STYLE_LIST);
             pStatusContextMenu->AddActionEventListener(*this);
 
-            pStatusContextMenu->AddItem(L"Онлайн", ID_STATUS_ONLINE);
-            pStatusContextMenu->AddItem(L"Відійшов", ID_STATUS_AWAY);
-            pStatusContextMenu->AddItem(L"Зайнятий", ID_STATUS_BUSY);
-            pStatusContextMenu->AddItem(L"Невидимка", ID_STATUS_INVISIBLE);
+            pStatusContextMenu->AddItem(LocString(L"IDS_STATUS_ONLINE"), ID_STATUS_ONLINE);
+            pStatusContextMenu->AddItem(LocString(L"IDS_STATUS_AWAY"), ID_STATUS_AWAY);
+            pStatusContextMenu->AddItem(LocString(L"IDS_STATUS_BUSY"), ID_STATUS_BUSY);
+            pStatusContextMenu->AddItem(LocString(L"IDS_STATUS_INVISIBLE"), ID_STATUS_INVISIBLE);
 
             pStatusContextMenu->SetShowState(true);
             pStatusContextMenu->Show();
@@ -428,6 +510,7 @@ void ContactListForm::OnActionPerformed(const Control& source, int actionId) {
         }
 
         case ID_MENU_ADD: {
+            SendUserEvent(USER_EVENT_GOTO_BLOG, null);
             break;
         }
 

@@ -32,13 +32,26 @@ public:
     virtual void OnTextValueChangeCanceled(const Osp::Ui::Control& source) {}
 
 private:
+    static const int ROW_INCOMING = 0;
+    static const int ROW_OWN      = 1;
+    static const int ROW_SYSTEM   = 2;
+
     void AppendLine(const Osp::Base::String& sender,
                     const Osp::Base::String& text,
-                    bool saveToHistory);
+                    bool saveToHistory,
+                    int rowKind);
+    void AppendRow(const Osp::Base::String& nick,
+                   const Osp::Base::String& text,
+                   int rowKind);
+    void AppendRowChunk(const Osp::Base::String& nick,
+                        const Osp::Base::String& chunk,
+                        const Osp::Graphics::Color& nickColor,
+                        int charsPerLine);
+    int CalibratedCharsPerLine(int textW) const;
     void ShowSystemLine(const Osp::Base::String& text);
     void SendNudgeNow(void);
     void LoadHistory(void);
-    void RedrawHistory(void);
+    void ClearHistoryView(void);
 
     static const int ID_SOFTKEY_BACK       = 301;
     static const int ID_BTN_SEND           = 302;
@@ -49,12 +62,18 @@ private:
 
     static const int MAX_LOADED_HISTORY_LINES = 200;
 
+    static const int ELEM_NICK = 1;
+    static const int ELEM_BODY = 2;
+
     AggConnection* pConnection;
     Osp::Base::String contactName;
     Osp::Base::String contactEmail;
 
-    Osp::Ui::Controls::EditArea* pHistoryArea;
     Osp::Ui::Controls::EditField* pInputField;
+    Osp::Ui::Controls::CustomList* pHistoryList;
+    Osp::Base::Collection::ArrayList* pRowFormats;
+    int rowSeq_;
+    Osp::Graphics::Font* pMeasureFont_;
 };
 
 #endif

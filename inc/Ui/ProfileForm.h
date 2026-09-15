@@ -48,9 +48,12 @@ private:
     Osp::Base::String GetDisplayEmail(void) const;
     const Osp::Graphics::Bitmap* GetAvatarBitmap(void) const;
     void RequestAvatar(void);
+    void SaveToAddressbook(void);
     void Leave(void);
 
     static const int ID_SOFTKEY_BACK = 401;
+    static const int ID_OPTIONKEY_SAVE = 402;
+    static const int ID_MENU_SAVE_CONTACT = 403;
     static const long USER_EVENT_POPULATE = 4001;
 
     static const int GROUP_IDENTITY = 0;

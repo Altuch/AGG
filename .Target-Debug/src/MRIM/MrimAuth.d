@@ -148,6 +148,37 @@ src/MRIM/MrimAuth.d src/MRIM/MrimAuth.o: ../src/MRIM/MrimAuth.cpp \
  C:/bada/2.0.6/Include/FSecCertX509CertificateStore.h \
  C:/bada/2.0.6/Include/FSecIdentity.h \
  C:/bada/2.0.6/Include/FSecIdentityInfo.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/Loc.h \
+ C:/bada/2.0.6/Include/FApp.h C:/bada/2.0.6/Include/FAppApplication.h \
+ C:/bada/2.0.6/Include/FSysBattery.h C:/bada/2.0.6/Include/FSysConfig.h \
+ C:/bada/2.0.6/Include/FSysPower.h C:/bada/2.0.6/Include/FAppConfig.h \
+ C:/bada/2.0.6/Include/FAppTypes.h C:/bada/2.0.6/Include/FAppAppManager.h \
+ C:/bada/2.0.6/Include/FAppAppControl.h \
+ C:/bada/2.0.6/Include/FAppIAppControlEventListener.h \
+ C:/bada/2.0.6/Include/FAppIPackageEventListener.h \
+ C:/bada/2.0.6/Include/FAppPackageManager.h \
+ C:/bada/2.0.6/Include/FAppAppRegistry.h \
+ C:/bada/2.0.6/Include/FAppAppResource.h \
+ C:/bada/2.0.6/Include/FGrpBitmap.h C:/bada/2.0.6/Include/FGrpConfig.h \
+ C:/bada/2.0.6/Include/FGrpPoint.h C:/bada/2.0.6/Include/FGrpColor.h \
+ C:/bada/2.0.6/Include/FGrpDimension.h \
+ C:/bada/2.0.6/Include/FGrpRectangle.h \
+ C:/bada/2.0.6/Include/FGrpBitmapCommon.h \
+ C:/bada/2.0.6/Include/FGrpBufferInfo.h \
+ C:/bada/2.0.6/Include/FGrpPixelFormat.h \
+ C:/bada/2.0.6/Include/FAppIAppFrame.h \
+ C:/bada/2.0.6/Include/FAppNotificationManager.h \
+ C:/bada/2.0.6/Include/FAppPackageInfo.h \
+ C:/bada/2.0.6/Include/FBaseObject.h \
+ C:/bada/2.0.6/Include/FAppDownloadUIManager.h \
+ C:/bada/2.0.6/Include/FAppGuestPackageManager.h \
+ C:/bada/2.0.6/Include/FAppPackageManager.h \
+ C:/bada/2.0.6/Include/FAppIPackageEventListener.h \
+ C:/bada/2.0.6/Include/FAppIGuestPackageEventListener.h \
+ C:/bada/2.0.6/Include/FAppGuestPackageInfo.h \
+ C:/bada/2.0.6/Include/FAppJavaAppManager.h \
+ C:/bada/2.0.6/Include/FAppJarInfo.h \
+ C:/bada/2.0.6/Include/FAppIAppControlListener.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProtocol.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AggConnection.h \
@@ -256,7 +287,13 @@ src/MRIM/MrimAuth.d src/MRIM/MrimAuth.o: ../src/MRIM/MrimAuth.cpp \
  C:/bada/2.0.6/Include/FNetNfcINdefTagConnectionListener.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
- C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h \
+ C:/bada/2.0.6/Include/FBaseColArrayList.h \
+ C:/bada/2.0.6/Include/FLclLocaleManager.h \
+ C:/bada/2.0.6/Include/FLclConfig.h C:/bada/2.0.6/Include/FLclTimeZone.h \
+ C:/bada/2.0.6/Include/FLclTimeRule.h \
+ C:/bada/2.0.6/Include/FSysSystemTime.h \
+ C:/bada/2.0.6/Include/FLclLocale.h C:/bada/2.0.6/Include/FLclLocale.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimAuth.h:
 
@@ -578,6 +615,80 @@ C:/bada/2.0.6/Include/FSecIdentity.h:
 
 C:/bada/2.0.6/Include/FSecIdentityInfo.h:
 
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/Loc.h:
+
+C:/bada/2.0.6/Include/FApp.h:
+
+C:/bada/2.0.6/Include/FAppApplication.h:
+
+C:/bada/2.0.6/Include/FSysBattery.h:
+
+C:/bada/2.0.6/Include/FSysConfig.h:
+
+C:/bada/2.0.6/Include/FSysPower.h:
+
+C:/bada/2.0.6/Include/FAppConfig.h:
+
+C:/bada/2.0.6/Include/FAppTypes.h:
+
+C:/bada/2.0.6/Include/FAppAppManager.h:
+
+C:/bada/2.0.6/Include/FAppAppControl.h:
+
+C:/bada/2.0.6/Include/FAppIAppControlEventListener.h:
+
+C:/bada/2.0.6/Include/FAppIPackageEventListener.h:
+
+C:/bada/2.0.6/Include/FAppPackageManager.h:
+
+C:/bada/2.0.6/Include/FAppAppRegistry.h:
+
+C:/bada/2.0.6/Include/FAppAppResource.h:
+
+C:/bada/2.0.6/Include/FGrpBitmap.h:
+
+C:/bada/2.0.6/Include/FGrpConfig.h:
+
+C:/bada/2.0.6/Include/FGrpPoint.h:
+
+C:/bada/2.0.6/Include/FGrpColor.h:
+
+C:/bada/2.0.6/Include/FGrpDimension.h:
+
+C:/bada/2.0.6/Include/FGrpRectangle.h:
+
+C:/bada/2.0.6/Include/FGrpBitmapCommon.h:
+
+C:/bada/2.0.6/Include/FGrpBufferInfo.h:
+
+C:/bada/2.0.6/Include/FGrpPixelFormat.h:
+
+C:/bada/2.0.6/Include/FAppIAppFrame.h:
+
+C:/bada/2.0.6/Include/FAppNotificationManager.h:
+
+C:/bada/2.0.6/Include/FAppPackageInfo.h:
+
+C:/bada/2.0.6/Include/FBaseObject.h:
+
+C:/bada/2.0.6/Include/FAppDownloadUIManager.h:
+
+C:/bada/2.0.6/Include/FAppGuestPackageManager.h:
+
+C:/bada/2.0.6/Include/FAppPackageManager.h:
+
+C:/bada/2.0.6/Include/FAppIPackageEventListener.h:
+
+C:/bada/2.0.6/Include/FAppIGuestPackageEventListener.h:
+
+C:/bada/2.0.6/Include/FAppGuestPackageInfo.h:
+
+C:/bada/2.0.6/Include/FAppJavaAppManager.h:
+
+C:/bada/2.0.6/Include/FAppJarInfo.h:
+
+C:/bada/2.0.6/Include/FAppIAppControlListener.h:
+
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProtocol.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimUtils.h:
@@ -807,3 +918,19 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h:
+
+C:/bada/2.0.6/Include/FBaseColArrayList.h:
+
+C:/bada/2.0.6/Include/FLclLocaleManager.h:
+
+C:/bada/2.0.6/Include/FLclConfig.h:
+
+C:/bada/2.0.6/Include/FLclTimeZone.h:
+
+C:/bada/2.0.6/Include/FLclTimeRule.h:
+
+C:/bada/2.0.6/Include/FSysSystemTime.h:
+
+C:/bada/2.0.6/Include/FLclLocale.h:
+
+C:/bada/2.0.6/Include/FLclLocale.h:

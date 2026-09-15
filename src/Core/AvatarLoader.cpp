@@ -3,12 +3,11 @@
 #include <FMedia.h>
 
 using namespace Osp::Base;
-using namespace Osp::Base::Collection;
 using namespace Osp::Graphics;
 using namespace Osp::Media;
 using namespace Osp::Net::Http;
 
-const wchar_t* AvatarLoader::TYPE_AVATAR       = L"_mrimavatar";
+const wchar_t* AvatarLoader::TYPE_AVATAR = L"_mrimavatar";
 const wchar_t* AvatarLoader::TYPE_AVATAR_SMALL = L"_mrimavatarsmall";
 
 AvatarLoader::AvatarLoader(void) :
@@ -48,7 +47,8 @@ String AvatarLoader::BuildAvatarPath(const String& email, const String& avatarTy
     clean.SubString(atPos + 1, domain);
     if (login.IsEmpty() || domain.IsEmpty()) return String(L"");
 
-    String shortDomain = domain;    int dotPos = -1;
+    String shortDomain = domain;
+    int dotPos = -1;
     domain.IndexOf(L".", 0, dotPos);
     if (dotPos > 0) domain.SubString(0, dotPos, shortDomain);
 
@@ -191,9 +191,8 @@ void AvatarLoader::FinishWithFailure(void) {
 }
 
 Bitmap* AvatarLoader::DecodeAvatar(const ByteBuffer& jpeg, int destSize) {
-    int size = (destSize > 0 && destSize <= 180) ? destSize : 90;
     Image img;
     if (IsFailed(img.Construct())) return null;
 
-    return img.DecodeN(jpeg, IMG_FORMAT_JPG, BITMAP_PIXEL_FORMAT_ARGB8888, size, size);
+    return img.DecodeN(jpeg, IMG_FORMAT_JPG, BITMAP_PIXEL_FORMAT_ARGB8888, destSize, destSize);
 }

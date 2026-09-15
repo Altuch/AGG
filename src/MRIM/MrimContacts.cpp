@@ -9,6 +9,7 @@ using namespace Osp::Base::Collection;
 MrimContacts::MrimContacts(AggConnection* pConn) :
     pConnection(pConn),
     pListener(null),
+    pMicroblogListener(null),
     pCachedGroups(null),
     pCachedContacts(null) {}
 
@@ -35,6 +36,18 @@ void MrimContacts::SetListener(IContactListListener* pListener) {
         this->pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
 }
 
+void MrimContacts::SetMicroblogListener(IMicroblogListener* pListener) {
+    pMicroblogListener = pListener;
+}
+
+void MrimContacts::NotifyMicroblogChanged(void) {
+    if (pMicroblogListener != null) pMicroblogListener->OnMicroblogChanged();
+}
+
+IList* MrimContacts::GetCachedContacts(void) {
+    return pCachedContacts;
+}
+
 bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     switch (command) {
         case Mrim::Cmd::USER_INFO: {
@@ -52,6 +65,10 @@ bool MrimContacts::ProcessCommand(unsigned long command, ByteBuffer& payload) {
         }
         case Mrim::Cmd::USER_STATUS: {
             ParseUserStatus(payload);
+            return true;
+        }
+        case Mrim::Cmd::USER_BLOG_STATUS: {
+            ParseUserBlogStatus(payload);
             return true;
         }
         case Mrim::Cmd::ADD_CONTACT_ACK: {
@@ -187,27 +204,32 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
             MrimUtils::ReadLPS(payload);
             if (isUnicode) {
                 MrimUtils::ReadLPSUcs2(payload);
-                MrimUtils::ReadLPSUcs2(payload); 
+                MrimUtils::ReadLPSUcs2(payload);
             } else {
                 MrimUtils::ReadLPS(payload);
                 MrimUtils::ReadLPS(payload);
             }
             MrimUtils::ReadUL(payload);
-            MrimUtils::ReadLPS(payload); 
+            MrimUtils::ReadLPS(payload);
         }
 
         if (cmLen >= 18) {
             MrimUtils::ReadUL(payload);
-            MrimUtils::ReadUL(payload); 
             MrimUtils::ReadUL(payload);
+            pContact->blogTime = MrimUtils::ReadUL(payload);
+            String blogText = isUnicode
+                ? MrimUtils::ReadLPSUcs2(payload)
+                : MrimUtils::ReadLPS(payload);
             if (isUnicode) {
-                MrimUtils::ReadLPSUcs2(payload);
                 MrimUtils::ReadLPSUcs2(payload);
                 MrimUtils::ReadLPSUcs2(payload);
             } else {
                 MrimUtils::ReadLPS(payload);
                 MrimUtils::ReadLPS(payload);
-                MrimUtils::ReadLPS(payload);
+            }
+
+            if (!blogText.IsEmpty() && pContact->blogTime != 0) {
+                pContact->blogText = blogText;
             }
         }
 
@@ -217,6 +239,45 @@ void MrimContacts::ParseContactList2(ByteBuffer& payload) {
 
     if (pListener != null)
         pListener->OnContactListReceived(pCachedGroups, pCachedContacts);
+    NotifyMicroblogChanged();
+}
+
+void MrimContacts::ParseUserBlogStatus(ByteBuffer& payload) {
+    if (payload.GetRemaining() < 4) return;
+    MrimUtils::ReadUL(payload);
+    if (payload.GetRemaining() < 4) return;
+    String email = MrimUtils::ReadLPS(payload);
+    if (payload.GetRemaining() < 12) return;
+    MrimUtils::ReadUL(payload);
+    MrimUtils::ReadUL(payload);
+    unsigned long blogTime = MrimUtils::ReadUL(payload);
+    String blogText;
+    if (payload.GetRemaining() >= 4) blogText = MrimUtils::ReadLPSUcs2(payload);
+    if (payload.GetRemaining() >= 4) MrimUtils::ReadUL(payload);
+
+    email.Trim();
+    email.ToLower();
+    if (email.IsEmpty() || pCachedContacts == null) return;
+
+    for (int i = 0; i < pCachedContacts->GetCount(); i++) {
+        ContactInfo* p = static_cast<ContactInfo*>(pCachedContacts->GetAt(i));
+        if (p == null) continue;
+        String e = p->email;
+        e.Trim();
+        e.ToLower();
+        if (e.Equals(email, true)) {
+            p->blogTime = blogTime;
+            p->blogText = blogText;
+
+            if (!blogText.IsEmpty() && pConnection != null) {
+                String nick = p->nickname.IsEmpty() ? email : p->nickname;
+                pConnection->OnBlogPostReceived(email, nick, blogText);
+            }
+            break;
+        }
+    }
+
+    NotifyMicroblogChanged();
 }
 
 void MrimContacts::ParseAddContactAck(ByteBuffer& payload) {
@@ -227,7 +288,6 @@ void MrimContacts::ParseAddContactAck(ByteBuffer& payload) {
 }
 
 void MrimContacts::SendAddContact(const String& email, const String& nickname, unsigned long groupIdx) {
-    // Nickname keeps its case; only the address is normalized.
     String cleanEmail = MrimUtils::NormalizeEmail(email);
     if (cleanEmail.IsEmpty()) return;
     ByteBuffer payload;
@@ -266,7 +326,7 @@ void MrimContacts::SendModifyContact(unsigned long contactIdx, const String& ema
     MrimUtils::AppendUL(payload, flags);
     MrimUtils::AppendUL(payload, groupIdx);
     MrimUtils::AppendLPS(payload, cleanEmail);
-    MrimUtils::AppendLPSUcs2(payload, nickname); 
+    MrimUtils::AppendLPSUcs2(payload, nickname);
     MrimUtils::AppendLPS(payload, L"");
     payload.Flip();
     pConnection->SendPacket(Mrim::Cmd::MODIFY_CONTACT, payload);

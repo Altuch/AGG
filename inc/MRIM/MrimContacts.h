@@ -16,7 +16,7 @@ public:
 
 class ContactInfo : public Osp::Base::Object {
 public:
-    ContactInfo(void) : flags(0), groupId(0), status(0) {}
+    ContactInfo(void) : flags(0), groupId(0), status(0), blogTime(0) {}
     virtual ~ContactInfo(void) {}
 
     unsigned long flags;
@@ -24,6 +24,8 @@ public:
     Osp::Base::String email;
     Osp::Base::String nickname;
     unsigned long status;
+    unsigned long blogTime;
+    Osp::Base::String blogText;
 };
 
 class IContactListListener {
@@ -32,15 +34,22 @@ public:
     virtual void OnContactListReceived(Osp::Base::Collection::IList* pGroups, Osp::Base::Collection::IList* pContacts) = 0;
 };
 
+class IMicroblogListener {
+public:
+    virtual ~IMicroblogListener(void) {}
+    virtual void OnMicroblogChanged(void) = 0;
+};
+
 class MrimContacts {
 public:
     MrimContacts(AggConnection* pConn);
     virtual ~MrimContacts(void);
 
     void SetListener(IContactListListener* pListener);
+    void SetMicroblogListener(IMicroblogListener* pListener);
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
+    Osp::Base::Collection::IList* GetCachedContacts(void);
 
-    // Contact management (C -> S)
     void SendAddContact(const Osp::Base::String& email, const Osp::Base::String& nickname, unsigned long groupIdx);
     void SendAddGroup(const Osp::Base::String& name);
     void SendModifyContact(unsigned long contactIdx, const Osp::Base::String& email,
@@ -50,13 +59,16 @@ public:
 private:
     AggConnection* pConnection;
     IContactListListener* pListener;
+    IMicroblogListener* pMicroblogListener;
 
     Osp::Base::Collection::ArrayList* pCachedGroups;
     Osp::Base::Collection::ArrayList* pCachedContacts;
 
     void ParseContactList2(Osp::Base::ByteBuffer& payload);
     void ParseUserStatus(Osp::Base::ByteBuffer& payload);
+    void ParseUserBlogStatus(Osp::Base::ByteBuffer& payload);
     void ParseAddContactAck(Osp::Base::ByteBuffer& payload);
+    void NotifyMicroblogChanged(void);
     void ClearCache(void);
 };
 

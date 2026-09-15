@@ -2,6 +2,7 @@
 #define _MRIM_PROFILE_H_
 
 #include <FBase.h>
+#include <FBaseColArrayList.h>
 
 class AggConnection;
 
@@ -38,12 +39,16 @@ public:
     void SetListener(IProfileListener* pListener);
 
     void RequestProfileFor(const Osp::Base::String& login);
+    void RequestProfileFor(const Osp::Base::String& login, IProfileListener* pListener);
 
     bool ProcessCommand(unsigned long command, Osp::Base::ByteBuffer& payload);
 
 private:
+    static Osp::Base::String NormalizeKey(const Osp::Base::String& user, const Osp::Base::String& domain);
+
     AggConnection* pConnection;
     IProfileListener* pListener;
+    Osp::Base::Collection::ArrayList* pPending;
 };
 
 #endif

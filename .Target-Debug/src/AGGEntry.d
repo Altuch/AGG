@@ -451,7 +451,8 @@ src/AGGEntry.d src/AGGEntry.o: ../src/AGGEntry.cpp \
  C:/bada/2.0.6/Include/FSecIdentityInfo.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
- C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h \
+ C:/bada/2.0.6/Include/FBaseColArrayList.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/AGG.h:
 
@@ -1422,3 +1423,5 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h:
+
+C:/bada/2.0.6/Include/FBaseColArrayList.h:

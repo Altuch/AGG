@@ -25,6 +25,8 @@ public:
 
 private:
     static bool ComputeMd5(const Osp::Base::String& password, byte digest[16]);
+    static Osp::Base::String GetClientVersion(void);
+    static Osp::Base::String GetClientLocale(void);
 
     AggConnection* pConnection;
     ILoginListener* pListener;

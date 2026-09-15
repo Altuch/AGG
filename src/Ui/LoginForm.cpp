@@ -1,4 +1,5 @@
 #include "Ui/LoginForm.h"
+#include "Core/Loc.h"
 #include "Ui/FormNavigator.h"
 #include "Core/AppSettings.h"
 #include "MRIM/MrimUtils.h"
@@ -51,6 +52,13 @@ result LoginForm::OnInitializing(void) {
 
     pEditEmail = static_cast<EditField*>(GetControl(L"IDC_EDITFIELD_EMAIL"));
     pEditPassword = static_cast<EditField*>(GetControl(L"IDC_EDITFIELD_PASSWORD"));
+    if (pBtnLogin != null) pBtnLogin->SetText(LocString(L"IDS_BTN_LOGIN"));
+    if (pBtnSignup != null) pBtnSignup->SetText(LocString(L"IDS_BTN_SIGNUP"));
+    if (pBtnSettings != null) pBtnSettings->SetText(LocString(L"IDS_BTN_SETTINGS"));
+    if (pEditEmail != null) pEditEmail->SetGuideText(LocString(L"IDS_GUIDE_EMAIL"));
+    if (pEditPassword != null) pEditPassword->SetGuideText(LocString(L"IDS_GUIDE_PASSWORD"));
+    Label* pLblHint = static_cast<Label*>(GetControl(L"IDC_LABEL"));
+    if (pLblHint != null) pLblHint->SetText(LocString(L"IDS_LOGIN_HINT"));
 
     String savedEmail = AppSettings::GetUserEmail();
     String savedPassword = AppSettings::GetUserPassword();
@@ -71,15 +79,12 @@ void LoginForm::OnActionPerformed(const Control& source, int actionId) {
 
             String email = (pEditEmail != null) ? pEditEmail->GetText() : String(L"");
             String password = (pEditPassword != null) ? pEditPassword->GetText() : String(L"");
-            // Email is case-insensitive on mail.ru; the server DB is not.
-            // Lowercase it so "User@Mail.Ru" logs in as "user@mail.ru".
-            // Password stays case-sensitive — trim only.
             email = MrimUtils::NormalizeEmail(email);
             password.Trim();
 
             if (email.IsEmpty() || password.IsEmpty()) {
                 MessageBox msgBox;
-                msgBox.Construct(L"Увага", L"Будь ласка, введіть e-mail та пароль!", MSGBOX_STYLE_OK);
+                msgBox.Construct(LocString(L"IDS_LOGIN_WARN_TITLE"), LocString(L"IDS_LOGIN_WARN_EMPTY"), MSGBOX_STYLE_OK);
                 int modalResult = 0;
                 msgBox.ShowAndWait(modalResult);
                 break;
@@ -95,8 +100,8 @@ void LoginForm::OnActionPerformed(const Control& source, int actionId) {
 
         case ID_BTN_SIGNUP: {
             MessageBox msgBox;
-            msgBox.Construct(L"Реєстрація",
-                             L"Реєстрація нових акаунтів доступна на офіційному сайті Mail.Ru.",
+            msgBox.Construct(LocString(L"IDS_SIGNUP_TITLE"),
+                             LocString(L"IDS_SIGNUP_TEXT"),
                              MSGBOX_STYLE_OK);
             int modalResult = 0;
             msgBox.ShowAndWait(modalResult);
@@ -119,30 +124,29 @@ void LoginForm::OnLoginSuccess(void) {
 
     pConnection = null;
 
-    // App was killed, user tapped a notification and logged in manually:
-    // the pending sender survived in a file — open that chat directly.
+    String pendingKind = pConn->PeekPendingNotificationKind();
     String pending = pConn->ConsumePendingNotificationSender();
     if (!pending.IsEmpty()) {
-        AppLog("Успішний вхід! Відкриваємо чат з %S...", pending.GetPointer());
-        FormNavigator::GoToChat(pConn, L"", pending, this);
+        if (pendingKind == L"BLOG") {
+            FormNavigator::GoToMicroblog(pConn, this);
+        } else {
+            FormNavigator::GoToChat(pConn, L"", pending, this);
+        }
     } else {
-        AppLog("Успішний вхід! Переходимо на список контактів...");
         FormNavigator::GoToContactList(pConn, this);
     }
 }
 
 void LoginForm::OnLoginFailed(const String& reason) {
-    AppLog("Авторизація не вдалася: %S", reason.GetPointer());
-
-    if (reason.StartsWith(L"Вхід відхилено", 0) || reason.StartsWith(L"Невірний логін", 0)) {
+    if (reason.StartsWith(LocString(L"IDS_AUTH_REJECT_PREFIX"), 0) || reason.StartsWith(LocString(L"IDS_AUTH_REJECTED"), 0)) {
         AppSettings::ClearPassword();
     }
 
     MessageBox msgBox;
     String errorMsg = reason.IsEmpty()
-        ? String(L"Не вдалося авторизуватися. Перевірте з'єднання з інтернетом або налаштування.")
+        ? String(LocString(L"IDS_LOGIN_FAIL_DEFAULT"))
         : reason;
-    msgBox.Construct(L"Помилка авторизації", errorMsg, MSGBOX_STYLE_OK);
+    msgBox.Construct(LocString(L"IDS_LOGIN_FAIL_TITLE"), errorMsg, MSGBOX_STYLE_OK);
     int modalResult = 0;
     msgBox.ShowAndWait(modalResult);
 }

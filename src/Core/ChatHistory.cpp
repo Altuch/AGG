@@ -1,10 +1,14 @@
 #include "Core/ChatHistory.h"
+#include "Core/Loc.h"
 #include <FIo.h>
 
 using namespace Osp::Base;
+using namespace Osp::Base::Collection;
 using namespace Osp::Io;
 
-const wchar_t* ChatHistory::SELF_LABEL = L"Ви";
+Osp::Base::String ChatHistory::GetSelfLabel(void) {
+    return LocString(L"IDS_SELF_LABEL");
+}
 
 String ChatHistory::GetFilePath(const String& email) {
     String safeName = email;
@@ -29,12 +33,12 @@ void ChatHistory::Append(const String& email, const String& sender, const String
     file.Write(sender + L"\t" + text + L"\n");
 }
 
-String ChatHistory::LoadRecentAsText(const String& email, int maxLines) {
-    if (email.IsEmpty()) return String(L"");
+int ChatHistory::LoadRecentPairs(const String& email, int maxLines, IList* pOut) {
+    if (email.IsEmpty() || pOut == null) return 0;
 
     File file;
     if (IsFailed(file.Construct(GetFilePath(email), L"r"))) {
-        return String(L"");
+        return 0;
     }
 
     if (maxLines <= 0 || maxLines > MAX_RING) maxLines = MAX_RING;
@@ -57,30 +61,10 @@ String ChatHistory::LoadRecentAsText(const String& email, int maxLines) {
 
     int start = (count < maxLines) ? 0 : next;
 
-    String text;
     for (int i = 0; i < count; i++) {
         String& line = ring[(start + i) % maxLines];
-
-        int tabPos = -1;
-        if (line.IsEmpty()) continue;
-        line.IndexOf(L"\t", 0, tabPos);
-        if (tabPos < 0) continue;
-
-        String sender;
-        String body;
-        line.SubString(0, tabPos, sender);
-        line.SubString(tabPos + 1, body);
-
-        text.Append(sender);
-        text.Append(L": ");
-        text.Append(body);
-        text.Append(L"\n\n");
+        pOut->Add(*(new String(line)));
     }
 
-    return text;
-}
-
-void ChatHistory::Clear(const String& email) {
-    if (email.IsEmpty()) return;
-    File::Remove(GetFilePath(email));
+    return count;
 }

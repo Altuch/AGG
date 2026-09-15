@@ -257,7 +257,8 @@ src/MRIM/MrimContacts.d src/MRIM/MrimContacts.o: \
  C:/bada/2.0.6/Include/FSecIdentity.h \
  C:/bada/2.0.6/Include/FSecIdentityInfo.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
- C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h \
+ C:/bada/2.0.6/Include/FBaseColArrayList.h
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 
@@ -808,3 +809,5 @@ C:/bada/2.0.6/Include/FSecIdentityInfo.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h:
+
+C:/bada/2.0.6/Include/FBaseColArrayList.h:

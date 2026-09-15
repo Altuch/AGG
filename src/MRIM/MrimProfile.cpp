@@ -4,15 +4,61 @@
 #include "Core/AggConnection.h"
 
 using namespace Osp::Base;
+using namespace Osp::Base::Collection;
 
-MrimProfile::MrimProfile(AggConnection* pConn) : pConnection(pConn), pListener(null) {}
-MrimProfile::~MrimProfile(void) {}
+class ProfileRequest : public Object {
+public:
+    ProfileRequest(const String& key, IProfileListener* pListener)
+        : emailKey(key), pTarget(pListener) {}
+
+    String emailKey;
+    IProfileListener* pTarget;
+};
+
+MrimProfile::MrimProfile(AggConnection* pConn) : pConnection(pConn), pListener(null) {
+    pPending = new ArrayList();
+    pPending->Construct();
+}
+
+MrimProfile::~MrimProfile(void) {
+    if (pPending != null) {
+        pPending->RemoveAll(true);
+        delete pPending;
+    }
+}
 
 void MrimProfile::SetListener(IProfileListener* pListener) {
+    if (pPending != null && this->pListener != pListener) {
+        IProfileListener* pOld = this->pListener;
+        for (int i = pPending->GetCount() - 1; i >= 0; i--) {
+            ProfileRequest* pReq = static_cast<ProfileRequest*>(pPending->GetAt(i));
+            if (pReq != null && pReq->pTarget == pOld) {
+                pPending->RemoveAt(i, true);
+            }
+        }
+    }
     this->pListener = pListener;
 }
 
+String MrimProfile::NormalizeKey(const String& user, const String& domain) {
+    String key = user;
+    key.Trim();
+    key.ToLower();
+    String dom = domain;
+    dom.Trim();
+    dom.ToLower();
+    if (!dom.IsEmpty()) {
+        key.Append(L"@");
+        key.Append(dom);
+    }
+    return key;
+}
+
 void MrimProfile::RequestProfileFor(const Osp::Base::String& login) {
+    RequestProfileFor(login, pListener);
+}
+
+void MrimProfile::RequestProfileFor(const Osp::Base::String& login, IProfileListener* pTarget) {
     String user = login;
     String domain;
 
@@ -26,6 +72,10 @@ void MrimProfile::RequestProfileFor(const Osp::Base::String& login) {
     user.ToLower();
     domain.Trim();
     domain.ToLower();
+
+    if (pPending != null) {
+        pPending->Add(*(new ProfileRequest(NormalizeKey(user, domain), pTarget)));
+    }
 
     ByteBuffer payload;
     payload.Construct(256);
@@ -51,14 +101,23 @@ bool MrimProfile::ProcessCommand(unsigned long command, ByteBuffer& payload) {
     MrimUtils::ReadUL(payload);
 
     if (status != Mrim::Anketa::Status::OK || rowCount == 0 || fieldCount == 0) {
-        if (pListener != null) pListener->OnProfileNotFound();
+        ProfileRequest* pOldest = null;
+        if (pPending != null && pPending->GetCount() > 0) {
+            pOldest = static_cast<ProfileRequest*>(pPending->GetAt(0));
+            pPending->RemoveAt(0, true);
+        }
+        if (pOldest != null && pOldest->pTarget != null) {
+            pOldest->pTarget->OnProfileNotFound();
+        } else if (pListener != null) {
+            pListener->OnProfileNotFound();
+        }
         return true;
     }
 
     if (fieldCount > 32) fieldCount = 32;
     String fieldNames[32];
     for (unsigned long i = 0; i < fieldCount; i++) {
-        fieldNames[i] = MrimUtils::ReadLPS(payload); 
+        fieldNames[i] = MrimUtils::ReadLPS(payload);
     }
 
     ProfileInfo info;
@@ -87,6 +146,25 @@ bool MrimProfile::ProcessCommand(unsigned long command, ByteBuffer& payload) {
         }
     }
 
-    if (pListener != null) pListener->OnProfileReceived(info);
+    String key = NormalizeKey(info.username, info.domain);
+    IProfileListener* pTarget = null;
+    if (pPending != null) {
+        for (int i = 0; i < pPending->GetCount(); i++) {
+            ProfileRequest* pReq = static_cast<ProfileRequest*>(pPending->GetAt(i));
+            if (pReq != null && !pReq->emailKey.IsEmpty() && pReq->emailKey.Equals(key, true)) {
+                pTarget = pReq->pTarget;
+                pPending->RemoveAt(i, true);
+                break;
+            }
+        }
+        if (pTarget == null && pPending->GetCount() > 0) {
+            ProfileRequest* pOldest = static_cast<ProfileRequest*>(pPending->GetAt(0));
+            if (pOldest != null) pTarget = pOldest->pTarget;
+            pPending->RemoveAt(0, true);
+        }
+    }
+    if (pTarget == null) pTarget = pListener;
+
+    if (pTarget != null) pTarget->OnProfileReceived(info);
     return true;
 }

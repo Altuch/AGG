@@ -46,6 +46,7 @@ public:
 
     void SetLoginListener(ILoginListener* pListener) { if (pAuthMgr != null) pAuthMgr->SetListener(pListener); }
     void SetContactListListener(IContactListListener* pListener) { if (pContactMgr != null) pContactMgr->SetListener(pListener); }
+    void SetMicroblogListener(IMicroblogListener* pListener) { if (pContactMgr != null) pContactMgr->SetMicroblogListener(pListener); }
     void SetConnectionStateListener(IConnectionStateListener* pListener) { pConnectionStateListener = pListener; }
     void SetForcedLogoutListener(IForcedLogoutListener* pListener) { pForcedLogoutListener = pListener; }
 
@@ -55,6 +56,7 @@ public:
 
     void SetProfileListener(IProfileListener* pListener) { if (pProfileMgr != null) pProfileMgr->SetListener(pListener); }
     void RequestProfile(const Osp::Base::String& login) { if (pProfileMgr != null) pProfileMgr->RequestProfileFor(login.IsEmpty() ? userLogin : login); }
+    void RequestProfileFor(const Osp::Base::String& login, IProfileListener* pListener) { if (pProfileMgr != null) pProfileMgr->RequestProfileFor(login, pListener); }
 
     void SendMessageTo(const Osp::Base::String& to, const Osp::Base::String& text) { if (pMessageMgr != null) pMessageMgr->SendMessageTo(to, text); }
     void SendNudge(const Osp::Base::String& to) { if (pMessageMgr != null) pMessageMgr->SendNudge(to); }
@@ -67,10 +69,17 @@ public:
     int GetUnreadCount(const Osp::Base::String& email) const;
     void SetKnownContactEmails(Osp::Base::Collection::IList* pEmails);
     Osp::Base::Collection::IList* GetStrangerEmails(void) const;
+    Osp::Base::Collection::IList* GetRosterContacts(void) { return (pContactMgr != null) ? pContactMgr->GetCachedContacts() : null; }
 
     Osp::Base::String PeekPendingNotificationSender(void) const;
     Osp::Base::String ConsumePendingNotificationSender(void);
+    Osp::Base::String PeekPendingNotificationKind(void) const;
     bool IsActiveChatWith(const Osp::Base::String& email) const;
+
+    void SetBlogViewOpen(bool open);
+    void OnBlogPostReceived(const Osp::Base::String& email,
+                            const Osp::Base::String& nick,
+                            const Osp::Base::String& text);
 
     void NotifyLoggedIn(void);
 

@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/Ui/ContactListForm.cpp \
 ../src/Ui/FormNavigator.cpp \
 ../src/Ui/LoginForm.cpp \
+../src/Ui/MicroblogForm.cpp \
 ../src/Ui/ProfileForm.cpp \
 ../src/Ui/SettingsForm.cpp 
 
@@ -16,6 +17,7 @@ OBJS += \
 ./src/Ui/ContactListForm.o \
 ./src/Ui/FormNavigator.o \
 ./src/Ui/LoginForm.o \
+./src/Ui/MicroblogForm.o \
 ./src/Ui/ProfileForm.o \
 ./src/Ui/SettingsForm.o 
 
@@ -24,6 +26,7 @@ CPP_DEPS += \
 ./src/Ui/ContactListForm.d \
 ./src/Ui/FormNavigator.d \
 ./src/Ui/LoginForm.d \
+./src/Ui/MicroblogForm.d \
 ./src/Ui/ProfileForm.d \
 ./src/Ui/SettingsForm.d 
 

@@ -1,1 +1,17 @@
-PC: 0x0ADFE7E8 LR: 0x00000000 Stack PTR : 0x00000000 
+PC: 0x4001FA44 LR: 0x4005C095 Stack PTR : 0x088FE6F8 
+0x4001FA44 [Platform Fns]
+0x4004DF7A [Platform Fns]
+0x4001FA56 [Platform Fns]
+0x401AB1AE [Platform Fns]
+0x4004AB46 [Platform Fns]
+0x4000243C [Platform Fns]
+0x40206A90 [Platform Fns]
+0x4004EAA6 [Platform Fns]
+0x400B55B4 [Platform Fns]
+0x4004CBC6 [Platform Fns]
+0x400B59FA [Platform Fns]
+0x4001EE82 [Platform Fns]
+0x4001EEB8 [Platform Fns]
+0x4005331C [Platform Fns]
+0x400B5D66 [Platform Fns]
+0x402070CC [Platform Fns]

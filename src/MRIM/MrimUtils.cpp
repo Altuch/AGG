@@ -239,7 +239,6 @@ String MrimUtils::NormalizeEmail(const String& email) {
     return clean;
 }
 
-
 bool MrimUtils::IsValidIpAddress(const String& ip) {
     String trimmedIp = ip;
     trimmedIp.Trim();

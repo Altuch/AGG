@@ -1,8 +1,8 @@
 #include "Core/AggConnection.h"
+#include "Core/Loc.h"
 #include "Core/MessageRouter.h"
 #include "MRIM/MrimProtocol.h"
 #include "MRIM/MrimUtils.h"
-
 
 using namespace Osp::Base;
 using namespace Osp::Base::Collection;
@@ -91,7 +91,6 @@ void AggConnection::Reset(void) {
 }
 
 void AggConnection::SetCredentials(const String& login, const String& password) {
-    // Defensive: login normalized even for autologin with old saved data.
     userLogin = MrimUtils::NormalizeEmail(login);
     userPassword = password;
 }
@@ -124,12 +123,24 @@ String AggConnection::PeekPendingNotificationSender(void) const {
     return (pMessageRouter != null) ? pMessageRouter->PeekPendingNotificationSender() : String(L"");
 }
 
+String AggConnection::PeekPendingNotificationKind(void) const {
+    return (pMessageRouter != null) ? pMessageRouter->PeekPendingNotificationKind() : String(L"");
+}
+
 String AggConnection::ConsumePendingNotificationSender(void) {
     return (pMessageRouter != null) ? pMessageRouter->ConsumePendingNotificationSender() : String(L"");
 }
 
 bool AggConnection::IsActiveChatWith(const String& email) const {
     return (pMessageRouter != null) ? pMessageRouter->IsActiveChatWith(email) : false;
+}
+
+void AggConnection::SetBlogViewOpen(bool open) {
+    if (pMessageRouter != null) pMessageRouter->SetBlogViewOpen(open);
+}
+
+void AggConnection::OnBlogPostReceived(const String& email, const String& nick, const String& text) {
+    if (pMessageRouter != null) pMessageRouter->OnBlogPostReceived(email, nick, text);
 }
 
 void AggConnection::CloseSocket(void) {
@@ -188,22 +199,19 @@ result AggConnection::ConnectToAddress(const IpAddress& address, int port) {
 void AggConnection::OnDnsResolutionCompletedN(IpHostEntry* pIpHostEntry, result r) {
     if (IsFailed(r) || pIpHostEntry == null) {
         delete pIpHostEntry;
-        AppLog("DNS: не вдалося визначити адресу '%S'.", lastServerHost.GetPointer());
-        if (pAuthMgr != null) pAuthMgr->NotifyLoginFailed(L"Не вдалося визначити адресу сервера.");
+        if (pAuthMgr != null) pAuthMgr->NotifyLoginFailed(LocString(L"IDS_LOGIN_DNS"));
         return;
     }
 
     IList* pAddresses = pIpHostEntry->GetAddressList();
     if (pAddresses == null || pAddresses->GetCount() == 0) {
         delete pIpHostEntry;
-        AppLog("DNS: жодної адреси для '%S'.", lastServerHost.GetPointer());
-        if (pAuthMgr != null) pAuthMgr->NotifyLoginFailed(L"DNS не повернув жодної адреси сервера.");
+        if (pAuthMgr != null) pAuthMgr->NotifyLoginFailed(LocString(L"IDS_LOGIN_DNS_EMPTY"));
         return;
     }
 
     IpAddress* pAddr = static_cast<IpAddress*>(pAddresses->GetAt(0));
     if (pAddr != null) {
-        AppLog("DNS: '%S' -> %S", lastServerHost.GetPointer(), pAddr->ToString().GetPointer());
         ConnectToAddress(*pAddr, lastServerPort);
     }
 
@@ -246,11 +254,6 @@ void AggConnection::ChangeStatus(unsigned long status) {
 void AggConnection::ChangeXStatus(unsigned long status, const String& xstatusType,
                                   const String& xstatusTitle,
                                   const String& xstatusDescription) {
-    // MRIM >= 1.15 (we are 1.22) expects the full MrimChangeXStatusRequest:
-    //   UL status, LPS xstatusType (CP1251), UNICODE title (UTF-16LE),
-    //   UNICODE description (UTF-16LE), UL features.
-    // Old code sent only the 4-byte UL: the server tolerated it (missing
-    // fields default to ""/0) but never learned our features/xstatus.
     ByteBuffer payload;
     payload.Construct(1024);
     MrimUtils::AppendUL(payload, status);
@@ -275,7 +278,7 @@ void AggConnection::OnSocketClosed(Socket& socket, NetSocketClosedReason reason)
 
     if (!hasLoggedInOnce) {
         if (pAuthMgr != null) {
-            pAuthMgr->NotifyLoginFailed(L"З'єднання розірвано. Перевірте мережу.");
+            pAuthMgr->NotifyLoginFailed(LocString(L"IDS_LOGIN_DROPPED"));
         }
         return;
     }
@@ -306,8 +309,6 @@ void AggConnection::OnSocketReadyToReceive(Socket& socket) {
 
     result r = pRxBuffer->SetArray(chunk.GetPointer(), 0, chunk.GetLimit());
     if (IsFailed(r)) {
-        // Buffer full and nothing consumable: reset to avoid deadlock
-        // (was 8K truncation -> desync -> disconnect after login).
         pRxBuffer->Clear();
         return;
     }
@@ -427,7 +428,6 @@ void AggConnection::ScheduleReconnect(void) {
 
 void AggConnection::AttemptReconnect(void) {
     if (lastServerHost.IsEmpty()) return;
-    AppLog("Спроба перепідключення #%d...", reconnectAttempt);
     ConnectToServer(lastServerHost, lastServerPort);
 }
 

@@ -20,6 +20,9 @@ public:
     static int GetAvatarPort(void);
     static void SaveAvatarServer(const Osp::Base::String& host, int port);
 
+    static int GetContactSortMode(void);
+    static void SaveContactSortMode(int mode);
+
     static Osp::Base::String GetDefaultServerIp(void);
     static int GetDefaultServerPort(void);
 

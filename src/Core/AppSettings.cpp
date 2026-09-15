@@ -10,6 +10,7 @@ static const wchar_t* KEY_SERVER_IP   = L"ServerIP";
 static const wchar_t* KEY_SERVER_PORT = L"ServerPort";
 static const wchar_t* KEY_AVATAR_HOST = L"AvatarHost";
 static const wchar_t* KEY_AVATAR_PORT = L"AvatarPort";
+static const wchar_t* KEY_SORT_MODE = L"ContactSortMode";
 
 static const wchar_t* DEFAULT_IP   = L"proto.mrim.su";
 static const int      DEFAULT_PORT = 2041;
@@ -116,4 +117,19 @@ int AppSettings::GetAvatarPort(void) {
 void AppSettings::SaveAvatarServer(const String& host, int port) {
     Put(KEY_AVATAR_HOST, host);
     Put(KEY_AVATAR_PORT, Integer::ToString(port));
+}
+
+int AppSettings::GetContactSortMode(void) {
+    String modeStr = Get(KEY_SORT_MODE, L"");
+    if (modeStr.IsEmpty()) return 0;
+
+    int mode = 0;
+    if (IsFailed(Integer::Parse(modeStr, mode))) return 0;
+    if (mode < 0 || mode > 3) return 0;
+    return mode;
+}
+
+void AppSettings::SaveContactSortMode(int mode) {
+    if (mode < 0 || mode > 3) mode = 0;
+    Put(KEY_SORT_MODE, Integer::ToString(mode));
 }

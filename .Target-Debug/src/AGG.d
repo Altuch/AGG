@@ -452,6 +452,8 @@ src/AGG.d src/AGG.o: ../src/AGG.cpp \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h \
+ C:/bada/2.0.6/Include/FBaseColArrayList.h \
+ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/Loc.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AppSettings.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/MessageRouter.h \
  C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Ui/FormNavigator.h
@@ -1425,6 +1427,10 @@ C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimContacts.h:
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimMessages.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/MRIM/MrimProfile.h:
+
+C:/bada/2.0.6/Include/FBaseColArrayList.h:
+
+C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/Loc.h:
 
 C:/Users/Vitaliy/Documents/bada/IDE/workspace/AGG/inc/Core/AppSettings.h:
 

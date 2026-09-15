@@ -1,4 +1,5 @@
 #include "Core/MessageRouter.h"
+#include "Core/Loc.h"
 #include "Core/ChatHistory.h"
 #include "MRIM/MrimUtils.h"
 #include <FIo.h>
@@ -22,6 +23,7 @@ MessageRouter::MessageRouter(void) :
     pKnownContactEmails(null),
     pStrangerEmails(null)
 {
+    blogViewOpen_ = false;
     pUnreadCounts = new ArrayList();
     pUnreadCounts->Construct();
 
@@ -68,7 +70,6 @@ void MessageRouter::SetActiveChat(IMessageListener* pListener, const String& ema
 
     ClearBadge();
     ResetUnreadCount(activeChatEmail);
-    // Chat with this contact is now open — its notification is handled.
     if (!pendingNotificationEmail.IsEmpty()
         && pendingNotificationEmail.Equals(activeChatEmail, true)) {
         ClearPendingNotificationSender();
@@ -169,7 +170,7 @@ void MessageRouter::RememberStranger(const String& email) {
 
     for (int i = 0; i < pStrangerEmails->GetCount(); i++) {
         String* pExisting = static_cast<String*>(pStrangerEmails->GetAt(i));
-        if (pExisting != null && pExisting->Equals(clean, true)) return; // уже знаємо
+        if (pExisting != null && pExisting->Equals(clean, true)) return;
     }
 
     pStrangerEmails->Add(*(new String(clean)));
@@ -228,7 +229,7 @@ void MessageRouter::ShowNotification(const String& sender, const String& text, b
     NotificationManager notiMgr;
     if (IsFailed(notiMgr.Construct())) return;
 
-    String message = sender + L": " + (isNudge ? String(L"🔔 Будильник!") : text);
+    String message = sender + L": " + (isNudge ? String(LocString(L"IDS_NOTI_NUDGE")) : text);
     if (message.GetLength() > NOTIFICATION_MAX_LENGTH) {
         String shortened;
         message.SubString(0, NOTIFICATION_MAX_LENGTH, shortened);
@@ -264,25 +265,42 @@ bool MessageRouter::IsActiveChatWith(const String& email) const {
 }
 
 void MessageRouter::SetPendingNotificationSender(const String& email) {
+    SetPendingNotificationSender(String(L"CHAT"), email);
+}
+
+void MessageRouter::SetPendingNotificationSender(const String& kind, const String& email) {
+    pendingNotificationKind_ = kind.IsEmpty() ? String(L"CHAT") : kind;
     pendingNotificationEmail = MrimUtils::NormalizeEmail(email);
     SavePendingNotificationSender();
 }
 
 void MessageRouter::ClearPendingNotificationSender(void) {
+    pendingNotificationKind_ = L"";
     pendingNotificationEmail = L"";
     File::Remove(PENDING_NOTI_FILE);
 }
 
 void MessageRouter::LoadPendingNotificationSender(void) {
+    pendingNotificationKind_ = L"";
     pendingNotificationEmail = L"";
 
     File file;
     if (IsFailed(file.Construct(PENDING_NOTI_FILE, L"r"))) return;
 
-    String line;
-    if (IsFailed(file.Read(line))) return;
+    String first;
+    if (IsFailed(file.Read(first))) return;
+    first.Trim();
 
-    pendingNotificationEmail = MrimUtils::NormalizeEmail(line);
+    String second;
+    if (IsFailed(file.Read(second))) {
+        pendingNotificationKind_ = L"CHAT";
+        pendingNotificationEmail = MrimUtils::NormalizeEmail(first);
+        return;
+    }
+    second.Trim();
+
+    pendingNotificationKind_ = first.IsEmpty() ? String(L"CHAT") : first;
+    pendingNotificationEmail = MrimUtils::NormalizeEmail(second);
 }
 
 void MessageRouter::SavePendingNotificationSender(void) {
@@ -293,7 +311,32 @@ void MessageRouter::SavePendingNotificationSender(void) {
 
     File file;
     if (IsFailed(file.Construct(PENDING_NOTI_FILE, L"w"))) return;
+    file.Write(pendingNotificationKind_ + L"\n");
     file.Write(pendingNotificationEmail);
+}
+
+String MessageRouter::PeekPendingNotificationKind(void) const {
+    return pendingNotificationKind_;
+}
+
+void MessageRouter::OnBlogPostReceived(const String& email, const String& nick, const String& text) {
+    String clean = MrimUtils::NormalizeEmail(email);
+    if (clean.IsEmpty() || text.IsEmpty()) return;
+    if (blogViewOpen_ && isAppInForeground) return;
+
+    String preview = text;
+    preview.Trim();
+    if (preview.GetLength() > 100) {
+        String shortened;
+        preview.SubString(0, 100, shortened);
+        preview = shortened + L"...";
+    }
+    String who = nick;
+    who.Trim();
+    if (who.IsEmpty()) who = clean;
+
+    SetPendingNotificationSender(String(L"BLOG"), clean);
+    ShowNotification(who, preview, false);
 }
 
 void MessageRouter::OnMessageReceived(const String& sender, const String& text, bool isNudge) {
@@ -301,7 +344,7 @@ void MessageRouter::OnMessageReceived(const String& sender, const String& text, 
     if (cleanSender.IsEmpty()) return;
     if (!isNudge && text.IsEmpty()) return;
 
-    String displayText = isNudge ? String(L"ВАМ НАДІСЛАНО БУДИЛЬНИК!") : text;
+    String displayText = isNudge ? String(LocString(L"IDS_NUDGE_RECEIVED")) : text;
 
     ChatHistory::Append(cleanSender, cleanSender, displayText);
 

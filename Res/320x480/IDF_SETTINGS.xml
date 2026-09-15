@@ -34,4 +34,9 @@
         <layout height="31" mode="Portrait" width="121" x="60" y="246"/>
         <layout height="24" mode="Landscape" width="131" x="135" y="186"/>
     </Button>
+    <Button id="IDC_BUTTON_SORT" parent="IDF_SETTINGS">
+        <property NormalBGBitmapPath="" PressedBGBitmapPath="" disableTextColor="" disabledBitmapPath="" disabledColor="" disabledColorOpacity="100" hAlign="ALIGN_CENTER" highlightedBGBitmapPath="" highlightedColor="" highlightedColorOpacity="100" highlightedTextColor="" normalBitmapPath="" normalColor="" normalColorOpacity="100" normalTextColor="" pressedBitmapPath="" pressedColor="" pressedColorOpacity="100" pressedTextColor="" text="Sort" textSize="16" vAlign="ALIGN_MIDDLE"/>
+        <layout height="31" mode="Portrait" width="225" x="5" y="292"/>
+        <layout height="24" mode="Landscape" width="381" x="10" y="216"/>
+    </Button>
 </Scene>

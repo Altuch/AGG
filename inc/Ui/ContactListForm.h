@@ -44,7 +44,15 @@ private:
                                                  const Osp::Graphics::Bitmap* pIcon);
     int AddStrangersGroup(int groupIndex);
     void PublishKnownContacts(void);
-    void ShowStatusMenu(void);
+
+    static const int SORT_AS_RECEIVED  = 0;
+    static const int SORT_AZ           = 1;
+    static const int SORT_ONLINE_FIRST = 2;
+    static const int SORT_OFFLINE_FIRST = 3;
+
+    static bool IsOnlineStatus(unsigned long status);
+    static int CompareContacts(const ContactInfo* pA, const ContactInfo* pB, int mode);
+    Osp::Base::Collection::ArrayList* BuildContactOrder(void) const;
 
     const Osp::Graphics::Bitmap* GetStatusBitmap(unsigned long status) const;
 
@@ -62,6 +70,7 @@ private:
 
     static const long USER_EVENT_POPULATE        = 2001;
     static const long USER_EVENT_ATTACH_LISTENER = 2002;
+    static const long USER_EVENT_GOTO_BLOG       = 2003;
 
     static const int ELEM_NAME  = 1;
     static const int ELEM_ICON  = 2;
@@ -81,6 +90,7 @@ private:
     int strangersGroupIndex;
 
     bool hasCheckedPendingChat;
+    bool populatePending_;
 
     Osp::Graphics::Bitmap* pBitmapOnline;
     Osp::Graphics::Bitmap* pBitmapAway;

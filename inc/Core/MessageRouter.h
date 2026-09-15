@@ -24,15 +24,17 @@ public:
     void SetKnownContacts(Osp::Base::Collection::IList* pContactEmails);
     Osp::Base::Collection::IList* GetStrangerEmails(void) const;
 
-    // Notification tap routing: tapping a bada notification only foregrounds
-    // the app (it carries no payload), so the router remembers which contact
-    // the last notification came from. UI consumes it and opens that chat.
-    // Persisted to a file so it also survives an app kill between tap and
-    // launch. Emails here are always normalized (lowercase).
     Osp::Base::String PeekPendingNotificationSender(void) const;
     Osp::Base::String ConsumePendingNotificationSender(void);
+
+    Osp::Base::String PeekPendingNotificationKind(void) const;
     bool IsActiveChatWith(const Osp::Base::String& email) const;
-    Osp::Base::String GetActiveChatEmail(void) const { return activeChatEmail; }
+
+    void SetBlogViewOpen(bool open) { blogViewOpen_ = open; }
+
+    void OnBlogPostReceived(const Osp::Base::String& email,
+                            const Osp::Base::String& nick,
+                            const Osp::Base::String& text);
 
     static void SetAppForeground(bool foreground);
 
@@ -64,6 +66,7 @@ private:
     void ClearBadge(void);
 
     void SetPendingNotificationSender(const Osp::Base::String& email);
+    void SetPendingNotificationSender(const Osp::Base::String& kind, const Osp::Base::String& email);
     void ClearPendingNotificationSender(void);
     void LoadPendingNotificationSender(void);
     void SavePendingNotificationSender(void);
@@ -71,6 +74,8 @@ private:
     IMessageListener* pActiveChatListener;
     Osp::Base::String activeChatEmail;
     Osp::Base::String pendingNotificationEmail;
+    Osp::Base::String pendingNotificationKind_;
+    bool blogViewOpen_;
 
     IUnreadCountListener* pUnreadCountListener;
     Osp::Base::Collection::ArrayList* pUnreadCounts;

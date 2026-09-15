@@ -1,7 +1,10 @@
 #include "Ui/ProfileForm.h"
+#include "Core/Loc.h"
+#include "Core/ContactSync.h"
 #include "Ui/FormNavigator.h"
 #include "Core/AppSettings.h"
 #include <FApp.h>
+#include <FMedia.h>
 
 using namespace Osp::App;
 using namespace Osp::Base;
@@ -40,12 +43,23 @@ result ProfileForm::Initialize(AggConnection* pConn,
 }
 
 result ProfileForm::OnInitializing(void) {
-    SetTitleText(contactEmail.IsEmpty() ? String(L"Мій профіль") : GetDisplayName());
+    SetTitleText(contactEmail.IsEmpty() ? String(LocString(L"IDS_PROFILE_OWN")) : GetDisplayName());
 
     SetSoftkeyActionId(SOFTKEY_0, ID_SOFTKEY_BACK);
     AddSoftkeyActionListener(SOFTKEY_0, *this);
 
+    SetOptionkeyActionId(ID_OPTIONKEY_SAVE);
+    AddOptionkeyActionListener(*this);
+    SetSoftkeyText(SOFTKEY_0, LocString(L"IDS_SK_BACK"));
+
     pList = static_cast<GroupedList*>(GetControl(L"IDC_PROFILE_LIST"));
+
+    int formW = GetClientAreaBounds().width;
+    if (formW <= 0) formW = 480;
+    int titleW = formW - 92 - 12;
+    if (titleW < 80) titleW = 80;
+    int fieldW = formW - 32;
+    if (fieldW < 80) fieldW = 80;
 
     pIdentityFormat = new CustomListItemFormat();
     pIdentityFormat->Construct();
@@ -54,7 +68,7 @@ result ProfileForm::OnInitializing(void) {
 
     pIdentityFormat->AddElement(
         ELEM_TITLE,
-        Rectangle(92, 8, 375, 44),
+        Rectangle(92, 8, titleW, 44),
         40,
         Osp::Graphics::Color(255, 255, 255),
         Osp::Graphics::Color(255, 255, 255)
@@ -62,7 +76,7 @@ result ProfileForm::OnInitializing(void) {
 
     pIdentityFormat->AddElement(
         ELEM_SUB,
-        Rectangle(92, 54, 375, 38),
+        Rectangle(92, 54, titleW, 38),
         30,
         Osp::Graphics::Color(175, 195, 235),
         Osp::Graphics::Color(255, 255, 255)
@@ -72,7 +86,7 @@ result ProfileForm::OnInitializing(void) {
     pFieldFormat->Construct();
     pFieldFormat->AddElement(
             ELEM_LABEL,
-            Rectangle(16, 8, 448, 28),
+            Rectangle(16, 8, fieldW, 28),
             22,
             Osp::Graphics::Color(60, 165, 240),
             Osp::Graphics::Color(60, 165, 240)
@@ -80,7 +94,7 @@ result ProfileForm::OnInitializing(void) {
 
     pFieldFormat->AddElement(
             ELEM_VALUE,
-            Rectangle(16, 38, 448, 36),
+            Rectangle(16, 38, fieldW, 36),
             32,
             Osp::Graphics::Color(255, 255, 255),
             Osp::Graphics::Color(255, 255, 255)
@@ -169,7 +183,6 @@ const Bitmap* ProfileForm::GetAvatarBitmap(void) const {
     return pAvatarBitmap;
 }
 
-
 CustomListItem* ProfileForm::CreateIdentityRow(void) const {
     CustomListItem* pItem = new CustomListItem();
     pItem->Construct(IDENTITY_ROW_HEIGHT);
@@ -184,11 +197,11 @@ CustomListItem* ProfileForm::CreateIdentityRow(void) const {
 }
 
 CustomListItem* ProfileForm::CreateFieldRow(const String& label, const String& value) const {
-	CustomListItem* pItem = new CustomListItem();
-	pItem->Construct(80);
-	pItem->SetItemFormat(*pFieldFormat);
-	pItem->SetElement(ELEM_LABEL, label);
-	pItem->SetElement(ELEM_VALUE, value);
+    CustomListItem* pItem = new CustomListItem();
+    pItem->Construct(80);
+    pItem->SetItemFormat(*pFieldFormat);
+    pItem->SetElement(ELEM_LABEL, label);
+    pItem->SetElement(ELEM_VALUE, value);
     return pItem;
 }
 
@@ -201,20 +214,20 @@ int ProfileForm::AddFieldRow(int group, int index, const String& label, const St
 void ProfileForm::PopulateList(void) {
     if (pList == null) return;
 
-    SetTitleText(contactEmail.IsEmpty() ? String(L"Мій профіль") : GetDisplayName());
+    SetTitleText(contactEmail.IsEmpty() ? String(LocString(L"IDS_PROFILE_OWN")) : GetDisplayName());
 
     pList->RemoveAllGroups();
 
-    pList->AddGroup(contactEmail.IsEmpty() ? L"Мій профіль" : L"Контакт", null, GROUP_IDENTITY);
+    pList->AddGroup(contactEmail.IsEmpty() ? LocString(L"IDS_PROFILE_OWN") : LocString(L"IDS_PROFILE_CONTACT"), null, GROUP_IDENTITY);
     pList->AddItem(GROUP_IDENTITY, *CreateIdentityRow(), 0);
 
-    pList->AddGroup(L"Анкета", null, GROUP_DETAILS);
+    pList->AddGroup(LocString(L"IDS_PROFILE_DETAILS"), null, GROUP_DETAILS);
 
     int index = 0;
     if (!hasProfile && !isNotFound) {
-        index = AddFieldRow(GROUP_DETAILS, index, L"Стан", L"Завантаження...");
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_STATE"), LocString(L"IDS_PROFILE_LOADING"));
     } else if (isNotFound) {
-        index = AddFieldRow(GROUP_DETAILS, index, L"Стан", L"Анкету не знайдено");
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_STATE"), LocString(L"IDS_PROFILE_NOTFOUND"));
     } else {
         String fullName = profile.firstName;
         if (!profile.lastName.IsEmpty()) {
@@ -222,17 +235,17 @@ void ProfileForm::PopulateList(void) {
             fullName.Append(profile.lastName);
         }
 
-        index = AddFieldRow(GROUP_DETAILS, index, L"Ім'я", fullName);
-        index = AddFieldRow(GROUP_DETAILS, index, L"Місто", profile.location);
-        index = AddFieldRow(GROUP_DETAILS, index, L"Народження", profile.birthday);
-        index = AddFieldRow(GROUP_DETAILS, index, L"Зодіак", profile.zodiac);
-        index = AddFieldRow(GROUP_DETAILS, index, L"Телефон", profile.phone);
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_NAME"), fullName);
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_CITY"), profile.location);
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_BIRTH"), profile.birthday);
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_ZODIAC"), profile.zodiac);
+        index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_PHONE"), profile.phone);
 
-        if (profile.sex == L"1") index = AddFieldRow(GROUP_DETAILS, index, L"Стать", L"Чоловіча");
-        else if (profile.sex == L"2") index = AddFieldRow(GROUP_DETAILS, index, L"Стать", L"Жіноча");
+        if (profile.sex == L"1") index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_SEX"), LocString(L"IDS_SEX_MALE"));
+        else if (profile.sex == L"2") index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_SEX"), LocString(L"IDS_SEX_FEMALE"));
 
         if (index == 0) {
-            index = AddFieldRow(GROUP_DETAILS, index, L"Стан", L"Сервер не має даних");
+            index = AddFieldRow(GROUP_DETAILS, index, LocString(L"IDS_F_STATE"), LocString(L"IDS_PROFILE_NODATA"));
         }
     }
 
@@ -287,7 +300,54 @@ void ProfileForm::OnActionPerformed(const Control& source, int actionId) {
             Leave();
             break;
 
+        case ID_OPTIONKEY_SAVE: {
+            OptionMenu* pMenu = new OptionMenu();
+            pMenu->Construct();
+            pMenu->AddItem(LocString(L"IDS_MENU_SAVECONTACT"), ID_MENU_SAVE_CONTACT);
+            pMenu->AddActionEventListener(*this);
+            pMenu->SetShowState(true);
+            pMenu->Show();
+            break;
+        }
+
+        case ID_MENU_SAVE_CONTACT:
+            SaveToAddressbook();
+            break;
+
         default:
             break;
     }
+}
+
+void ProfileForm::SaveToAddressbook(void) {
+    String email = GetDisplayEmail();
+    if (email.IsEmpty()) return;
+
+    String firstName = profile.firstName;
+    String lastName = profile.lastName;
+    if (firstName.IsEmpty() && lastName.IsEmpty()) {
+        firstName = profile.nickname.IsEmpty() ? GetDisplayName() : profile.nickname;
+    }
+
+    String avatarPath = L"";
+    if (pAvatarBitmap != null) {
+        avatarPath = ContactSync::AvatarFilePath(email);
+        Osp::Media::Image img;
+        if (IsFailed(img.Construct())
+            || IsFailed(img.EncodeToFile(*pAvatarBitmap, Osp::Media::IMG_FORMAT_JPG, avatarPath, true))) {
+            avatarPath = L"";
+        }
+    }
+
+    bool ok = ContactSync::SaveContact(firstName, lastName, email, profile.phone,
+                                       profile.birthday, avatarPath);
+
+    MessageBox msgBox;
+    if (ok) {
+        msgBox.Construct(LocString(L"IDS_SAVED_TITLE"), LocString(L"IDS_SAVEDCONTACT_OK"), MSGBOX_STYLE_OK);
+    } else {
+        msgBox.Construct(LocString(L"IDS_ERR_TITLE"), LocString(L"IDS_SAVEDCONTACT_FAIL"), MSGBOX_STYLE_OK);
+    }
+    int modalResult = 0;
+    msgBox.ShowAndWait(modalResult);
 }

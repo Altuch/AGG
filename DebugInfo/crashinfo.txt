@@ -7,7 +7,7 @@
  API Version         : 1.0
  Platform Version    : 2.0.0
  Firmware Version    : Wave-EXXKC4
- Crashed Time        : 2026/09/05 03:44:18
+ Crashed Time        : 2026/09/15 03:20:35
  Crashed Module      : DynamicLinker.c:818
 ----------------------------------------------------------------------------------
 
@@ -16,10 +16,7 @@
 ----------------------------------------------------------------------------------
 ----------------------------- Recent AppLog Messages -----------------------------
 ----------------------------------------------------------------------------------
-[0] 2959.404,INFO,P36,T00,A139,OspMain (32) > Application started.
-[1] 2960.100,INFO,P36,T00,A143,AGG::OnAppInitializing (67) > Збережених даних немає: відкриваємо форму авторизації...
-[2] 2977.594,INFO,P36,T00,A143,Form1::OnActionPerformed (77) > Натиснуто Вхід!
-[3] 2977.841,INFO,P36,T00,A143,MrimAuth::SendLogin2 (35) > Sent LOGIN2 packet.
-[4] 2978.321,INFO,P36,T00,A143,MrimAuth::ProcessCommand (41) > MRIM_CS_LOGIN_ACK received -> викликаємо OnLoginSuccess!
-[5] 2978.322,INFO,P36,T00,A143,Form1::OnLoginSuccess (159) > Успішний вхід! Переходимо на контакт-лист...
-[6] 2978.760,INFO,P36,T00,A143,MrimContacts::ProcessCommand (49) > Знайдено нікнейм: Staryk_1500
+[0] 8965.938,INFO,P42,T00,A173,OspMain (32) > Application started.
+[1] 8966.402,INFO,P42,T00,A177,AGG::OnAppInitializing (32) > Збережених даних немає: відкриваємо форму авторизації...
+[2] 9009.907,INFO,P42,T00,A177,AggConnection::OnDnsResolutionCompletedN (206) > DNS: 'proto.mrim.su' -> 103.71.21.140
+[3] 9010.974,INFO,P42,T00,A177,LoginForm::OnLoginSuccess (132) > Успішний вхід! Переходимо на список контактів...
